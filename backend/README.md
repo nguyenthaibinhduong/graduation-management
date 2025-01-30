@@ -45,4 +45,10 @@ $ yarn dev
 $ yarn run start:prod
 ```
 
+## Chạy dữ liệu mẫu (Đảm bảo DB được tạo và chưa có dữ liệu ở các bảng)
+ 
+ ```bash
+$ yarn seed
+```
+
 
