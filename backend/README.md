@@ -21,7 +21,7 @@ $ yarn
 Tạo file cấu hình trong root folder đặt tên .env
 
 ```bash
-APP_PORT = 
+APP_PORT = 3022
 
 DB_TYPE=mysql
 DB_HOST=localhost
@@ -30,6 +30,10 @@ DB_USERNAME=root
 DB_PASSWORD=password
 DB_DATABASE=db
 DB_LOGGING=true
+
+JWT_SECRET_KEY=cc25282ab89f24e76ede8b3c70b6d311ef95f4f342dbed4d9bfc7a252df7c039
+ACCESS_TOKEN_EXPIRE=3600
+REFRESH_TOKEN_EXPIRE=604800 
 ```
 
 ## Chạy sự án và database
