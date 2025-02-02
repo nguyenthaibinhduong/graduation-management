@@ -39,14 +39,10 @@ REFRESH_TOKEN_EXPIRE=604800
 ## Chạy sự án và database
 
 ```bash
-# development
-$ yarn start
 
-# watch mode
 $ yarn dev
 
-# production mode
-$ yarn run start:prod
+
 ```
 
 ## Chạy dữ liệu mẫu (Đảm bảo DB được tạo và chưa có dữ liệu ở các bảng)
