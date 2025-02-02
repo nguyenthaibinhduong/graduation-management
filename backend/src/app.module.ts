@@ -4,10 +4,11 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
-import { User } from './modules/users/entities/user.entity';
+import { User } from './entities/user.entity';
 import { DataSource } from 'typeorm';
 import { AppDataSource } from './db/data-source';
 import { StudentsModule } from './modules/students/students.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { StudentsModule } from './modules/students/students.module';
     TypeOrmModule.forFeature([User]),
     UsersModule,
     StudentsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

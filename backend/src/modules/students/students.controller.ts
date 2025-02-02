@@ -8,14 +8,17 @@ import {
   Query,
   Put,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
-import { Student } from './entities/student.entity';
+import { Student } from '../../entities/student.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('students')
+@UseGuards(JwtAuthGuard)
 export class StudentsController {
   constructor(private readonly studentService: StudentsService) {}
 

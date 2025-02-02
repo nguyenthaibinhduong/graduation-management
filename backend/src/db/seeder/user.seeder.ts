@@ -1,5 +1,5 @@
 import { AppDataSource } from '../data-source';
-import { User } from 'src/modules/users/entities/user.entity';
+import { User } from 'src/entities/user.entity';
 import { UserFactory } from '../factory/user.factory';
 export class UserSeeder {
   static async seed() {

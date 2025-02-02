@@ -1,4 +1,4 @@
-import { User, UserRole } from 'src/modules/users/entities/user.entity';
+import { User, UserRole } from 'src/entities/user.entity';
 import { fakerVI as faker } from '@faker-js/faker';
 import * as bcrypt from 'bcrypt';
 

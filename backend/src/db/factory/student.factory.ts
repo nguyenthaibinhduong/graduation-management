@@ -1,6 +1,6 @@
-import { Student } from 'src/modules/students/entities/student.entity';
+import { Student } from 'src/entities/student.entity';
 import { fakerVI as faker } from '@faker-js/faker';
-import { User } from 'src/modules/users/entities/user.entity';
+import { User } from 'src/entities/user.entity';
 import { AppDataSource } from '../data-source';
 
 export class StudentFactory {

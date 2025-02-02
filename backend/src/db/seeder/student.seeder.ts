@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { StudentFactory } from '../factory/student.factory'; // Đảm bảo rằng bạn đã import đúng StudentFactory
 import { AppDataSource } from '../data-source';
-import { Student } from 'src/modules/students/entities/student.entity';
+import { Student } from 'src/entities/student.entity';
 
 export class StudentSeeder {
   static async seed() {
