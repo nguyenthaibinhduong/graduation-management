@@ -37,11 +37,24 @@ export class UsersController {
     @Query('limit') limit?: number,
     @Query('page') page?: number,
   ): Promise<
-    Response<{ items: User[]; total: number; limit?: number; page?: number }>
+    Response<{ items: any; total: number; limit?: number; page?: number }>
   > {
     try {
       const users = await this.userService.getAll(search, limit, page);
-      return new Response(users, HttpStatus.SUCCESS, Message.SUCCESS);
+      const usersWithoutPassword = users.items.map((user) => {
+        const { password, ...userWithoutPassword } = user; // Tách password khỏi user
+        return userWithoutPassword; // Trả về user không có password
+      });
+      return new Response(
+        {
+          items: usersWithoutPassword, // Dữ liệu người dùng đã loại bỏ mật khẩu
+          total: users.total, // Tổng số người dùng
+          limit, // Giới hạn số lượng
+          page, // Trang hiện tại
+        },
+        HttpStatus.SUCCESS,
+        Message.SUCCESS,
+      );
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
     }
