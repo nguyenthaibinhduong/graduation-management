@@ -9,6 +9,7 @@ import {
   Put,
   ValidationPipe,
   UseGuards,
+  HttpException,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -30,7 +31,10 @@ export class StudentsController {
       const newStudent = await this.studentService.create(student);
       return new Response(newStudent, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 
@@ -46,7 +50,10 @@ export class StudentsController {
       const students = await this.studentService.getAll(search, limit, page);
       return new Response(students, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 

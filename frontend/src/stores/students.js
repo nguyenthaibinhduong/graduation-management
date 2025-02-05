@@ -2,62 +2,45 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
 
+const api = axios.create({ baseURL: 'http://localhost:3034/api/v1/students' })
+
 export const useStudentStore = defineStore('student', () => {
   const students = ref([])
 
-  // Lấy danh sách sinh viên
   const fetchStudents = async () => {
     try {
-      const response = await axios.get('http://localhost:3034/api/v1/students')
-      students.value = response.data.data.items
+      students.value = (await api.get('/')).data.data.items
     } catch (error) {
-      console.error('Lỗi khi tải danh sách sinh viên:', error)
+      console.error(error)
     }
   }
 
-  // Thêm sinh viên mới
   const addStudent = async (studentData) => {
     try {
-      const response = await axios.post('http://localhost:3034/api/v1/students', studentData)
-      if (response.status === 201) {
-        students.value.push(response.data.data)  // Thêm vào danh sách
-        console.log('Sinh viên đã được thêm thành công!')
-      }
+      await api.post('/', studentData)
+      await fetchStudents()
     } catch (error) {
-      console.error('Lỗi khi thêm sinh viên:', error)
+      throw new Error(error.response?.data?.message || 'Failed to create student')
     }
   }
 
-  // Cập nhật thông tin sinh viên
-  const updateStudent = async (studentId, updatedData) => {
+  const updateStudent = async (id,studentData) => {
     try {
-      const response = await axios.put(`http://localhost:3034/api/v1/students/${studentId}`, updatedData)
-      if (response.status === 200) {
-        // Tìm và cập nhật lại thông tin sinh viên
-        const index = students.value.findIndex(student => student.id === studentId)
-        if (index !== -1) {
-          students.value[index] = response.data.data
-        }
-        console.log('Thông tin sinh viên đã được cập nhật!')
-      }
+      await api.put(`/${id}`, studentData)
+      await fetchStudents()
     } catch (error) {
-      console.error('Lỗi khi cập nhật sinh viên:', error)
+      throw new Error(error.response?.data?.message || 'Failed to update student')
     }
   }
 
-  // Xóa sinh viên
-  const deleteStudent = async (studentId) => {
+  const deleteStudent = async (id) => { 
     try {
-      const response = await axios.delete(`http://localhost:3034/api/v1/students/${studentId}`)
-      if (response.status === 200) {
-        // Xóa sinh viên khỏi danh sách
-        students.value = students.value.filter(student => student.id !== studentId)
-        console.log('Sinh viên đã được xóa thành công!')
-      }
-    } catch (error) {
-      console.error('Lỗi khi xóa sinh viên:', error)
+      await api.delete(`/${id}`)
+      await fetchStudents()
+    } catch (error) { 
+      throw new Error(error.response?.data?.message || 'Failed to delete student')
     }
   }
 
-  return { students, fetchStudents, addStudent, updateStudent, deleteStudent }
+  return { students, fetchStudents, addStudent ,deleteStudent,updateStudent}
 })
