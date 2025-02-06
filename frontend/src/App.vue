@@ -9,3 +9,11 @@ import Header from './components/Header.vue'
     <RouterView />
   </div>
 </template>
+
+<style>
+.pi {
+  font-family: 'PrimeIcons' !important;
+  font-style: normal !important;
+}
+
+</style>

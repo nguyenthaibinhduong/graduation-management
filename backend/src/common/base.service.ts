@@ -18,25 +18,25 @@ export abstract class BaseService<T> {
   }
 
   async getAll(
-    search?: string, // Cho phép tìm kiếm theo nhiều trường
-    limit: number = 10,
-    page: number = 1,
-    // Hỗ trợ sắp xếp
-  ): Promise<{ items: T[]; total: number; limit: number; page: number }> {
-    const whereConditions: any = {};
+    search?: string,
+    limit?: number,
+    page?: number,
+  ): Promise<{ items: T[]; total: number; limit?: number; page?: number }> {
+    const where = search ? { name: Like(`%${search}%`) } : {};
+    const options: any = { where };
 
-    // Thêm điều kiện tìm kiếm theo tên nếu có
-    if (search) {
-      whereConditions.name = Like(`%${search}%`);
+    if (limit && page) {
+      options.take = limit;
+      options.skip = (page - 1) * limit;
     }
 
-    const [items, total] = await this.repository.findAndCount({
-      where: whereConditions.length ? whereConditions : undefined,
-      take: limit,
-      skip: (page - 1) * limit,
-    });
+    // Lấy danh sách items theo search, limit, page
+    const items = await this.repository.find(options);
 
-    return { items, total, limit, page };
+    // Luôn lấy tổng số bản ghi thực tế không bị ảnh hưởng bởi search
+    const total = await this.repository.count();
+
+    return { items, total, ...(limit && { limit }), ...(page && { page }) };
   }
 
   async update(
