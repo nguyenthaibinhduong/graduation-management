@@ -5,9 +5,10 @@
       <router-link to="/" class="text-2xl font-bold text-blue-600"> MyLogo </router-link>
 
       <!-- Menu Items (Desktop) -->
-      <ul class="hidden md:flex space-x-6 text-gray-700">
+      <ul class="hidden md:flex space-x-6 text-gray-700 items-center">
         <li><router-link to="/" class="hover:text-blue-600">User</router-link></li>
         <li><router-link to="/student" class="hover:text-blue-600">Student</router-link></li>
+        <li><Button v-if="authStore.isAuthenticated" v-on:click="handleLogout" label="Đăng xuất" severity="danger" class="text-white" /></li>
       </ul>
 
       <!-- Mobile Menu Button -->
@@ -52,11 +53,24 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '@/stores/auth';
+import { Button } from 'primevue';
 import { ref } from 'vue'
+import {  useRouter } from 'vue-router';
 
 const isOpen = ref(false)
-
+const errorMessage = ref('');
+const authStore = useAuthStore()
+const router = useRouter()
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
 }
+
+const handleLogout = async () => {
+  try {
+    authStore.logout();
+  } catch (error) {
+    errorMessage.value = "Đăng xuất thất bại !";
+  }
+  };
 </script>

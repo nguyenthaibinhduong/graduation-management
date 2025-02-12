@@ -22,8 +22,8 @@ export class UsersService extends BaseService<User> {
     user.password = hashPassword;
     return this.userRepository.save(user);
   }
-  findByEmail(email: string) {
-    const user = this.userRepository.findOneBy({ email });
+  async findByEmail(email: string) {
+    const user = await this.userRepository.findOneBy({ email });
     return user;
   }
   async validateUser(email: string, password: string) {
