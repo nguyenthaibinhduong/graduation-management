@@ -24,7 +24,7 @@ api.interceptors.request.use(
 );
 
 
-
+let refreshStatus = null
 
 // Xử lý khi token hết hạn
 api.interceptors.response.use(
@@ -36,14 +36,27 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const authStore = useAuthStore(); // Nếu dùng Pinia trong Vue
     if (status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        await authStore.refreshAccessToken()
-        api.defaults.headers.Authorization = `Bearer ${authStore.token}`;
+      originalRequest._retry = true; 
+      if (!refreshStatus) {
+        refreshStatus = authStore
+        .refreshAccessToken()
+        .then(() => {
+          api.defaults.headers.Authorization = `Bearer ${authStore.token}`;
+          })
+          .catch(() => {
+          console.log('Phiên đăng nhập hết hạn');
+          authStore.logout();
+          })
+        .finally(() => {
+          refreshStatus= null
+        })
+      }
+      
+      return refreshStatus.then(() => {
         return api(originalRequest);
-      } catch (error) {
-        authStore.logout();
-      } 
+      });
+      
+
     }
 
     return Promise.reject(error.response.data.message || "Lỗi");
