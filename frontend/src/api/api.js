@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/stores/auth";
+import { showToast } from "@/utils/toast";
 import axios from "axios";
 
 const API_URL = "http://localhost:3034/api/v1";
@@ -44,7 +45,7 @@ api.interceptors.response.use(
           api.defaults.headers.Authorization = `Bearer ${authStore.token}`;
           })
           .catch(() => {
-          console.log('Phiên đăng nhập hết hạn');
+          showToast(error.response?.data?.message || "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
           authStore.logout();
           })
         .finally(() => {
@@ -57,6 +58,49 @@ api.interceptors.response.use(
       });
       
 
+    }
+    if (status === 401 && originalRequest._retry) {
+      
+      const messages = error.response?.data?.message;
+
+      if (Array.isArray(messages)) {
+        // Nếu messages là một mảng, duyệt qua từng lỗi
+        messages.forEach((msg) => showToast(msg, "error"));
+      } else {
+        showToast(messages, "error");
+      }
+      return Promise.reject("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+    }
+
+    if (status === 402) {
+      showToast(error.response?.data?.message || "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
+      authStore.logout();
+      return Promise.reject("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+    }
+    if (status === 400) {
+      const messages = error.response?.data?.message;
+
+      if (Array.isArray(messages)) {
+        // Nếu messages là một mảng, duyệt qua từng lỗi
+        messages.forEach((msg) => showToast(msg, "error"));
+      } else {
+        showToast(messages || "Dữ liệu không hợp lệ.", "error");
+      }
+      
+      return Promise.reject("Dữ liệu không hợp lệ.");
+    }
+    if (status === 403) {
+      authStore.logout();
+      showToast(error.response?.data?.message || "Bạn không có quyền truy cập vào tính năng này.", "error");
+      return Promise.reject("Bạn không có quyền truy cập vào tính năng này.");
+    }
+    if (status === 404) {
+      showToast(error.response?.data?.message || "Bạn không có quyền truy cập vào tính năng này.", "error");
+      return Promise.reject("Không tìm thấy trang bạn yêu cầu.");
+    }
+    if (status === 500) {
+      showToast(error.response?.data?.message || "Đã xảy ra lỗi trong hệ thống.", "error");
+      return Promise.reject("Đã xảy ra l��i trong hệ thống.");
     }
 
     return Promise.reject(error.response.data.message || "Lỗi");

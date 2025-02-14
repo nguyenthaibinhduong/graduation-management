@@ -1,19 +1,13 @@
 
 <template>
-  <div class="p-4">
+  <!-- <div class="p-4">
     <DataTable :value="students" :loading="loading" class="p-datatable-sm shadow-md">
       <template #header>
         <div class="flex flex-wrap items-center justify-between py-3 border-b">
-        <!-- Tiêu đề -->
         <span class="text-2xl font-semibold">Danh sách Sinh viên</span>
-
-        <!-- Thanh tìm kiếm -->
         <div class="flex items-center w-full md:w-1/3">
           <InputText class="w-full" type="text" v-model="search" placeholder="Tìm kiếm sinh viên..." />
-          <!-- <Button @click="studentStore.fetchStudents(search)" class="ms-2" icon="pi pi-search" /> -->
         </div>
-
-        <!-- Các chức năng khác -->
         <div class="flex items-center gap-3">
           <Select 
             v-model="limit" 
@@ -62,8 +56,24 @@
       :first="(page - 1) * limit"
       @page="onPageChange" 
     />
-  </div>
-
+  </div> -->
+   <DataTableCustom
+      title="Danh sách Sinh Viên"
+      :data="students"
+      :columns="[
+        { field: 'name', header: 'Họ và tên', sortable: true },
+        { field: 'student_code', header: 'Mã sinh viên', sortable: true },
+        { field: 'date_of_birth', header: 'Ngày sinh', sortable: true },
+        { field: 'major', header: 'Ngành học', sortable: true },
+        { field: 'enrollment_year', header: 'Năm nhập học', sortable: true },
+      ]"
+      :total="studentStore?.total"
+      :loading="loading"
+      @fetch="fetchStudent"
+      @add="addStudent"
+      @edit="editStudent"
+      @delete="deleteStudent"
+    />
   <Drawer class="w-2/5" v-model:visible="visibleLeft" :header="isEditing?'Sửa sinh viên':'Thêm sinh viên'" position="right">
     <div class="grid grid-cols-1 gap-5 w-full">
       <div class="p-field mb-2 mt-2">
@@ -103,73 +113,49 @@
     </div>
   </Drawer>
 
-  <Toast />
+ 
 </template>
   <script setup>
   import { ref, onMounted, watchEffect, watch } from 'vue';
-  import { useToast } from 'primevue/usetoast';
+  import { Button, Drawer ,InputText, DatePicker} from 'primevue';
   import { useStudentStore } from '@/stores/students';
-  import * as XLSX from "xlsx";
-  import { saveAs } from "file-saver";
-  import DataTable from 'primevue/datatable';
-  import Column from 'primevue/column';
-  import { Button } from 'primevue';
-  import Drawer from 'primevue/drawer';
-  import InputText from 'primevue/inputtext';
-  import Toast from 'primevue/toast';
-  import DatePicker from 'primevue/datepicker';
-  import Paginator from 'primevue/paginator';
-  import Select from 'primevue/select';
-
+  import DataTableCustom from '@/components/DataTableCustom.vue';
 
 
   const visibleLeft = ref(false);
   const studentStore = useStudentStore();
   const students = ref([]);
-  const search = ref('');
-  const limit = ref(4); // Số lượng sinh viên trên mỗi trang
-  const page = ref(1);
   const loading = ref(false);
-  const toast = useToast();
   const isEditing = ref(false);
   const editedStudentId = ref(null);
   const newStudent = ref({ name: '', student_code: '', date_of_birth: '', major: '', enrollment_year: '' });
 
-  onMounted(() => studentStore.fetchStudents(page.value,limit.value));
-  watchEffect(() => (students.value = studentStore.students));
- watch([page, limit, search], async ([newPage, newLimit, newSearch]) => {
-  await studentStore.fetchStudents(
-    newSearch ? 1 : newPage, 
-    newSearch ? studentStore.total : newLimit, 
-    newSearch
-  );
-});
-const saveStudent = async () => {
-  // if (Object.values(newStudent.value).some((v) => !v)) {
-  //   return toast.add({ severity: 'error', summary: 'Lỗi', detail: 'Vui lòng điền đủ thông tin.', life: 3000 });
-  // }
-  try {
+  onMounted(() => studentStore.fetchItems());
+  watchEffect(() => {
+    students.value = studentStore.items
+  });
+
+  const fetchStudent = async (newPage, newLimit, newSearch) => {
+    await studentStore.fetchItems(
+      newSearch ? 1 : newPage, 
+      newSearch ? studentStore.total : newLimit, 
+      newSearch
+    );
+  }
+  const addStudent = () => {
+    visibleLeft.value = true;
+  }
+  const saveStudent = async () => {
     if (isEditing.value) {
-      await studentStore.updateStudent(editedStudentId.value, newStudent.value);
-      toast.add({ severity: 'success', summary: 'Thành công', detail: 'Cập nhật sinh viên thành công.', life: 3000 });
+      await studentStore.updateItem(editedStudentId.value, newStudent.value);
     } else {
-      await studentStore.addStudent(newStudent.value);
-      toast.add({ severity: 'success', summary: 'Thành công', detail: 'Thêm sinh viên thành công.', life: 3000 });
+      await studentStore.addItem(newStudent.value);
     }
     cancelForm();
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'Lỗi', detail: error.message || 'Đã xảy ra lỗi.', life: 3000 });
-  }
 };
 
   const deleteStudent = async (id) => { 
-    try {
-      await studentStore.deleteStudent(id);
-      toast.add({ severity:'success', summary: 'Thành công', detail: 'Sinh viên đã được xóa.', life: 3000 });
-    } catch (error) {
-      
-      toast.add({ severity: 'error', summary: 'Lỗi', detail: error.message || 'Đã xảy ra lỗi.', life: 3000 });
-    }
+    await studentStore.deleteItem(id);
   }
 
   const editStudent = (student) => {
@@ -192,35 +178,6 @@ const saveStudent = async () => {
     }
   });
 
-  const exportToExcel = () => {
-  // 1. Chuẩn bị dữ liệu tùy chỉnh
-    const formattedData = students.value.map(student => ({
-      "Mã sinh viên": student.student_code,
-      "Họ và tên": student.name,
-      "Ngành": student.major,
-      "Năm nhập học": student.enrollment_year, // Làm tròn điểm GPA
-      "Ngày sinh": new Date(student.date_of_birth).toLocaleDateString(), // Format ngày sinh
-    }));
-      // 1. Chuyển dữ liệu thành worksheet
-      const ws = XLSX.utils.json_to_sheet(formattedData);
-
-      // 2. Tạo một Workbook
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Danh sách sinh viên");
-
-      // 3. Xuất file
-      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-
-      // 4. Lưu file
-      const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-      saveAs(data, "DanhSachSinhVien.xlsx");
-  }
-    const onPageChange = async (event) => {
-      page.value = event.page + 1;
-    };
-    const onLimitChange = async (event) => {
-      page.value = 1; // Đặt lại về trang đầu tiên khi thay đổi số bản ghi
-    };
 </script>
 
 
