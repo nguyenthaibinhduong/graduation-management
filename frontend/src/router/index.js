@@ -8,6 +8,7 @@ const routes = [
   { path: "/login", name: "login", component: views["../views/LoginView.vue"] },
   { path: "/", name: "user", component: views["../views/UserView.vue"], meta: { requiresAuth: true } },
   { path: "/student", name: "student", component: views["../views/StudentView.vue"], meta: { requiresAuth: true } },
+  { path: "/teacher", name: "teacher", component: views["../views/TeacherView.vue"], meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

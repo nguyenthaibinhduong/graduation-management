@@ -8,6 +8,7 @@
       <ul class="hidden md:flex space-x-6 text-gray-700 items-center">
         <li><router-link to="/" class="hover:text-blue-600">User</router-link></li>
         <li><router-link to="/student" class="hover:text-blue-600">Student</router-link></li>
+        <li><router-link to="/teacher" class="hover:text-blue-600">Teacher</router-link></li>
         <li><Button v-if="authStore.isAuthenticated" v-on:click="handleLogout" label="Đăng xuất" severity="danger" class="text-white" /></li>
       </ul>
 

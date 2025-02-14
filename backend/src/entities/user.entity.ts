@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { RefreshToken } from './refresh_token.entity';
+import { Teacher } from './teacher.entity';
 
 export enum UserRole {
   STUDENT = 'student',
@@ -40,6 +41,10 @@ export class User {
 
   @OneToOne(() => Student, (student) => student.user, { cascade: true })
   student?: Student;
+
+  @OneToOne(() => Teacher, (teacher) => teacher.user, { cascade: true })
+  teacher?: Teacher;
+
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, {
     cascade: true,
   })
