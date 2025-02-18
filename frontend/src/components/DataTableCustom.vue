@@ -23,7 +23,7 @@
       
       <Column header="Hành động">
         <template #body="{ data }">
-         <div class="grid grid-cols-2 gap-x-1">
+         <div class="flex gap-4">
           <Button icon="pi pi-pencil" class="p-button-primary bg-blue-500 border-blue-500 text-white" @click="$emit('edit', data)" />
           <Button icon="pi pi-trash" class="p-button-danger bg-red-500 border-red-500 text-white" @click="$emit('delete', data.id)" />
          </div>
@@ -79,4 +79,7 @@ const exportToExcel = () => {
   const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   saveAs(new Blob([excelBuffer]), 'Data.xlsx');
 };
+
+
+
 </script>

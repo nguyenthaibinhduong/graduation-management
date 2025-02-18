@@ -64,7 +64,7 @@
   const loading = ref(false);
   const isEditing = ref(false);
   const editedTeacherId = ref(null);
-  const newTeacher = ref({ name: '', teacher_code: '', date_of_birth: '', major: '', enrollment_year: '' });
+  const newTeacher = ref({ name: '', teacher_code: '', date_of_birth: '', major: '' });
 
   onMounted(() => teacherStore.fetchItems());
   watchEffect(() => {

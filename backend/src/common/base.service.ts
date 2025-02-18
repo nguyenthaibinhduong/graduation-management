@@ -5,7 +5,10 @@ import { NotFoundException } from '@nestjs/common';
 export abstract class BaseService<T> {
   protected constructor(protected readonly repository: Repository<T>) {}
 
-  async create(data: DeepPartial<T>): Promise<T> {
+  async create(data: DeepPartial<T> | DeepPartial<T>[]): Promise<T | T[]> {
+    if (Array.isArray(data)) {
+      return await this.repository.save(data);
+    }
     return await this.repository.save(data);
   }
 

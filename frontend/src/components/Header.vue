@@ -1,11 +1,11 @@
 <template>
-  <header class="bg-white shadow-md">
+  <header class="shadow-md">
     <nav class="container mx-auto flex items-center justify-between py-4 px-6">
       <!-- Logo -->
       <router-link to="/" class="text-2xl font-bold text-blue-600"> MyLogo </router-link>
 
       <!-- Menu Items (Desktop) -->
-      <ul class="hidden md:flex space-x-6 text-gray-700 items-center">
+      <ul class="hidden md:flex space-x-6 items-center">
         <li><router-link to="/" class="hover:text-blue-600">User</router-link></li>
         <li><router-link to="/student" class="hover:text-blue-600">Student</router-link></li>
         <li><router-link to="/teacher" class="hover:text-blue-600">Teacher</router-link></li>
@@ -13,7 +13,7 @@
       </ul>
 
       <!-- Mobile Menu Button -->
-      <button @click="toggleMenu" class="md:hidden text-gray-700">
+      <button @click="toggleMenu" class="md:hidden">
         <svg
           v-if="!isOpen"
           class="w-6 h-6"

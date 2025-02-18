@@ -25,7 +25,7 @@ export class StudentsController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) student: CreateStudentDto,
+    @Body(new ValidationPipe()) student: CreateStudentDto | [],
   ): Promise<Response<Student>> {
     try {
       const newStudent = await this.studentService.create(student);

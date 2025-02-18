@@ -2,25 +2,33 @@
   <div class="flex items-center justify-center min-h-screen">
     <Card class="w-[24rem] shadow-lg">
       <template #title>
-        <h2 class="text-center text-xl font-semibold">Đăng nhập</h2>
+        <h2 class="text-center text-2xl font-semibold py-4">Đăng nhập</h2>
       </template>
 
       <template #content>
         <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
+        <FloatLabel class="mb-3">
+          <label for="email">Email</label>
           <InputText 
-            v-model="email" 
-            type="email" 
-            placeholder="Email" 
-            required 
-            class="w-full"
-          />
-           <InputText 
-            v-model="password" 
-            type="password" 
-            placeholder="Mật khẩu" 
-            required 
-            class="w-full"
-          />
+              id="email"
+              v-model="email" 
+              type="email" 
+              required 
+              class="w-full"
+            />
+          </FloatLabel>
+         <FloatLabel class="mb-3">  
+          <label for="password">Mật khẩu</label> 
+          <InputText 
+              id="password"
+              v-model="password" 
+              type="password" 
+             
+              required 
+              class="w-full"
+            />
+          </FloatLabel>
+        
           <Button 
             type="submit" 
             label="Đăng nhập"
@@ -36,7 +44,7 @@
 </template>
 <script setup>
   import { useAuthStore } from "@/stores/auth";
-  import { Card, Button,InputText} from "primevue";
+  import { Card, Button,InputText, FloatLabel} from "primevue";
   import { ref } from "vue";
   import { useRouter } from "vue-router";
   const email = ref("");

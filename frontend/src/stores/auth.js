@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import api from "@/api/api";
 import router from "@/router";
+import { showToast } from "@/utils/toast";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -26,16 +27,18 @@ export const useAuthStore = defineStore("auth", {
         this.user = response.data.user;
         localStorage.setItem("token", this.token);
         api.defaults.headers.common["Authorization"] = `Bearer ${this.token}`;
+        showToast("Đăng nhập thành công","success")
       } catch (error) {
-        console.error("Login failed:", error);
+        showToast(error.response?.data?.message,"error")
       }
     },
    async refreshAccessToken() {
-       const response = await axios.post(
+       const response =await axios.post(
           "http://localhost:3034/api/v1/auth/refresh-token",
-          {},
-          { withCredentials: true }
+          {}, 
+          { withCredentials: true } 
         );
+
 
         if (response.data.access_token) {
           this.token = response.data.access_token;

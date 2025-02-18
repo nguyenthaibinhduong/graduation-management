@@ -4,7 +4,9 @@ import { RouterView } from 'vue-router'
 import { Toast, useToast } from 'primevue';
 import { initToast } from './utils/toast';
 import Header from './components/Header.vue'
+import { useAuthStore } from './stores/auth';
 const toast = useToast();
+const authStore = useAuthStore()
 
 onMounted(() => {
   initToast(toast);
@@ -12,11 +14,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <Header />
-  <div class="container mx-auto">
-    <RouterView />
-    <Toast />
-  </div>
+  <RouterView />
+  <Toast />
 </template>
 
 <style>

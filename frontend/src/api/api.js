@@ -36,7 +36,9 @@ api.interceptors.response.use(
     const { status } = error.response;
     const originalRequest = error.config;
     const authStore = useAuthStore(); // Nếu dùng Pinia trong Vue
-    if (status === 401 && !originalRequest._retry) {
+
+    if (status === 401) {
+      if (!originalRequest._retry) {
       originalRequest._retry = true; 
       if (!refreshStatus) {
         refreshStatus = authStore
@@ -45,7 +47,7 @@ api.interceptors.response.use(
           api.defaults.headers.Authorization = `Bearer ${authStore.token}`;
           })
           .catch(() => {
-          showToast(error.response?.data?.message || "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
+          showToast("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
           authStore.logout();
           })
         .finally(() => {
@@ -59,8 +61,6 @@ api.interceptors.response.use(
       
 
     }
-    if (status === 401 && originalRequest._retry) {
-      
       const messages = error.response?.data?.message;
 
       if (Array.isArray(messages)) {
@@ -73,7 +73,7 @@ api.interceptors.response.use(
     }
 
     if (status === 402) {
-      showToast(error.response?.data?.message || "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
+      showToast("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
       authStore.logout();
       return Promise.reject("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
     }
