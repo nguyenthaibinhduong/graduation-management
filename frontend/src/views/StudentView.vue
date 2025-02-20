@@ -72,6 +72,8 @@
     @add="addStudent"
     @edit="editStudent"
     @delete="deleteStudent"
+    @selectOne="handleSelectOne"
+    @selectAll="handleSelectAll"
   />
   <Drawer
     class="w-1/2"
@@ -231,8 +233,8 @@ const saveStudent = async () => {
   cancelForm();
 };
 
-const deleteStudent = async (id) => {
-  await studentStore.deleteItem(id);
+const deleteStudent = async (ids) => {
+  await studentStore.deleteItem(ids);
 };
 
 const editStudent = (student) => {
@@ -315,10 +317,18 @@ const formatDate = (excelDate) => {
   }
   return excelDate.split("/").length === 3 ? excelDate : "";
 };
-
+const selectedIds = ref([]);
 const submitDataImport = async () => {
   await studentStore.addItem(JSON.stringify(excelData.value));
   excelData.value = [];
+};
+
+const handleSelectOne = (ids) => {
+  selectedIds.value = ids;
+};
+
+const handleSelectAll = (ids) => {
+  selectedIds.value = ids;
 };
 
 </script>
