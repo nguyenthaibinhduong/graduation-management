@@ -1,61 +1,4 @@
 <template>
-  <!-- <div class="p-4">
-    <DataTable :value="students" :loading="loading" class="p-datatable-sm shadow-md">
-      <template #header>
-        <div class="flex flex-wrap items-center justify-between py-3 border-b">
-        <span class="text-2xl font-semibold">Danh sách Sinh viên</span>
-        <div class="flex items-center w-full md:w-1/3">
-          <InputText class="w-full" type="text" v-model="search" placeholder="Tìm kiếm sinh viên..." />
-        </div>
-        <div class="flex items-center gap-3">
-          <Select 
-            v-model="limit" 
-            :options="[2, 5, 10, 20]" 
-            @change="onLimitChange" 
-            placeholder="Hiện bản ghi" 
-            class="w-45"
-          />
-          <Button icon="pi pi-file-excel" label="Xuất Excel" @click="exportToExcel" class="p-button-success" />
-          <Button icon="pi pi-plus" label="Thêm mới" @click="visibleLeft = true" severity="info" />
-        </div>
-      </div>
-      
-      </template>
-      <template #empty>
-    <div class="text-center text-gray-500 py-5 w-full">
-      <i class="pi pi-info-circle text-xl"></i>
-      <p class="mt-2">Không tìm thấy dữ liệu.</p>
-    </div>
-  </template>
-     <Column header="STT" sortable>
-        <template #body="{ index }">
-          {{ (page - 1) * limit + index + 1 }}
-        </template>
-    </Column>
-      <Column field="name" header="Họ và tên" sortable></Column>
-      <Column field="student_code" header="Mã sinh viên" sortable></Column>
-      <Column field="date_of_birth" header="Ngày sinh" sortable></Column>
-      <Column field="major" header="Ngành học" sortable></Column>
-      <Column field="enrollment_year" header="Năm nhập học" sortable></Column>
-      <Column header="Hành động">
-      <template #body="slotProps">
-      <div class="grid grid-cols-2 gap-2">
-      <Button icon="pi pi-pencil"  class="bg-blue-600 text-white border-blue-500 " 
-          @click="editStudent(slotProps.data)" />
-        <Button icon="pi pi-trash"  class="bg-red-500 text-white border-red-500" 
-          @click="deleteStudent(slotProps.data.id)" /></div>
-        
-      </template>
-    </Column>
-    </DataTable>
-    <Paginator 
-      v-if="studentStore.total > limit"
-      :rows="limit" 
-      :totalRecords="studentStore.total" 
-      :first="(page - 1) * limit"
-      @page="onPageChange" 
-    />
-  </div> -->
   <DataTableCustom
     title="Danh sách Sinh Viên"
     :data="students"
@@ -72,8 +15,8 @@
     @add="addStudent"
     @edit="editStudent"
     @delete="deleteStudent"
-    @selectOne="handleSelectOne"
-    @selectAll="handleSelectAll"
+    @selectOne="handleSelectData"
+    @selectAll="handleSelectData"
   />
   <Drawer
     class="w-1/2"
@@ -224,6 +167,7 @@ const fetchStudent = async (newPage, newLimit, newSearch) => {
 const addStudent = () => {
   visibleLeft.value = true;
 };
+
 const saveStudent = async () => {
   if (isEditing.value) {
     await studentStore.updateItem(editedStudentId.value, newStudent.value);
@@ -323,12 +267,10 @@ const submitDataImport = async () => {
   excelData.value = [];
 };
 
-const handleSelectOne = (ids) => {
+const handleSelectData = (ids) => {
   selectedIds.value = ids;
 };
 
-const handleSelectAll = (ids) => {
-  selectedIds.value = ids;
-};
+
 
 </script>
