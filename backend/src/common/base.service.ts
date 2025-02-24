@@ -56,11 +56,28 @@ export abstract class BaseService<T> {
     return this.getById(options);
   }
 
-  async delete(id: number): Promise<void> {
-    const entity = await this.repository.findOne({ where: { id } as any });
-    if (!entity) {
-      throw new NotFoundException('Entity not found');
+  // async delete(id: number | number[]): Promise<void> {
+  //   const entity = await this.repository.findOne({ where: { id } as any });
+  //   if (!entity) {
+  //     throw new NotFoundException('Entity not found');
+  //   }
+  //   await this.repository.delete(id);
+  // }
+
+  // delete one or multiple entities
+  async delete(ids: number | number[]): Promise<void> {
+    const idArray = Array.isArray(ids) ? ids : [ids];
+    const entities = await this.repository.findByIds(idArray);
+
+    if (entities.length !== idArray.length) {
+      throw new NotFoundException('One or more entities not found');
     }
-    await this.repository.delete(id);
+
+    try {
+      await this.repository.delete(idArray);
+    } catch (error) {
+      console.error('Error in delete:', error); // Add logging for debugging
+      throw error;
+    }
   }
 }
