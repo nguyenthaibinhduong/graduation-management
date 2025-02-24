@@ -1,8 +1,18 @@
 <template>
   <div class="p-4">
+    <div class="flex items-center gap-2 w-full ps-2">
+      <div >
+          <Checkbox  v-model="selectStatus"   @change="toggleSelectAll" binary />
+          <label class="ms-2" for="ingredient1"> Chọn tất cả </label>
+      </div>  
+      <div>
+      <Button v-if="selectedRows.length>0" label="Xóa tất cả" @click="$emit('delete', selectedRows)" class="bg-red-600 border border-red-600 text-white" />
+      </div>   
+    </div>
     <DataTable :value="data" :loading="loading" class="p-datatable-sm shadow-md">
       <template #header>
         <div class="flex flex-wrap items-center justify-between py-3 border-b">
+        
           <span class="text-2xl font-semibold">{{ title }}</span>
           <div class="flex items-center w-full md:w-1/3">
             <InputText class="w-full" v-model="search" placeholder="Tìm kiếm..." />
@@ -14,7 +24,11 @@
           </div>
         </div>
       </template>
-      
+      <Column>
+        <template v-slot:body="{ data: row }">
+          <Checkbox v-model="selectedRows" :value="row.id" @change="updateSelectAll" />
+        </template>
+      </Column>
       <Column v-for="col in columns" :key="col.field" :field="col.field" :header="col.header" sortable>
         <template v-slot:body="{ data }">
           <slot :name="col.field" :data="data">{{ data[col.field] }}</slot>
@@ -37,7 +51,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { Button, Column, DataTable, InputText, Paginator, Select } from 'primevue';
+import { Button, Column, DataTable, InputText, Paginator, Select ,Checkbox } from 'primevue';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -49,21 +63,47 @@ const props = defineProps({
   loading: Boolean,
 });
 
-const emit = defineEmits(['edit', 'delete', 'add', 'fetch']);
+const emit = defineEmits(['edit', 'delete', 'add', 'fetch', 'selectOne','selectAll']);
 const search = ref('');
 const limit = ref(10);
 const page = ref(1);
+const selectedRows = ref([]);
+const selectStatus = ref(false);
 
 
 watch([page, limit, search], ([newPage, newLimit, newSearch]) => {
   emit('fetch', newPage, newLimit, newSearch);
 });
+
+watch(selectedRows, (newSelection) => {
+  emit('selectOne', newSelection);
+});
+
+
+const toggleSelectAll = () => {
+  if (selectStatus.value) {
+    selectedRows.value = props.data.map(row => row.id);
+  } else {
+    selectedRows.value = [];
+  }
+  selectStatus.value = selectedRows.length == props.data.length;
+  emit('selectAll', selectedRows.value);
+};
+
+const updateSelectAll = () => {
+  selectStatus.value = selectedRows.value.length == props.data.length;
+    
+};
+
+
 const onLimitChange =(event) => {
       page.value = 1; // Đặt lại về trang đầu tiên khi thay đổi số bản ghi
 };
 const onPageChange = (event) => {
   page.value = event.page + 1;
 };
+
+
 
 const exportToExcel = () => {
   const formattedData = props.data.map(row => {

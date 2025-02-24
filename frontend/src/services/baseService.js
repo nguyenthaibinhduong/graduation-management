@@ -17,8 +17,13 @@ const baseService = (resource) => ({
     return api.put(`/${resource}/${id}`, payload)
   },
 
-  delete: async (id) => {
-    return api.delete(`/${resource}/${id}`)
+  delete: async (ids) => {
+    if (!ids.length) {
+      return api.delete(`/${resource}/${ids}`)
+    } else {
+      console.log('xoa tat ca');
+    }
+    
   }
 })
 
