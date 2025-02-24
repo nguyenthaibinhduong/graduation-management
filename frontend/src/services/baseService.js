@@ -21,8 +21,7 @@ const baseService = (resource) => ({
     if (!ids.length) {
       return api.delete(`/${resource}/${ids}`)
     } else {
-      console.log('xoa tat ca' );
-      console.log(ids);
+      return api.post(`/${resource}/remove-multi`,ids)
     }
     
   }
