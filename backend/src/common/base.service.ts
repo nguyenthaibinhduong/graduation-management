@@ -1,4 +1,4 @@
-import { DeepPartial, FindOneOptions, Like, Repository } from 'typeorm';
+import { DeepPartial, FindOneOptions, In, Like, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { NotFoundException } from '@nestjs/common';
 
@@ -56,27 +56,19 @@ export abstract class BaseService<T> {
     return this.getById(options);
   }
 
-  // async delete(id: number | number[]): Promise<void> {
-  //   const entity = await this.repository.findOne({ where: { id } as any });
-  //   if (!entity) {
-  //     throw new NotFoundException('Entity not found');
-  //   }
-  //   await this.repository.delete(id);
-  // }
-
-  // delete one or multiple entities
   async delete(ids: number | number[]): Promise<void> {
     const idArray = Array.isArray(ids) ? ids : [ids];
-    const entities = await this.repository.findByIds(idArray);
+    const where = { id: In(idArray) };
+    const options: any = { where };
+    const entities = await this.repository.find(options);
 
-    if (entities.length !== idArray.length) {
+    if (entities.length != idArray.length) {
       throw new NotFoundException('One or more entities not found');
     }
 
     try {
       await this.repository.delete(idArray);
     } catch (error) {
-      console.error('Error in delete:', error); // Add logging for debugging
       throw error;
     }
   }
