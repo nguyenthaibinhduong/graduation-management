@@ -98,4 +98,19 @@ export class TeachersController {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
     }
   }
+
+  @Post('remove-multi')
+  async removeMulti(
+    @Body() ids: number[],
+  ): Promise<Response<void> | HttpException> {
+    try {
+      await this.teacherService.delete(ids);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
 }

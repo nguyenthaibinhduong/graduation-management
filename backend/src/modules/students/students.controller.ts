@@ -97,4 +97,19 @@ export class StudentsController {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
     }
   }
+
+  @Post('remove-multi')
+  async removeMulti(
+    @Body() ids: number[],
+  ): Promise<Response<void> | HttpException> {
+    try {
+      await this.studentService.delete(ids);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
 }
