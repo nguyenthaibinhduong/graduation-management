@@ -27,16 +27,11 @@ export abstract class BaseService<T> {
   ): Promise<{ items: T[]; total: number; limit?: number; page?: number }> {
     const where = search ? { name: Like(`%${search}%`) } : {};
     const options: any = { where };
-
     if (limit && page) {
       options.take = limit;
       options.skip = (page - 1) * limit;
     }
-
-    // Lấy danh sách items theo search, limit, page
     const items = await this.repository.find(options);
-
-    // Luôn lấy tổng số bản ghi thực tế không bị ảnh hưởng bởi search
     const total = await this.repository.count();
 
     return { items, total, ...(limit && { limit }), ...(page && { page }) };

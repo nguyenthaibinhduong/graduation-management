@@ -183,7 +183,7 @@ const deleteStudent = async (ids) => {
 
 const editStudent = (student) => {
   editedStudentId.value = student.id;
-  newStudent.value = { ...student };
+  newStudent.value = student ;
   isEditing.value = true;
   visibleLeft.value = true;
 };
