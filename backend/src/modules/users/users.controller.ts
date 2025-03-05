@@ -16,9 +16,11 @@ import { User } from 'src/entities/user.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RoleGuard } from 'src/common/guards/role.guard';
+import { Roles } from 'src/common/decorators/roles.decorators';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
@@ -34,6 +36,7 @@ export class UsersController {
     }
   }
 
+  @Roles('teacher')
   @Get()
   async findAll(
     @Query('search') search?: string,

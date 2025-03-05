@@ -10,7 +10,7 @@ export class AuthService {
     private readonly JwtService: JwtService,
   ) {}
   async login(user: any, res: Response) {
-    const payload = { id: user.id, email: user.email };
+    const payload = { id: user.id, email: user.email, role: user.role };
     // 🔐 Tạo Access Token (Hết hạn trong 15 phút)
     const accessToken = this.JwtService.sign(payload, {
       expiresIn: '5m',
@@ -51,7 +51,7 @@ export class AuthService {
         throw new UnauthorizedException('Refresh token is invalid or revoked');
       }
 
-      const payload = { id: user.id, email: user.email };
+      const payload = { id: user.id, email: user.email, role: user.role };
       return this.JwtService.sign(payload, {
         expiresIn: '15s',
         secret: process.env.JWT_ACCESS_SECRET, // Sử dụng secret riêng cho access token
