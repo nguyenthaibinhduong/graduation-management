@@ -27,7 +27,7 @@ const toggleMenu = (menu) => {
 
     <!-- Navigation Menu -->
     <nav class="px-4">
-     <!-- <SwitchMode /> -->
+     <SwitchMode />
       <ul>
         <!-- Introduction -->
         <li class="py-2">

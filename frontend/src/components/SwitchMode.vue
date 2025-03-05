@@ -1,49 +1,26 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, watch } from "vue";
+import ToggleSwitch from "primevue/toggleswitch";
 
-// Biến reactive để lưu trạng thái Dark Mode
 const isDarkMode = ref(false);
+const darkTheme = "my-app-dark";
 
-// Danh sách các theme sáng và tối của PrimeVue
-const lightTheme = "lara-light-blue";
-const darkTheme = "lara-dark-blue";
-
-// Hàm chuyển đổi Light/Dark Mode
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value;
-  const theme = isDarkMode.value ? darkTheme : lightTheme;
-  
-  // Thay đổi file CSS của PrimeVue
-  changeTheme(theme);
-  
-  // Lưu trạng thái vào localStorage
-  localStorage.setItem("theme", theme);
-};
-
-// Hàm thay đổi theme
-const changeTheme = (theme) => {
-  const link = document.querySelector("link[href*='theme.css']");
-  if (link) {
-    link.href = `https://unpkg.com/primevue/resources/themes/${theme}/theme.css`;
+// Theo dõi sự thay đổi của isDarkMode để thêm hoặc xóa class dark mode
+watch(isDarkMode, (newVal) => {
+  if (newVal) {
+    document.documentElement.classList.add(darkTheme);
+  } else {
+    document.documentElement.classList.remove(darkTheme);
   }
-};
-
-// Kiểm tra trạng thái đã lưu khi tải trang
-onMounted(() => {
-  const savedTheme = localStorage.getItem("theme") || lightTheme;
-  isDarkMode.value = savedTheme === darkTheme;
-  changeTheme(savedTheme);
 });
 </script>
 
 <template>
-  <div class="p-5 flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 transition">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Light / Dark Mode với PrimeVue</h1>
-
-    <Button @click="toggleDarkMode" class="mt-4">
-      <i :class="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'" class="mr-2"></i>
-      {{ isDarkMode ? "Light Mode" : "Dark Mode" }}
-    </Button>
+  <div class="p-5 flex flex-col items-center justify-center transition">
+    <div class="flex items-center gap-2">
+      <span >Dark/Light Mode</span>
+      <ToggleSwitch v-model="isDarkMode" />
+    </div>
   </div>
 </template>
 
