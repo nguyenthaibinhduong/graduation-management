@@ -22,9 +22,7 @@ const user = ref(authStore.user)
 
 onMounted(() => {
   if (!user.value) {
-    authStore.fetchUser().then(() => {
-      user.value = authStore.user
-    })
+    authStore.fetchUser()
   }
 })
 </script>
