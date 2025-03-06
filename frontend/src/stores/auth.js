@@ -27,7 +27,7 @@ export const useAuthStore = defineStore("auth", {
         this.user = response.data.user;
         localStorage.setItem("token", this.token);
         api.defaults.headers.common["Authorization"] = `Bearer ${this.token}`;
-        showToast("Đăng nhập thành công","success")
+        showToast("Đăng nhập thành công", "success")
       } catch (error) {
         showToast(error.response?.data?.message,"error")
       }
@@ -55,8 +55,7 @@ export const useAuthStore = defineStore("auth", {
     async fetchUser() {
       if (this.token) {
         try {
-          const response = await api.get("auth/me");
-          this.user = response.data;
+         this.user = (await api.get("auth/me")).data;
         } catch (error) {
           console.error("Failed to fetch user:", error);
           this.logout();

@@ -1,8 +1,8 @@
 <template>
   <Header v-if="authStore.isAuthenticated" />
   <div class="container mx-auto flex gap-2 py">
-    <div class="w-1/4 shadow-md"><NavBar /></div>
-    <div class="w-3/4"><RouterView /></div>
+    <div class="w-1/5"><NavBar /></div>
+    <div class="w-4/5"><RouterView /></div>
   </div>
 </template>
 <script setup>

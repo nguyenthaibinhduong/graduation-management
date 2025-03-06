@@ -1,6 +1,9 @@
 <template>
   <div class="p-4">
-    <div class="flex items-center gap-2 w-full ps-2">
+    
+    <DataTable :value="data" :loading="loading" class="p-datatable-sm">
+      <template #header>
+      <div class="flex items-center gap-2 w-full ps-2">
       <div >
           <Checkbox  v-model="selectStatus"   @change="toggleSelectAll" binary />
           <label class="ms-2" for="ingredient1"> Chọn tất cả </label>
@@ -9,9 +12,7 @@
       <Button v-if="selectedRows.length>0" label="Xóa tất cả" @click="$emit('delete', selectedRows)" class="bg-red-600 border border-red-600 text-white" />
       </div>   
     </div>
-    <DataTable :value="data" :loading="loading" class="p-datatable-sm shadow-md">
-      <template #header>
-        <div class="flex flex-wrap items-center justify-between py-3 border-b">
+        <div class="flex flex-wrap items-center justify-between py-3">
         
           <span class="text-2xl font-semibold">{{ title }}</span>
           <div class="flex items-center w-full md:w-1/3">
