@@ -53,7 +53,7 @@ export class AuthService {
 
       const payload = { id: user.id, email: user.email, role: user.role };
       return this.JwtService.sign(payload, {
-        expiresIn: '15s',
+        expiresIn: '5m',
         secret: process.env.JWT_ACCESS_SECRET, // Sử dụng secret riêng cho access token
       });
     } catch (error) {
