@@ -1,54 +1,36 @@
 <template>
-  <div class="profile-container">
-    <Card class="profile-card">
-      <div class="profile-details">
-        <div class="profile-item">
-          <span>Email:</span>
-          <span>{{ authStore.user.email }}</span>
+  <div class="profile-view">
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-2">
+            <label class="font-semibold">Email:</label>
+            <span>{{ authStore.user?.email }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="font-semibold">Vai trò:</label>
+            <span>{{ authStore.user?.role }}</span>
+          </div>
         </div>
-        <div class="profile-item">
-          <span>Role:</span>
-          <span>{{ authStore.user.role }}</span>
-        </div>
-      </div>
-    </Card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watchEffect } from 'vue'
-import { Card } from 'primevue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
-const user = ref()
+const user = ref(authStore.user)
 
-onMounted(() => authStore.fetchUser())
-watchEffect(() => {
-  user.value = authStore.user
+onMounted(() => {
+  if (!user.value) {
+    authStore.fetchUser().then(() => {
+      user.value = authStore.user
+    })
+  }
 })
 </script>
 
 <style scoped>
-.profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.profile-card {
-  width: 400px;
-}
-
-.profile-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.profile-item {
-  display: flex;
-  justify-content: space-between;
+.profile-view {
+  padding: 20px;
 }
 </style>
