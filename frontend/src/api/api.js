@@ -1,29 +1,28 @@
-import { useAuthStore } from "@/stores/auth";
-import { showToast } from "@/utils/toast";
-import axios from "axios";
+import { useAuthStore } from '@/stores/auth'
+import { showToast } from '@/utils/toast'
+import axios from 'axios'
 
-const API_URL = "http://localhost:3034/api/v1";
+const API_URL = 'http://localhost:3034/api/v1'
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
   withCredentials: true,
-});
+})
 
 // Lấy token từ localStorage khi request
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token')
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`
     }
-    return config;
+    return config
   },
   (error) => Promise.reject(error)
-);
-
+)
 
 let refreshStatus = null
 
@@ -31,81 +30,84 @@ let refreshStatus = null
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (!error.response) return Promise.reject(error.response.data.message || "Lỗi");
+    if (!error.response) return Promise.reject(error.response.data.message || 'Lỗi')
 
-    const { status } = error.response;
-    const originalRequest = error.config;
-    const authStore = useAuthStore(); // Nếu dùng Pinia trong Vue
+    const { status } = error.response
+    const originalRequest = error.config
+    const authStore = useAuthStore() // Nếu dùng Pinia trong Vue
 
     if (status === 401) {
       if (!originalRequest._retry) {
-      originalRequest._retry = true; 
-      if (!refreshStatus) {
-        refreshStatus = authStore
-        .refreshAccessToken()
-        .then(() => {
-          api.defaults.headers.Authorization = `Bearer ${authStore.token}`;
-          })
-          .catch(() => {
-          showToast("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
-          authStore.logout();
-          })
-        .finally(() => {
-          refreshStatus= null
+        originalRequest._retry = true
+        if (!refreshStatus) {
+          refreshStatus = authStore
+            .refreshAccessToken()
+            .then(() => {
+              api.defaults.headers.Authorization = `Bearer ${localStorage.getItem('token')}`
+            })
+            .catch(() => {
+              showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error')
+              authStore.logout()
+            })
+            .finally(() => {
+              refreshStatus = null
+            })
+        }
+
+        return refreshStatus.then(() => {
+          return api(originalRequest)
         })
       }
-      
-      return refreshStatus.then(() => {
-        return api(originalRequest);
-      });
-      
-
-    }
-      const messages = error.response?.data?.message;
+      const messages = error.response?.data?.message
 
       if (Array.isArray(messages)) {
         // Nếu messages là một mảng, duyệt qua từng lỗi
-        messages.forEach((msg) => showToast(msg, "error"));
+        messages.forEach((msg) => showToast(msg, 'error'))
       } else {
-        showToast(messages, "error");
+        showToast(messages, 'error')
       }
-      return Promise.reject("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+      return Promise.reject('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
     }
 
     if (status === 402) {
-      showToast("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
-      authStore.logout();
-      return Promise.reject("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+      showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error')
+      authStore.logout()
+      return Promise.reject('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
     }
     if (status === 400) {
-      const messages = error.response?.data?.message;
+      const messages = error.response?.data?.message
 
       if (Array.isArray(messages)) {
         // Nếu messages là một mảng, duyệt qua từng lỗi
-        messages.forEach((msg) => showToast(msg, "error"));
+        messages.forEach((msg) => showToast(msg, 'error'))
       } else {
-        showToast(messages || "Dữ liệu không hợp lệ.", "error");
+        showToast(messages || 'Dữ liệu không hợp lệ.', 'error')
       }
-      
-      return Promise.reject("Dữ liệu không hợp lệ.");
+
+      return Promise.reject('Dữ liệu không hợp lệ.')
     }
     if (status === 403) {
-      authStore.logout();
-      showToast(error.response?.data?.message || "Bạn không có quyền truy cập vào tính năng này.", "error");
-      return Promise.reject("Bạn không có quyền truy cập vào tính năng này.");
+      authStore.logout()
+      showToast(
+        error.response?.data?.message || 'Bạn không có quyền truy cập vào tính năng này.',
+        'error'
+      )
+      return Promise.reject('Bạn không có quyền truy cập vào tính năng này.')
     }
     if (status === 404) {
-      showToast(error.response?.data?.message || "Bạn không có quyền truy cập vào tính năng này.", "error");
-      return Promise.reject("Không tìm thấy trang bạn yêu cầu.");
+      showToast(
+        error.response?.data?.message || 'Bạn không có quyền truy cập vào tính năng này.',
+        'error'
+      )
+      return Promise.reject('Không tìm thấy trang bạn yêu cầu.')
     }
     if (status === 500) {
-      showToast(error.response?.data?.message || "Đã xảy ra lỗi trong hệ thống.", "error");
-      return Promise.reject("Đã xảy ra l��i trong hệ thống.");
+      showToast(error.response?.data?.message || 'Đã xảy ra lỗi trong hệ thống.', 'error')
+      return Promise.reject('Đã xảy ra l��i trong hệ thống.')
     }
 
-    return Promise.reject(error.response.data.message || "Lỗi");
+    return Promise.reject(error.response.data.message || 'Lỗi')
   }
-);
+)
 
-
-export default api;
+export default api
