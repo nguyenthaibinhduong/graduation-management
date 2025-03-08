@@ -9,11 +9,13 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('token') || null,
+    isAuthenticated: localStorage.getItem('isAuthenticated') == true,
   }),
-  getters: {
-    isAuthenticated: (state) => !!state.token,
-  },
   actions: {
+    setAuth(status) {
+      this.isAuthenticated = status
+      localStorage.setItem('isAuthenticated', status)
+    },
     async login(email, password) {
       try {
         const apiAuth = axios.create({
@@ -22,12 +24,15 @@ export const useAuthStore = defineStore('auth', {
           },
           withCredentials: true,
         })
-        const response = await apiAuth.post("http://localhost:3034/api/v1/auth/login", {email, password});
-        this.token = response.data.access_token;
-        this.user = response.data.user;
-        localStorage.setItem("token", this.token);
-        api.defaults.headers.common["Authorization"] = `Bearer ${this.token}`;
-        showToast("Đăng nhập thành công","success")
+        const response = await apiAuth.post('http://localhost:3034/api/v1/auth/login', {
+          email,
+          password,
+        })
+        this.token = response.data.access_token
+        this.user = response.data.user
+        localStorage.setItem('token', this.token)
+        api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+        showToast('Đăng nhập thành công', 'success')
       } catch (error) {
         showToast(error.response?.data?.message, 'error')
       }
@@ -41,21 +46,47 @@ export const useAuthStore = defineStore('auth', {
 
       if (response.data.access_token) {
         this.token = response.data.access_token
-        localStorage.setItem('token', this.token)
-        return this.token
+        localStorage.setItem('token', response.data.access_token) // Lưu token mới
+        return response.data.access_token
+      }
+    },
+    async logout_kk() {
+      try {
+        const token = localStorage.getItem('token')
+        if (token) {
+          await axios.post(
+            'http://localhost:3034/api/v1/auth/logout',
+            {},
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
+        }
+      } catch (error) {
+        console.error('Error during logout:', error)
+      } finally {
+        this.token = null
+        this.user = null
+        this.isAuthenticated = false
+        localStorage.removeItem('isAuthenticated')
+        localStorage.removeItem('token')
+        router.push('/login')
       }
     },
     logout() {
       this.token = null
       this.user = null
+      this.isAuthenticated = false
+      localStorage.removeItem('isAuthenticated')
       localStorage.removeItem('token')
       router.push('/login')
     },
+
     async fetchUser() {
       if (this.token) {
         try {
-          const response = await api.get("auth/me");
-          this.user = response.data;
+          const response = await api.get('auth/me')
+          this.user = response.data
         } catch (error) {
           console.error('Failed to fetch user:', error)
           this.logout()

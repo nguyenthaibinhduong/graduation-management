@@ -19,23 +19,17 @@ const toggleMenu = (menu) => {
 </script>
 
 <template>
-  <div class="w-full p-3">
-    <!-- Logo -->
-    <div class="flex justify-center py-4">
-      <i class="pi fas fa-hamburger text-3xl"></i>
-    </div>
+  <div class="w-full min-h-screen shadow-lg z-100 pt-5">
 
     <!-- Navigation Menu -->
     <nav class="px-4">
-     <SwitchMode />
+    <div class="w-2/3 mx-auto h-[80px] "><router-link to="/" class="text-3xl font-bold text-blue-600 py-5 "><h1 class="text-center">My Logo</h1></router-link></div>
+    
+  
       <ul>
-        <!-- Introduction -->
-        <li class="py-2">
-          <a href="#" class="font-bold">INTRODUCTION</a>
-        </li>
 
         <!-- Overview (Có danh mục con) -->
-        <li class="py-2">
+        <li class="py-3 text-[1.1rem]">
           <a href="#" @click.prevent="toggleMenu('overview')" class="flex justify-between items-center font-bold cursor-pointer">
             OVERVIEW
             <i :class="openMenus.overview ? 'pi pi-angle-up' : 'pi pi-angle-down'"></i>
@@ -59,40 +53,14 @@ const toggleMenu = (menu) => {
         </li>
 
         <!-- Các menu khác -->
-        <li class="py-2">
+        <li class="py-3 text-[1.1rem]">
           <a href="#" @click.prevent="toggleMenu('fundamentals')" class="flex justify-between items-center font-bold cursor-pointer">
             FUNDAMENTALS
             <i :class="openMenus.fundamentals ? 'pi pi-angle-up' : 'pi pi-angle-down'"></i>
           </a>
         </li>
 
-        <li class="py-2">
-          <a href="#" @click.prevent="toggleMenu('techniques')" class="flex justify-between items-center font-bold cursor-pointer">
-            TECHNIQUES
-            <i :class="openMenus.techniques ? 'pi pi-angle-up' : 'pi pi-angle-down'"></i>
-          </a>
-        </li>
-
-        <li class="py-2">
-          <a href="#" @click.prevent="toggleMenu('security')" class="flex justify-between items-center font-bold cursor-pointer">
-            SECURITY
-            <i :class="openMenus.security ? 'pi pi-angle-up' : 'pi pi-angle-down'"></i>
-          </a>
-        </li>
-
-        <li class="py-2">
-          <a href="#" @click.prevent="toggleMenu('graphql')" class="flex justify-between items-center font-bold cursor-pointer">
-            GRAPHQL
-            <i :class="openMenus.graphql ? 'pi pi-angle-up' : 'pi pi-angle-down'"></i>
-          </a>
-        </li>
-
-        <li class="py-2">
-          <a href="#" @click.prevent="toggleMenu('websockets')" class="flex justify-between items-center font-bold cursor-pointer">
-            WEBSOCKETS
-            <i :class="openMenus.websockets ? 'pi pi-angle-up' : 'pi pi-angle-down'"></i>
-          </a>
-        </li>
+       
       </ul>
     </nav>
   </div>

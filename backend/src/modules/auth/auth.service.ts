@@ -1,4 +1,9 @@
-import { Injectable, Res, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
@@ -60,6 +65,22 @@ export class AuthService {
       throw new UnauthorizedException(
         error.message || 'Refresh token verification failed',
       );
+    }
+  }
+  async verifyToken(token: string) {
+    try {
+      const decoded: any = this.JwtService.verify(token, {
+        secret: process.env.JWT_ACCESS_SECRET,
+      });
+      if (!decoded || !decoded.id || !decoded.exp || !decoded.role) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+      return true;
+    } catch (error) {
+      if (error?.message === 'jwt expired') {
+        throw new ConflictException('Token đã hết hạn');
+      }
+      throw new UnauthorizedException('Token verification failed');
     }
   }
 }

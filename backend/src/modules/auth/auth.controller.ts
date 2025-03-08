@@ -51,16 +51,35 @@ export class AuthController {
     };
   }
 
+  @Post('verify-token')
+  async VerifyToken(@Body() data: any) {
+    const tokenCheck = data.token;
+    if (!tokenCheck) {
+      throw new BadRequestException('No token provided');
+    }
+    const newToken = await this.authService.verifyToken(tokenCheck);
+    if (!newToken) {
+      throw new BadRequestException('Invalid refresh token');
+    }
+    return {
+      'Token verified': newToken,
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@Request() request: any, @Res() res: Response) {
-    const userId = request.user.id;
-    await this.userService.deleteRefreshToken(userId);
-    res.clearCookie('refresh_token', {
-      httpOnly: true,
-      // secure: true, // Chỉ dùng khi HTTPS
-      // sameSite: 'None', // Nếu frontend & backend khác domain
-    });
-    return res.json({ message: 'Đăng xuất thành công' });
+    try {
+      const userId = request.user.id;
+      await this.userService.deleteRefreshToken(userId);
+      res.clearCookie('refresh_token', {
+        httpOnly: true,
+        // secure: true, // Chỉ dùng khi HTTPS
+        // sameSite: 'None', // Nếu frontend & backend khác domain
+      });
+      return res.json({ message: 'Logout successfully' });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }

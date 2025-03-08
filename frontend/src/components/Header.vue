@@ -1,15 +1,29 @@
 <template>
-  <header class="shadow-md">
-    <nav class="container mx-auto flex items-center justify-between py-4 px-6">
+  <header class="z-50 w-full">
+    <nav class="w-full flex items-center justify-between py-4 px-6">
       <!-- Logo -->
-      <router-link to="/" class="text-2xl font-bold text-blue-600"> MyLogo </router-link>
+
+      <SwitchMode />
 
       <!-- Menu Items (Desktop) -->
       <ul class="hidden md:flex space-x-6 items-center">
         <li><router-link to="/" class="hover:text-blue-600">User</router-link></li>
-        <li><router-link to="/student" class="hover:text-blue-600">Student</router-link></li>
-        <li><router-link to="/teacher" class="hover:text-blue-600">Teacher</router-link></li>
-        <li><Button v-if="authStore.isAuthenticated" v-on:click="handleLogout" label="Đăng xuất" severity="danger" class="text-white" /></li>
+        <li>
+          <router-link to="/student" class="hover:text-blue-600">Student</router-link>
+        </li>
+        <li>
+          <router-link to="/teacher" class="hover:text-blue-600">Teacher</router-link>
+        </li>
+
+        <li>
+          <Button
+            v-if="checkAuth"
+            v-on:click="handleLogout"
+            label="Đăng xuất"
+            severity="danger"
+            class="text-white"
+          />
+        </li>
       </ul>
 
       <!-- Mobile Menu Button -->
@@ -45,33 +59,41 @@
     <div v-if="isOpen" class="md:hidden bg-white shadow-md">
       <ul class="text-gray-700 text-center py-2">
         <li class="py-2"><router-link to="/" @click="toggleMenu">Home</router-link></li>
-        <li class="py-2"><router-link to="/about" @click="toggleMenu">About</router-link></li>
-        <li class="py-2"><router-link to="/services" @click="toggleMenu">Services</router-link></li>
-        <li class="py-2"><router-link to="/contact" @click="toggleMenu">Contact</router-link></li>
+        <li class="py-2">
+          <router-link to="/about" @click="toggleMenu">About</router-link>
+        </li>
+        <li class="py-2">
+          <router-link to="/services" @click="toggleMenu">Services</router-link>
+        </li>
+        <li class="py-2">
+          <router-link to="/contact" @click="toggleMenu">Contact</router-link>
+        </li>
       </ul>
     </div>
   </header>
 </template>
 
 <script setup>
-import { useAuthStore } from '@/stores/auth';
-import { Button } from 'primevue';
-import { ref } from 'vue'
-import {  useRouter } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
+import { Button } from "primevue";
+import { ref } from "vue";
+import SwitchMode from "./SwitchMode.vue";
 
-const isOpen = ref(false)
-const errorMessage = ref('');
-const authStore = useAuthStore()
-const router = useRouter()
+const isOpen = ref(false);
+const errorMessage = ref("");
+const authStore = useAuthStore();
+const checkAuth = ref(
+  authStore.isAuthenticated || localStorage.getItem("isAuthenticated")
+);
 const toggleMenu = () => {
-  isOpen.value = !isOpen.value
-}
+  isOpen.value = !isOpen.value;
+};
 
 const handleLogout = async () => {
   try {
-    authStore.logout();
+    await authStore.logout();
   } catch (error) {
     errorMessage.value = "Đăng xuất thất bại !";
   }
-  };
+};
 </script>

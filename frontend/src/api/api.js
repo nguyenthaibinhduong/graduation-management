@@ -36,7 +36,7 @@ api.interceptors.response.use(
     const originalRequest = error.config
     const authStore = useAuthStore() // Nếu dùng Pinia trong Vue
 
-    if (status === 401) {
+    if (status === 409) {
       if (!originalRequest._retry) {
         originalRequest._retry = true
         if (!refreshStatus) {

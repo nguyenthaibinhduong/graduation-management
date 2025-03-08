@@ -16,10 +16,10 @@ watch(isDarkMode, (newVal) => {
 </script>
 
 <template>
-  <div class="p-5 flex flex-col items-center justify-center transition">
-    <div class="flex items-center gap-2">
-      <span >Dark/Light Mode</span>
+  <div class="py-5 flex justify-start items-center transition">
+    <div class="flex items-center gap-5">
       <ToggleSwitch v-model="isDarkMode" />
+      <span >Dark/Light Mode</span>
     </div>
   </div>
 </template>
