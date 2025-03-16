@@ -1,33 +1,18 @@
 <template>
-  <DataTableCustom
-    title="Danh sách Sinh Viên"
-    :data="students"
-    :columns="[
-      { field: 'name', header: 'Họ và tên', sortable: true },
-      { field: 'student_code', header: 'Mã sinh viên', sortable: true },
-      { field: 'date_of_birth', header: 'Ngày sinh', sortable: true },
-      { field: 'major', header: 'Ngành học', sortable: true },
-      { field: 'enrollment_year', header: 'Năm nhập học', sortable: true },
-    ]"
-    :total="studentStore?.total"
-    :loading="loading"
-    @fetch="fetchStudent"
-    @add="addStudent"
-    @edit="editStudent"
-    @delete="deleteStudent"
-    @selectOne="handleSelectData"
-    @selectAll="handleSelectData"
-  />
-  <Drawer
-    class="w-1/2"
-    v-model:visible="visibleLeft"
-    :header="isEditing ? 'Sửa sinh viên' : 'Thêm sinh viên'"
-    position="right"
-  >
+  <DataTableCustom title="Danh sách Sinh Viên" :data="students" :columns="[
+    { field: 'name', header: 'Họ và tên', sortable: true },
+    { field: 'student_code', header: 'Mã sinh viên', sortable: true },
+    { field: 'date_of_birth', header: 'Ngày sinh', sortable: true },
+    { field: 'major', header: 'Ngành học', sortable: true },
+    { field: 'enrollment_year', header: 'Năm nhập học', sortable: true },
+  ]" :total="studentStore?.total" :loading="loading" @fetch="fetchStudent" @add="addStudent" @edit="editStudent"
+    @delete="deleteStudent" @selectOne="handleSelectData" @selectAll="handleSelectData" />
+  <Drawer class="w-1/2" v-model:visible="visibleLeft" :header="isEditing ? 'Sửa sinh viên' : 'Thêm sinh viên'"
+    position="right">
     <Tabs value="0">
       <TabList>
         <Tab value="0">Nhập dữ liệu </Tab>
-        <Tab value="1">Import Excel</Tab>
+        <Tab v-if="!isEditing" value="1">Import Excel</Tab>
       </TabList>
       <TabPanels>
         <TabPanel value="0">
@@ -41,11 +26,7 @@
             <div class="p-field mb-2">
               <div class="flex flex-col gap-2">
                 <label for="student_code">Mã Sinh Viên</label>
-                <InputText
-                  class="w-full"
-                  id="student_code"
-                  v-model="newStudent.student_code"
-                />
+                <InputText class="w-full" id="student_code" v-model="newStudent.student_code" />
               </div>
             </div>
             <div class="p-field mb-2">
@@ -63,32 +44,19 @@
             <div class="p-field mb-2">
               <div class="flex flex-col gap-2">
                 <label for="enrollment_year">Năm Nhập Học</label>
-                <InputText
-                  class="w-full"
-                  id="enrollment_year"
-                  v-model="newStudent.enrollment_year"
-                />
+                <InputText class="w-full" id="enrollment_year" v-model="newStudent.enrollment_year" />
               </div>
             </div>
           </div>
           <div class="w-full grid grid-cols-2 gap-2 mt-10">
             <Button label="Lưu" @click="saveStudent" class="w-full" />
-            <Button
-              label="Hủy"
-              @click="cancelForm"
-              class="w-full bg-red-500 text-white border-red-500"
-            />
+            <Button label="Hủy" @click="cancelForm" class="w-full bg-red-500 text-white border-red-500" />
           </div>
         </TabPanel>
         <TabPanel value="1">
           <div class="p-4">
             <div class="w-full flex">
-              <FileUpload
-                mode="basic"
-                chooseLabel="Upload Excel"
-                accept=".xlsx, .xls"
-                @select="handleFileUpload"
-              />
+              <FileUpload mode="basic" chooseLabel="Upload Excel" accept=".xlsx, .xls" @select="handleFileUpload" />
             </div>
             <Message v-if="errors.length" severity="error" class="mt-3">
               <ul>
@@ -104,13 +72,8 @@
             </DataTable>
 
             <!-- Nút Import -->
-            <Button
-              label="Import Data"
-              icon="pi pi-upload"
-              class="mt-3"
-              :disabled="errors.length || !excelData.length"
-              @click="submitDataImport"
-            />
+            <Button label="Import Data" icon="pi pi-upload" class="mt-3" :disabled="errors.length || !excelData.length"
+              @click="submitDataImport" />
           </div>
         </TabPanel>
       </TabPanels>
@@ -183,7 +146,7 @@ const deleteStudent = async (ids) => {
 
 const editStudent = (student) => {
   editedStudentId.value = student.id;
-  newStudent.value = student ;
+  newStudent.value = student;
   isEditing.value = true;
   visibleLeft.value = true;
 };
@@ -195,11 +158,6 @@ const cancelForm = () => {
   Object.keys(newStudent.value).forEach((key) => (newStudent.value[key] = ""));
 };
 
-watch(visibleLeft, (newVal) => {
-  if (newVal == false) {
-    cancelForm();
-  }
-});
 
 const excelData = ref([]);
 const errors = ref([]);

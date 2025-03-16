@@ -41,7 +41,7 @@
     </div>
   </Drawer>
 
- 
+
 </template>
   <script setup>
   import { ref, onMounted, watchEffect, watch } from 'vue';
@@ -65,8 +65,8 @@
 
   const fetchUser = async (newPage, newLimit, newSearch) => {
     await userStore.fetchItems(
-      newSearch ? 1 : newPage, 
-      newSearch ? userStore.total : newLimit, 
+      newSearch ? 1 : newPage,
+      newSearch ? userStore.total : newLimit,
       newSearch
     );
   }
@@ -82,7 +82,7 @@
     cancelForm();
 };
 
-  const deleteUser = async (id) => { 
+  const deleteUser = async (id) => {
     await userStore.deleteItem(id);
   }
 
