@@ -11,7 +11,7 @@ watchEffect(() => {
   localStorage.setItem("darkMode", isDarkMode.value);
 });
 
-// Đảm bảo chế độ tối được áp dụng ngay khi trang tải lại
+
 onMounted(() => {
   if (isDarkMode.value) {
     document.documentElement.classList.add(darkTheme);
