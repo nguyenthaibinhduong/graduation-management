@@ -26,18 +26,30 @@ export class User {
   @Column({ unique: true })
   email: string; // Địa chỉ email (unique)
 
+  @Column({ length: 255 })
+  username: string; 
+
+  @Column({ length: 255 })
+  firstname: string;
+
+  @Column({ length: 255 })
+  lastname: string;
+
+  @Column()
+  birth_date: Date;
+
+  @Column() 
+  address: string;
+
+  @Column({ length: 255 })
+  phone: string; // Số điện thoại (unique)
+
   @Exclude()
   @Column({ length: 255 })
   password: string; // Mật khẩu (lưu trữ sau khi mã hóa)
 
   @Column({ type: 'enum', enum: UserRole })
   role: UserRole;
-
-  @CreateDateColumn()
-  created_at: Date; // Ngày tạo tài khoản
-
-  @UpdateDateColumn()
-  updated_at: Date; // Ngày cập nhật thông tin người dùng
 
   @OneToOne(() => Student, (student) => student.user, { cascade: true })
   student?: Student;
@@ -49,4 +61,9 @@ export class User {
     cascade: true,
   })
   refreshTokens: RefreshToken[];
+   @CreateDateColumn()
+  created_at: Date; // Ngày tạo tài khoản
+
+  @UpdateDateColumn()
+  updated_at: Date; // Ngày cập nhật thông tin người dùng
 }
