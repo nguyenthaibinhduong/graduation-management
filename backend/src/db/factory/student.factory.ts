@@ -20,21 +20,21 @@ export class StudentFactory {
         'No users with role "student" found to assign to students',
       );
     }
-
-    return {
-      name: faker.person.fullName(),
-      student_code: faker.string.uuid(), // Sử dụng uuid cho student_code
-      date_of_birth: faker.date.past(), // Sinh nhật ngẫu nhiên
-      major: faker.helpers.arrayElement([
-        'Khoa học máy tính',
-        'Cơ điện tử',
-        'Tài chính',
-        'Kinh tế',
-        'Kế toán',
-      ]), // Ngành học ngẫu nhiên
-      enrollment_year: faker.number.int({ min: 2015, max: 2025 }),
-      user: users[index], // Năm nhập học ngẫu nhiên
-    };
+    return null; //Xoa dong nay khi chay seed
+    // return {
+    //   name: faker.person.fullName(),
+    //   student_code: faker.string.uuid(), // Sử dụng uuid cho student_code
+    //   date_of_birth: faker.date.past(), // Sinh nhật ngẫu nhiên
+    //   major: faker.helpers.arrayElement([
+    //     'Khoa học máy tính',
+    //     'Cơ điện tử',
+    //     'Tài chính',
+    //     'Kinh tế',
+    //     'Kế toán',
+    //   ]), // Ngành học ngẫu nhiên
+    //   enrollment_year: faker.number.int({ min: 2015, max: 2025 }),
+    //   user: users[index], // Năm nhập học ngẫu nhiên
+    // };
   }
 
   static async createMany(count: number): Promise<Partial<Student>[]> {

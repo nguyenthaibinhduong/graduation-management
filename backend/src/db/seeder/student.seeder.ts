@@ -9,10 +9,10 @@ export class StudentSeeder {
     const studentRepo = AppDataSource.getRepository(Student);
 
     // Tạo 10 users giả mạo
-    const users = await StudentFactory.createMany(5);
-    await studentRepo.save(users);
+    // const users = await StudentFactory.createMany(5);
+    // await studentRepo.save(users);
 
-    console.log('Student seeding completed!');
-    await AppDataSource.destroy();
+    // console.log('Student seeding completed!');
+    // await AppDataSource.destroy();
   }
 }

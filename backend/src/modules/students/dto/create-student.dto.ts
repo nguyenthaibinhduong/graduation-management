@@ -5,8 +5,7 @@ import {
   IsDate,
   Length,
   IsNotEmpty,
-  ValidateIf,
-  Matches,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -20,7 +19,7 @@ export class CreateStudentDto {
 
   @IsString({ message: 'Mã sinh viên phải là chuỗi' })
   @IsNotEmpty({ message: 'Mã sinh viên không được để trống' })
-  student_code: string;
+  code: string;
 
   @IsOptional()
   @IsDate({ message: 'Ngày sinh phải là kiểu dữ liệu ngày tháng' })
@@ -28,9 +27,17 @@ export class CreateStudentDto {
   date_of_birth?: Date;
 
   @IsOptional()
-  @IsString({ message: 'Chuyên ngành phải là chuỗi' })
-  major?: string;
+  @ValidateNested({ message: 'Chuyên ngành không hợp lệ' })
+  @Type(() => Object) // Replace with a DTO for Major if available
+  major?: object;
 
-  @IsNotEmpty({ message: 'Năm học không được để trống' })
-  enrollment_year?: number;
+  @IsOptional()
+  @ValidateNested({ message: 'Khoa không hợp lệ' })
+  @Type(() => Object) // Replace with a DTO for Department if available
+  department?: object;
+
+  @IsOptional()
+  @ValidateNested({ message: 'Người dùng không hợp lệ' })
+  @Type(() => Object) // Replace with a DTO for User if available
+  user?: object;
 }
