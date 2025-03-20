@@ -21,6 +21,7 @@ const routes = [
       { path: '/student', component: StudentView },
       { path: '/teacher', component: TeacherView },
       { path: '/profile', component: ProfileView },
+      { path: '/user', component: UserView },
     ],
   },
 ]
