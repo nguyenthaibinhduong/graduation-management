@@ -15,13 +15,15 @@ export class Student {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  code: string;
+  @Column({ unique: true })
+  code: string; // Mã sinh viên
 
   @ManyToOne(() => Major, (major) => major.students)
+  @JoinColumn({ name: 'major_id' })
   major: Major;
 
   @ManyToOne(() => Department, (department) => department.students)
+  @JoinColumn({ name: 'department_id' })
   department: Department;
 
   @OneToOne(() => User, (user) => user.student)

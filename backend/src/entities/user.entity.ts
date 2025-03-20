@@ -27,7 +27,7 @@ export class User {
   email: string; // Địa chỉ email (unique)
 
   @Column({ length: 255 })
-  username: string; 
+  username: string;
 
   @Column({ length: 255 })
   firstname: string;
@@ -38,11 +38,14 @@ export class User {
   @Column()
   birth_date: Date;
 
-  @Column() 
+  @Column()
   address: string;
 
   @Column({ length: 255 })
   phone: string; // Số điện thoại (unique)
+
+  @Column()
+  birthDate: Date;
 
   @Exclude()
   @Column({ length: 255 })
@@ -61,7 +64,7 @@ export class User {
     cascade: true,
   })
   refreshTokens: RefreshToken[];
-   @CreateDateColumn()
+  @CreateDateColumn()
   created_at: Date; // Ngày tạo tài khoản
 
   @UpdateDateColumn()
