@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TeachersModule } from './modules/teachers/teachers.module';
 import { MajorsModule } from './modules/majors/majors.module';
 import { PositionsModule } from './modules/positions/positions.module';
+import { DepartmentModule } from './modules/department/department.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PositionsModule } from './modules/positions/positions.module';
     TeachersModule,
     MajorsModule,
     PositionsModule,
+    DepartmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
