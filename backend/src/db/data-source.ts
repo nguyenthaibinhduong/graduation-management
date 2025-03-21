@@ -7,6 +7,7 @@ import { Teacher } from 'src/entities/teacher.entity';
 import { Major } from 'src/entities/major.entity';
 import { Course } from 'src/entities/course.entity';
 import { Department } from 'src/entities/department.entity';
+import { Project } from 'src/entities/project.entity';
 
 // Load biến môi trường từ file .env
 dotenv.config();
@@ -20,6 +21,16 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: false,
-  entities: [User, Student, Major, Course, Department, RefreshToken, Teacher],
+  entities: [
+    User,
+    Student,
+    Major,
+    Course,
+    Department,
+    RefreshToken,
+    Teacher,
+    Department,
+    Project,
+  ],
   subscribers: [],
 });
