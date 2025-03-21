@@ -1,4 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Department } from './department.entity';
 import { Course } from './course.entity';
 
@@ -20,8 +26,10 @@ export class EnrollmentSession {
   content: string;
 
   @OneToOne(() => Department, (department) => department.id)
+  @JoinColumn({ name: 'department_id' })
   department: Department;
 
   @OneToOne(() => Course, (course) => course.id)
+  @JoinColumn({ name: 'course_id' })
   course: Course;
 }
