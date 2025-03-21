@@ -10,6 +10,8 @@ import { AppDataSource } from './db/data-source';
 import { StudentsModule } from './modules/students/students.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TeachersModule } from './modules/teachers/teachers.module';
+import { MajorsModule } from './modules/majors/majors.module';
+import { PositionsModule } from './modules/positions/positions.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { TeachersModule } from './modules/teachers/teachers.module';
     StudentsModule,
     AuthModule,
     TeachersModule,
+    MajorsModule,
+    PositionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
