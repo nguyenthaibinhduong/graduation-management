@@ -88,8 +88,8 @@ export class UsersService extends BaseService<User> {
       page?: number,
     ): Promise<{ items: User[]; total: number; limit?: number; page?: number }> {
       const where = search ? [
-        { firstName: Like(`%${search}%`) },
-        { lastName: Like(`%${search}%`) },
+        { firstname: Like(`%${search}%`) },
+        { lastname: Like(`%${search}%`) },
       ] :
         role
     ? { role }
