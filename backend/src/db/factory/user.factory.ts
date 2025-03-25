@@ -12,8 +12,7 @@ export class UserFactory {
     return {
       email: faker.internet.email(),
       username: String(faker.number.bigInt({ min: 10n, max: 100n })),
-      firstname: faker.person.firstName(),
-      lastname: faker.person.lastName(),
+      fullname: faker.person.fullName(),
       birth_date: faker.date.past(),
       address: "",
       phone: faker.phone.number(),

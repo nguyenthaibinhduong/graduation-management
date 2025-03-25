@@ -2,8 +2,7 @@
   <DataTableCustom title="Danh sách Tài Khoản" :data="users" :columns="[
     { field: 'email', header: 'Email', sortable: true },
     { field: 'username', header: 'Tài khoản', sortable: true },
-    { field: 'lastname', header: 'Họ', sortable: true },
-    { field: 'firstname', header: 'Tên', sortable: true },
+    { field: 'fullname', header: 'Tên người dùng', sortable: true },
     { field: 'phone', header: 'Số điện thoại', sortable: true },
     { field: 'role', header: 'Vai trò', sortable: true },
   ]" :total="userStore?.total" :loading="loading" @fetch="fetchUser" @add="addUser" @edit="editUser"

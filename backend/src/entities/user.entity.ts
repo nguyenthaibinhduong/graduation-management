@@ -30,10 +30,8 @@ export class User {
   username: string;
 
   @Column({ length: 255 })
-  firstname: string;
+  fullname: string;
 
-  @Column({ length: 255 })
-  lastname: string;
 
   @Column()
   birth_date: Date;

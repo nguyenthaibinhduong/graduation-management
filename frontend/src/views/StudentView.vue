@@ -1,10 +1,11 @@
 <template>
   <DataTableCustom title="Danh sách Sinh Viên" :data="students" :columns="[
-    { field: 'name', header: 'Họ và tên', sortable: true },
-    { field: 'student_code', header: 'Mã sinh viên', sortable: true },
-    { field: 'date_of_birth', header: 'Ngày sinh', sortable: true },
-    { field: 'major', header: 'Ngành học', sortable: true },
-    { field: 'enrollment_year', header: 'Năm nhập học', sortable: true },
+    { field: 'code', header: 'Mã sinh viên', sortable: true },
+    { field: 'user.fullname', header: 'Họ và tên', sortable: true },
+    { field: 'user.email', header: 'Email', sortable: true },
+    { field: 'user.phone', header: 'Số điện thoại', sortable: true },
+    { field: 'major.name', header: 'Ngành học', sortable: true },
+    { field: 'department.name', header: 'Khoa', sortable: true }
   ]" :total="studentStore?.total" :loading="loading" @fetch="fetchStudent" @add="addStudent" @edit="editStudent"
     @delete="deleteStudent" @selectOne="handleSelectData" @selectAll="handleSelectData" />
   <Drawer class="w-1/2" v-model:visible="visibleLeft" :header="isEditing ? 'Sửa sinh viên' : 'Thêm sinh viên'"

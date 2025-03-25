@@ -19,7 +19,7 @@ import { HttpStatus, Message } from 'src/common/globalEnum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('students')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class StudentsController {
   constructor(private readonly studentService: StudentsService) {}
 
@@ -47,7 +47,7 @@ export class StudentsController {
     Response<{ items: Student[]; total: number; limit?: number; page?: number }>
   > {
     try {
-      const students = await this.studentService.getAll(search, limit, page);
+      const students = await this.studentService.getAllStudent(search, limit, page);
       return new Response(students, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

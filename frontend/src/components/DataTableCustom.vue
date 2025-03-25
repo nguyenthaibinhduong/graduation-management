@@ -36,9 +36,9 @@
           <Checkbox v-model="selectedRows" :value="row.id" @change="updateSelectAll" />
         </template>
       </Column>
-      <Column v-for="col in columns" :key="col.field" :field="col.field" :header="col.header" sortable>
+      <Column v-for="col in columns" :key="col.field" :field="col.field" :header="col.header">
         <template v-slot:body="{ data }">
-          <slot :name="col.field" :data="data">{{ data[col.field] }}</slot>
+          {{ getNestedValue(data, col.field) }}
         </template>
       </Column>
 
@@ -89,6 +89,10 @@ watch(selectedRows, (newSelection) => {
   emit('selectOne', newSelection);
 });
 
+
+const getNestedValue = (obj, field) => {
+  return field.split('.').reduce((acc, key) => acc?.[key], obj) || "N/A";
+};
 
 const toggleSelectAll = () => {
   if (selectStatus.value) {
