@@ -20,7 +20,7 @@ import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
@@ -38,6 +38,7 @@ export class UsersController {
 
   @Get()
   async findAll(
+    @Query('role') role?: string,
     @Query('search') search?: string,
     @Query('limit') limit?: number,
     @Query('page') page?: number,
@@ -45,7 +46,7 @@ export class UsersController {
     Response<{ items: any; total: number; limit?: number; page?: number }>
   > {
     try {
-      const users = await this.userService.getAll(search, limit, page);
+      const users = await this.userService.getAllUser( role, search, limit, page,);
       const usersWithoutPassword = users.items.map((user) => {
         const { password, ...userWithoutPassword } = user; // Tách password khỏi user
         return userWithoutPassword; // Trả về user không có password

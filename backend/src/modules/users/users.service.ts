@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseService } from 'src/common/base.service';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { RefreshToken } from 'src/entities/refresh_token.entity';
 
@@ -80,4 +80,28 @@ export class UsersService extends BaseService<User> {
   async deleteRefreshToken(userId: number): Promise<void> {
     await this.refreshTokenRepository.delete({ user: { id: userId } });
   }
+
+  async getAllUser(
+      role ?:string,
+      search?: string,
+      limit?: number,
+      page?: number,
+    ): Promise<{ items: User[]; total: number; limit?: number; page?: number }> {
+      const where = search ? [
+        { firstName: Like(`%${search}%`) },
+        { lastName: Like(`%${search}%`) },
+      ] :
+        role
+    ? { role }
+    : {};
+      const options: any = { where};
+      if (limit && page) {
+        options.take = limit;
+        options.skip = (page - 1) * limit;
+      }
+      const items = await this.repository.find(options);
+      const total = await this.repository.count();
+  
+      return { items, total, ...(limit && { limit }), ...(page && { page }) };
+    }
 }

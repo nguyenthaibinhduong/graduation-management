@@ -12,4 +12,7 @@ export class StudentsService extends BaseService<Student> {
   ) {
     super(studentRepository);
   }
+  async getALLSTudent() { 
+
+  }
 }

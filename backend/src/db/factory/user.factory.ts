@@ -11,10 +11,16 @@ export class UserFactory {
     const randomRole = faker.helpers.arrayElement(roles); // Randomly select a role
     return {
       email: faker.internet.email(),
+      username: String(faker.number.bigInt({ min: 10n, max: 100n })),
+      firstname: faker.person.firstName(),
+      lastname: faker.person.lastName(),
+      birth_date: faker.date.past(),
+      address: "",
+      phone: faker.phone.number(),
       password: hashedPassword,
-      role: randomRole,
-      created_at: faker.date.past(),
-      updated_at: faker.date.recent(),
+      role: faker.helpers.arrayElement([UserRole.STUDENT, UserRole.TEACHER, UserRole.ADMIN]),
+      created_at: new Date(),
+      updated_at: new Date(),
     };
   }
 

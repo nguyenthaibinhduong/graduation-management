@@ -20,7 +20,7 @@ import { Position } from 'src/entities/position.entity';
 import { Response } from 'src/common/globalClass';
 
 @Controller('positions')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class PositionsController {
   constructor(private readonly positionService: PositionsService) {}
 
