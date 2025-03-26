@@ -17,6 +17,7 @@ import { Student } from '../../entities/student.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { UpdateStudentDto } from './dto/update-student.dto';
 
 @Controller('students')
 // @UseGuards(JwtAuthGuard)
@@ -65,26 +66,28 @@ export class StudentsController {
         ? new Response(student, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+     throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
-    @Body(new ValidationPipe()) student: CreateStudentDto,
+    @Param('id') id: string ,
+    @Body(new ValidationPipe()) student: UpdateStudentDto,
   ): Promise<Response<Student>> {
     try {
-      const updatedStudent = await this.studentService.update(
-        id,
-        { where: { id } },
-        student,
-      );
+      const updatedStudent = await this.studentService.updateStudent(id,student);
       return updatedStudent
         ? new Response(updatedStudent, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 

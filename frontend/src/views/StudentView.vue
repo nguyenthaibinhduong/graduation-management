@@ -27,7 +27,7 @@
             <div class="p-field mb-2">
               <div class="flex flex-col gap-2">
                 <label for="student_code">Mã Sinh Viên</label>
-                <InputText class="w-full" id="student_code" v-model="newStudent.code" />
+                <InputText :disabled="isEditing" class="w-full" id="student_code" v-model="newStudent.code" />
               </div>
             </div>
 
@@ -41,6 +41,12 @@
               <div class="flex flex-col gap-2">
                 <label for="student_email">Email</label>
                 <InputText class="w-full" id="student_email" v-model="newStudent.user.email" />
+              </div>
+            </div>
+            <div class="p-field mb-2">
+              <div class="flex flex-col gap-2">
+                <label for="student_address">Địa chỉ</label>
+                <InputText class="w-full" id="student_address" v-model="newStudent.user.address" />
               </div>
             </div>
             <div class="p-field mb-2">
@@ -179,7 +185,11 @@ const deleteStudent = async (ids) => {
 
 const editStudent = (student) => {
   editedStudentId.value = student.id;
-  newStudent.value = student;
+  newStudent.value = {
+    ...student,
+    major_id: student.major,
+    department_id: student.department
+  };
   isEditing.value = true;
   visibleLeft.value = true;
 };

@@ -1,6 +1,6 @@
 <template>
-  <header class="z-50 w-full ">
-    <nav class="w-full flex items-center justify-between py-4 px-6 " >
+  <div class="z-50 w-full  border-b-[1.5px] border-gray-100">
+    <nav class="w-full flex items-center justify-between px-6 ">
       <!-- Left side with logo/switch -->
       <SwitchMode />
 
@@ -10,15 +10,9 @@
         <div class="hidden md:flex items-center gap-2">
           <Menu ref="profileMenu" :model="menuItems" :popup="true" />
 
-          
-          <Button
-            type="button"
-            @click="toggleProfileMenu"
-            aria-label="Profile Menu"
-            class="p-button-rounded p-button-text"
-            v-tooltip.bottom="'Profile Menu'"
-            severity="info"
-          >
+
+          <Button type="button" @click="toggleProfileMenu" aria-label="Profile Menu"
+            class="p-button-rounded p-button-text" v-tooltip.bottom="'Profile Menu'" severity="info">
             <i class="pi pi-user text-xl"></i>
           </Button>
         </div>
@@ -54,9 +48,9 @@
               {{ group.label }}
             </div>
             <div v-if="group.items">
-              <div v-for="(item, itemIndex) in group.items" :key="`item-${itemIndex}`" 
-                   class="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-                   @click="navigateTo(item)">
+              <div v-for="(item, itemIndex) in group.items" :key="`item-${itemIndex}`"
+                class="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                @click="navigateTo(item)">
                 <i v-if="item.icon" :class="['pi', item.icon]"></i>
                 <span>{{ item.label }}</span>
               </div>
@@ -65,7 +59,8 @@
         </li>
       </ul>
     </div>
-  </header>
+  </div>
+
 </template>
 
 <script setup>
@@ -94,18 +89,18 @@ const menuItems = ref([
         icon: 'pi pi-user',
         command: () => navigateTo({ path: '/profile' })
       },
-      { 
-        label: 'Users', 
+      {
+        label: 'Users',
         icon: 'pi pi-users',
         command: () => navigateTo({ path: '/user' })
       },
-      { 
-        label: 'Students', 
+      {
+        label: 'Students',
         icon: 'pi pi-user',
         command: () => navigateTo({ path: '/student' })
       },
-      { 
-        label: 'Teachers', 
+      {
+        label: 'Teachers',
         icon: 'pi pi-briefcase',
         command: () => navigateTo({ path: '/teacher' })
       }
@@ -117,8 +112,8 @@ const menuItems = ref([
   {
     label: 'Account',
     items: [
-      { 
-        label: 'Logout', 
+      {
+        label: 'Logout',
         icon: 'pi pi-sign-out',
         command: () => handleLogout()
       }
@@ -153,7 +148,7 @@ const navigateTo = (item) => {
   } else if (item.command) {
     item.command();
   }
-  
+
   // Close menus
   if (profileMenu.value) {
     profileMenu.value.hide();
@@ -169,9 +164,9 @@ onMounted(() => {
       isOpen.value = false;
     }
   };
-  
+
   window.addEventListener('resize', handleResize);
-  
+
   // Clean up
   onUnmounted(() => {
     window.removeEventListener('resize', handleResize);

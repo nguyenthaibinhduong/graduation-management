@@ -46,7 +46,7 @@ api.interceptors.response.use(
               api.defaults.headers.Authorization = `Bearer ${localStorage.getItem('token')}`
             })
             .catch(() => {
-              showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error')
+              showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'Lỗi ')
               authStore.logout()
             })
             .finally(() => {
@@ -62,15 +62,15 @@ api.interceptors.response.use(
 
       if (Array.isArray(messages)) {
         // Nếu messages là một mảng, duyệt qua từng lỗi
-        messages.forEach((msg) => showToast(msg, 'error'))
+        messages.forEach((msg) => showToast(msg, 'error','Lỗi'))
       } else {
-        showToast(messages, 'error')
+        showToast(messages, 'error','Lỗi')
       }
       return Promise.reject('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
     }
 
     if (status === 402) {
-      showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error')
+      showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error','Lỗi')
       authStore.logout()
       return Promise.reject('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
     }
@@ -79,9 +79,9 @@ api.interceptors.response.use(
 
       if (Array.isArray(messages)) {
         // Nếu messages là một mảng, duyệt qua từng lỗi
-        messages.forEach((msg) => showToast(msg, 'error'))
+        messages.forEach((msg) => showToast(msg, 'error','Lỗi'))
       } else {
-        showToast(messages || 'Dữ liệu không hợp lệ.', 'error')
+        showToast(messages || 'Dữ liệu không hợp lệ.', 'error','Lỗi')
       }
 
       return Promise.reject('Dữ liệu không hợp lệ.')
@@ -90,19 +90,19 @@ api.interceptors.response.use(
       authStore.logout()
       showToast(
         error.response?.data?.message || 'Bạn không có quyền truy cập vào tính năng này.',
-        'error'
+        'error','Lỗi'
       )
       return Promise.reject('Bạn không có quyền truy cập vào tính năng này.')
     }
     if (status === 404) {
       showToast(
         error.response?.data?.message || 'Bạn không có quyền truy cập vào tính năng này.',
-        'error'
+        'error','Lỗi'
       )
       return Promise.reject('Không tìm thấy trang bạn yêu cầu.')
     }
     if (status === 500) {
-      showToast(error.response?.data?.message || 'Đã xảy ra lỗi trong hệ thống.', 'error')
+      showToast(error.response?.data?.message || 'Đã xảy ra lỗi trong hệ thống.', 'error','Lỗi')
       return Promise.reject('Đã xảy ra l��i trong hệ thống.')
     }
 

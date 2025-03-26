@@ -45,8 +45,9 @@ export class User {
   @Column()
   birthDate: Date;
 
+  
+  @Column()
   @Exclude()
-  @Column({ length: 255 })
   password: string; // Mật khẩu (lưu trữ sau khi mã hóa)
 
   @Column({ type: 'enum', enum: UserRole })

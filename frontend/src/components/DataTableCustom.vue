@@ -1,30 +1,30 @@
 <template>
-  <div class="p-4">
-    <div class="w-full flex justify-between">
+  <div class="px-2">
+    <div class="w-full flex justify-center py-4">
       <h1 class="text-2xl font-semibold">{{ title }}</h1>
-
-
     </div>
 
-    <DataTable :value="data" :loading="loading" class="p-datatable-sm">
+    <DataTable :value="data" stripedRows :loading="loading"
+      class="p-datatable-sm border border-gray-200  rounded-[20px] text-xs py-[20px] pb-[20px]">
       <template #header>
 
 
         <div class="flex flex-wrap items-center justify-between py-3">
           <div class="flex items-center">
-            <Checkbox v-model="selectStatus" @change="toggleSelectAll" binary />
+            <Checkbox size="small" v-model="selectStatus" @change="toggleSelectAll" binary />
             <label v-if="!selectedRows.length > 0" class="ms-2" for="ingredient1"> Chọn tất cả </label>
-            <Button v-if="selectedRows.length > 0" label="Xóa mục chọn" @click="$emit('delete', selectedRows)"
+            <Button size="small" v-if="selectedRows.length > 0" label="Xóa" @click="$emit('delete', selectedRows)"
               class="bg-red-600 border border-red-600 text-white ms-2" />
           </div>
           <div class="flex items-center w-full md:w-1/2">
-            <InputText class="w-full" v-model="search" placeholder="Tìm kiếm..." />
+            <InputText size="small" class="w-full" v-model="search" placeholder="Tìm kiếm..." />
           </div>
           <div class="flex items-center gap-3">
-            <Select v-model="limit" :options="[2, 5, 10, 20]" @change="onLimitChange" placeholder="Hiện bản ghi"
-              class="w-45" />
-            <Button icon="pi pi-file-excel" label="Xuất Excel" @click="exportToExcel" class="p-button-success" />
-            <Button icon="pi pi-plus" label="Thêm mới" @click="$emit('add')" class="p-button-info" />
+            <Select size="small" v-model="limit" :options="[2, 5, 10, 20]" @change="onLimitChange"
+              placeholder="Hiện bản ghi" class="w-45" />
+            <Button variant="outlined" severity="contrast" size="small" icon="pi pi-file-excel" label="Xuất Excel"
+              @click="exportToExcel" />
+            <Button size="small" icon="pi pi-plus" severity="secondary" label="Thêm mới" @click="$emit('add')" />
           </div>
 
 
@@ -33,7 +33,7 @@
       </template>
       <Column>
         <template v-slot:body="{ data: row }">
-          <Checkbox v-model="selectedRows" :value="row.id" @change="updateSelectAll" />
+          <Checkbox size="small" v-model="selectedRows" :value="row.id" @change="updateSelectAll" />
         </template>
       </Column>
       <Column v-for="col in columns" :key="col.field" :field="col.field" :header="col.header">
@@ -42,16 +42,30 @@
         </template>
       </Column>
 
-      <Column header="Hành động">
-        <template #body="{ data }">
-          <div class="flex gap-4">
-            <Button icon="pi pi-pencil" class="p-button-primary bg-blue-500 border-blue-500 text-white"
-              @click="$emit('edit', data)" />
-            <Button icon="pi pi-trash" class="p-button-danger bg-red-500 border-red-500 text-white"
-              @click="$emit('delete', data.id)" />
-          </div>
-        </template>
-      </Column>
+      <template>
+        <Column header="Hành động">
+          <template #body="{ data }">
+            <div class="relative">
+              <!-- Nút ba chấm -->
+              <Button icon="pi pi-ellipsis-h" class="w-[30px] h-[30px] ms-2 bg-transparent border-none text-black"
+                @click="toggleDropdown($event, data.id)" />
+
+              <!-- Dropdown menu -->
+              <OverlayPanel ref="dropdown">
+                <div class="w-[120px] text-sm">
+                  <button class="w-full px-3 py-2 hover:bg-gray-100 flex items-center" @click="$emit('edit', data)">
+                    <i class="pi pi-pencil mr-2"></i> Sửa
+                  </button>
+                  <button class="w-full px-3 py-2 hover:bg-gray-100 flex items-center text-red-500"
+                    @click="$emit('delete', data.id)">
+                    <i class="pi pi-trash mr-2"></i> Xóa
+                  </button>
+                </div>
+              </OverlayPanel>
+            </div>
+          </template>
+        </Column>
+      </template>
     </DataTable>
 
     <Paginator v-if="total > limit" :rows="limit" :totalRecords="total" :first="(page - 1) * limit"
@@ -61,7 +75,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { Button, Column, DataTable, InputText, Paginator, Select, Checkbox } from 'primevue';
+import { Button, Column, DataTable, InputText, Paginator, Select, Checkbox, OverlayPanel } from 'primevue';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -79,6 +93,11 @@ const limit = ref(10);
 const page = ref(1);
 const selectedRows = ref([]);
 const selectStatus = ref(false);
+const dropdown = ref(null);
+
+const toggleDropdown = (event) => {
+  dropdown.value.toggle(event);
+};
 
 
 watch([page, limit, search], ([newPage, newLimit, newSearch]) => {
@@ -137,3 +156,14 @@ const exportToExcel = () => {
 
 
 </script>
+<style>
+.p-popover-content {
+  padding: 0;
+}
+
+.p-popover:after,
+.p-popover:before {
+  bottom: none !important;
+  border: none !important;
+}
+</style>
