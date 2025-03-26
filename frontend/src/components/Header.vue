@@ -1,6 +1,6 @@
 <template>
-  <header class="z-50 w-full">
-    <nav class="w-full flex items-center justify-between py-4 px-6">
+  <header class="z-50 w-full ">
+    <nav class="w-full flex items-center justify-between py-4 px-6 " >
       <!-- Left side with logo/switch -->
       <SwitchMode />
 

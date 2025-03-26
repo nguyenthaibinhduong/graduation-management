@@ -25,10 +25,10 @@ export class StudentsController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) student: CreateStudentDto | [],
+    @Body(new ValidationPipe()) student: CreateStudentDto ,
   ): Promise<Response<Student>> {
     try {
-      const newStudent = await this.studentService.create(student);
+      const newStudent = await this.studentService.createStudent(student);
       return new Response(newStudent, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

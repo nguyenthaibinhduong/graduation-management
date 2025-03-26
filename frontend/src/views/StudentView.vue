@@ -21,31 +21,41 @@
             <div class="p-field mb-2 mt-2">
               <div class="flex flex-col gap-2">
                 <label for="name">Tên Sinh Viên</label>
-                <InputText class="w-full" id="name" v-model="newStudent.name" />
+                <InputText class="w-full" id="name" v-model="newStudent.user.fullname" />
               </div>
             </div>
             <div class="p-field mb-2">
               <div class="flex flex-col gap-2">
                 <label for="student_code">Mã Sinh Viên</label>
-                <InputText class="w-full" id="student_code" v-model="newStudent.student_code" />
+                <InputText class="w-full" id="student_code" v-model="newStudent.code" />
+              </div>
+            </div>
+
+            <div class="p-field mb-2">
+              <div class="flex flex-col gap-2">
+                <label for="date_of_birth">Ngày Sinh</label>
+                <DatePicker class="w-full" v-model="newStudent.user.birth_date" />
               </div>
             </div>
             <div class="p-field mb-2">
               <div class="flex flex-col gap-2">
-                <label for="date_of_birth">Ngày Sinh</label>
-                <DatePicker class="w-full" v-model="newStudent.date_of_birth" />
+                <label for="student_email">Email</label>
+                <InputText class="w-full" id="student_email" v-model="newStudent.user.email" />
               </div>
             </div>
             <div class="p-field mb-2">
               <div class="flex flex-col gap-2">
                 <label for="major">Chuyên Ngành</label>
-                <InputText class="w-full" id="major" v-model="newStudent.major" />
+                <Select v-model="newStudent.major_id" :options="majors" optionLabel="name"
+                  placeholder="Chọn chuyên ngành" class="w-full " />
+
               </div>
             </div>
             <div class="p-field mb-2">
               <div class="flex flex-col gap-2">
-                <label for="enrollment_year">Năm Nhập Học</label>
-                <InputText class="w-full" id="enrollment_year" v-model="newStudent.enrollment_year" />
+                <label for="department">Khoa</label>
+                <Select v-model="newStudent.department_id" :options="departments" optionLabel="name"
+                  placeholder="Chọn khoa" class="w-full " />
               </div>
             </div>
           </div>
@@ -97,28 +107,45 @@ import {
   Column,
   Message,
   FileUpload,
+  Select,
 } from "primevue";
 import { useStudentStore } from "@/stores/students";
+import { useMajorStore } from "@/stores/majors";
+import { useDepartmentStore } from "@/stores/departments";
 import DataTableCustom from "@/components/DataTableCustom.vue";
 import * as XLSX from "xlsx";
 
 const visibleLeft = ref(false);
 const studentStore = useStudentStore();
+const majorsStore = useMajorStore();
+const departmentsStore = useDepartmentStore();
 const students = ref([]);
+const departments = ref([]);
+const majors = ref([]);
 const loading = ref(false);
 const isEditing = ref(false);
 const editedStudentId = ref(null);
 const newStudent = ref({
-  name: "",
-  student_code: "",
-  date_of_birth: "",
-  major: "",
-  enrollment_year: "",
+  code: "",
+  user: {
+    email: "",
+    fullname: "", // Cung cấp giá trị hợp lệ
+    birth_date: null, // Định dạng YYYY-MM-DD (ISO)
+    phone: "" // Loại bỏ khoảng trắng nếu cần
+  },
+  major_id: 0, // Để null thay vì chuỗi rỗng nếu chưa có giá trị
+  department_id: 0
 });
 
-onMounted(() => studentStore.fetchItems());
+onMounted(() => {
+  studentStore.fetchItems();
+  majorsStore.fetchItems();
+  departmentsStore.fetchItems();
+});
 watchEffect(() => {
   students.value = studentStore.items;
+  majors.value = majorsStore.items;
+  departments.value = departmentsStore.items;
 });
 
 const fetchStudent = async (newPage, newLimit, newSearch) => {
@@ -133,11 +160,16 @@ const addStudent = () => {
 };
 
 const saveStudent = async () => {
-  if (isEditing.value) {
-    await studentStore.updateItem(editedStudentId.value, newStudent.value);
-  } else {
-    await studentStore.addItem(newStudent.value);
-  }
+  const newData = {
+    ...newStudent.value,
+    major_id: newStudent.value.major_id?.id || '',
+    department_id: newStudent.value.department_id?.id || ''
+  };
+
+  isEditing.value
+    ? await studentStore.updateItem(editedStudentId.value, newData)
+    : await studentStore.addItem(newData);
+
   cancelForm();
 };
 
