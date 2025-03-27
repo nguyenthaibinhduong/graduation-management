@@ -5,16 +5,20 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ProjectGroup } from './project_group.entity';
+import { Group } from './group.entity';
+import { Project } from './project.entity';
 
 @Entity('scores')
 export class Score {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => ProjectGroup, (projectGroup) => projectGroup.id)
-  @JoinColumn({ name: 'project_group_id' })
-  projectGroup: ProjectGroup;
+  @OneToOne(() => Group, (group) => group.score)
+  @JoinColumn({ name: 'group_id' })
+  group: Group;
+
+  @OneToOne(() => Project, (project) => project.id)
+  project: Project;
 
   @Column({ type: 'double' })
   total_score: number;

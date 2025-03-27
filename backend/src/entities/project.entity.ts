@@ -2,12 +2,17 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Teacher } from './teacher.entity';
 import { EnrollmentSession } from './enrollment_session.entity';
+import { Committee } from './committee.entity';
+import { Group } from './group.entity';
+import { Score } from './score.entity';
 
 @Entity('projects')
 export class Project {
@@ -26,6 +31,17 @@ export class Project {
   @ManyToOne(() => Teacher, (teacher) => teacher.id)
   teacher: Teacher;
 
+  @ManyToMany(() => Committee, (committee) => committee.id)
+  @JoinTable()
+  committee: Committee[];
+
+  @ManyToMany(() => Group, (group) => group.id)
+  @JoinTable()
+  groups: Group[];
+
+  @OneToOne( () => Score, (score) => score.project)
+  score: Score;
+  
   @Column({
     type: 'enum',
     enum: ['process', 'pending', 'approve'],

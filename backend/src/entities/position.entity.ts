@@ -2,11 +2,14 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Department } from './department.entity';
 import { Major } from './major.entity';
+import { Teacher } from './teacher.entity';
 
 @Entity('positions')
 export class Position {
@@ -23,4 +26,8 @@ export class Position {
   @ManyToOne(() => Major, (major) => major.id)
   @JoinColumn({ name: 'major_id' })
   major: Major;
+
+  @ManyToMany(() => Teacher, (teacher) => teacher.position)
+  @JoinTable()
+  teachers: Teacher[];
 }

@@ -5,10 +5,12 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  ManyToMany,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Major } from './major.entity';
 import { Department } from './department.entity';
+import { Group } from './group.entity';
 
 @Entity('students')
 export class Student {
@@ -29,4 +31,7 @@ export class Student {
   @OneToOne(() => User, (user) => user.student)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @ManyToMany(() => Group, (group) => group.students)
+  groups: Group[];
 }
