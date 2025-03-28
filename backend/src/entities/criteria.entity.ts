@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { EvaluationForm } from './evaluation_form.entity';
 
 @Entity('criteria')
 export class Criteria {
@@ -16,4 +17,7 @@ export class Criteria {
 
   @Column({ type: 'double' })
   step: number;
+
+  @ManyToMany(() => EvaluationForm, (evaluationForm) => evaluationForm.criteria)
+  evaluationForms: EvaluationForm[];
 }

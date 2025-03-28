@@ -32,7 +32,6 @@ export class User {
   @Column({ length: 255 })
   fullname: string;
 
-
   @Column()
   birth_date: Date;
 
@@ -42,10 +41,6 @@ export class User {
   @Column({ length: 255 })
   phone: string; // Số điện thoại (unique)
 
-  @Column()
-  birthDate: Date;
-
-  
   @Column()
   @Exclude()
   password: string; // Mật khẩu (lưu trữ sau khi mã hóa)

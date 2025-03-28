@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Criteria } from './criteria.entity';
 
 @Entity('evaluation_froms')
 export class EvaluationForm {
@@ -17,4 +24,8 @@ export class EvaluationForm {
     default: 'active',
   })
   status: 'blocked' | 'active';
+
+  @ManyToMany(() => Criteria, (criteria) => criteria.evaluationForms)
+  @JoinTable({ name: 'evaluation_criterias' })
+  criteria: Criteria[];
 }

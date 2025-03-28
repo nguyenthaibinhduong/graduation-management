@@ -6,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Major } from './major.entity';
@@ -33,5 +34,8 @@ export class Student {
   user: User;
 
   @ManyToMany(() => Group, (group) => group.students)
+  @JoinTable({
+    name: 'student_groups',
+  })
   groups: Group[];
 }

@@ -32,16 +32,16 @@ export class Project {
   teacher: Teacher;
 
   @ManyToMany(() => Committee, (committee) => committee.id)
-  @JoinTable()
+  @JoinTable({ name: 'project_committees' })
   committee: Committee[];
 
   @ManyToMany(() => Group, (group) => group.id)
-  @JoinTable()
+  @JoinTable({ name: 'project_groups' })
   groups: Group[];
 
-  @OneToOne( () => Score, (score) => score.project)
+  @OneToOne(() => Score, (score) => score.project)
   score: Score;
-  
+
   @Column({
     type: 'enum',
     enum: ['process', 'pending', 'approve'],

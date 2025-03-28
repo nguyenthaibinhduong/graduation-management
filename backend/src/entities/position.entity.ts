@@ -28,6 +28,5 @@ export class Position {
   major: Major;
 
   @ManyToMany(() => Teacher, (teacher) => teacher.position)
-  @JoinTable()
   teachers: Teacher[];
 }
