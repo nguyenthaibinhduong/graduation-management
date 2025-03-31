@@ -22,12 +22,16 @@ export class UsersService extends BaseService<User> {
     user.password = hashPassword;
     return this.userRepository.save(user);
   }
-  async findByEmail(email: string) {
-    const user = await this.userRepository.findOneBy({ email });
+  // async findByEmail(email: string) {
+  //   const user = await this.userRepository.findOneBy({ email });
+  //   return user;
+  // }
+    async findByUsername(username: string) {
+    const user = await this.userRepository.findOneBy({ username });
     return user;
   }
-  async validateUser(email: string, password: string) {
-    const user = await this.findByEmail(email);
+  async validateUser(username: string, password: string) {
+    const user = await this.findByUsername(username);
     if (!user) {
       return null;
     }

@@ -7,32 +7,16 @@
 
       <template #content>
         <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
-        <FloatLabel class="mb-3">
-          <label for="email">Email</label>
-          <InputText 
-              id="email"
-              v-model="email" 
-              type="email" 
-              required 
-              class="w-full"
-            />
+          <FloatLabel class="mb-3">
+            <label for="username">Tên đăng nhập</label>
+            <InputText id="username" v-model="username" type="username" required class="w-full" />
           </FloatLabel>
-         <FloatLabel class="mb-3">  
-          <label for="password">Mật khẩu</label> 
-          <InputText 
-              id="password"
-              v-model="password" 
-              type="password" 
-             
-              required 
-              class="w-full"
-            />
+          <FloatLabel class="mb-3">
+            <label for="password">Mật khẩu</label>
+            <InputText id="password" v-model="password" type="password" required class="w-full" />
           </FloatLabel>
-        
-          <Button 
-            type="submit" 
-            label="Đăng nhập"
-          />
+
+          <Button type="submit" label="Đăng nhập" />
         </form>
         <p v-if="errorMessage" class="text-red-600 text-sm text-center mt-2">
           {{ errorMessage }}
@@ -40,30 +24,26 @@
       </template>
     </Card>
   </div>
- 
+
 </template>
 <script setup>
-  import { useAuthStore } from "@/stores/auth";
-  import { Card, Button,InputText, FloatLabel} from "primevue";
-  import { ref } from "vue";
-  import { useRouter } from "vue-router";
-  const email = ref("");
-  const password = ref("");
-  const errorMessage = ref("");
-  const authStore = useAuthStore();
-  const router = useRouter();
-    
-    
-  const handleLogin = async () => {
-      try {
-        // console.log(email.value, password.value);
-        await authStore.login(email.value, password.value);
-       router.push("/student");
-      } catch (error) {
-        errorMessage.value = "Email hoặc mật khẩu không đúng!";
-      }
-  };
+import { useAuthStore } from "@/stores/auth";
+import { Card, Button, InputText, FloatLabel } from "primevue";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+const username = ref("");
+const password = ref("");
+const errorMessage = ref("");
+const authStore = useAuthStore();
+const router = useRouter();
+
+
+const handleLogin = async () => {
+  try {
+    await authStore.login(username.value, password.value);
+    router.push("/student");
+  } catch (error) {
+    errorMessage.value = "Email hoặc mật khẩu không đúng!";
+  }
+};
 </script>
-
-
-

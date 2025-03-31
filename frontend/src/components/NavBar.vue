@@ -42,45 +42,36 @@ const toggleNavbar = () => {
 </script>
 
 <template>
-  <div class="relative ms-3 mt-3" :class="{ 'w-[250px]': isNavbarOpen, 'w-[50px]': !isNavbarOpen }">
+  <div class="relative " :class="{ 'w-[250px]': isNavbarOpen, 'w-[50px]': !isNavbarOpen }">
     <!-- Nút toggle -->
-    <Button
-      severity="secondary"
-      @click="toggleNavbar"
-      :class="[
-        'absolute -right-0 w-[38px] h-[38px] rounded-full top-5 flex items-center justify-center transition-all duration-300 hover:scale-110 text-blue-600',
-        {
-          'me-2': isNavbarOpen,
-          'me-1': !isNavbarOpen
-        }
-      ]"
-    >
+    <Button severity="secondary" @click="toggleNavbar" :class="[
+      'absolute -right-0 w-[38px] h-[38px] rounded-full top-5 flex items-center justify-center transition-all duration-300 hover:scale-110 text-blue-600',
+      {
+        'me-2': isNavbarOpen,
+        'me-1': !isNavbarOpen
+      }
+    ]">
       <i :class="isNavbarOpen ? 'pi pi-angle-left' : 'pi pi-angle-right'" class="text-xl"></i>
     </Button>
 
-    <div class="min-h-[95vh] shadow-[0_0_20px_0_rgba(0,0,0,0.1)] py-5 rounded-[20px]  z-100 pt-5 overflow-hidden">
-    <img v-if="!isNavbarOpen" src="/assets/img/iuh_logo-rút gọn.png" alt="logo" class="w-full  mt-[50px]">
+    <div class="min-h-[100vh] shadow-[0_0_20px_0_rgba(0,0,0,0.1)] py-5  z-100 pt-5 overflow-hidden">
+      <img v-if="!isNavbarOpen" src="/assets/img/iuh_logo-rút gọn.png" alt="logo" class="w-full  mt-[50px]">
 
       <nav class="px-4">
         <!-- Logo section với animation -->
         <div class=" overflow-hidden">
-          <router-link to="/"
-            class="block text-3xl font-bold transition-all duration-300  mt-10"
-
-          >
+          <router-link to="/" class="block text-3xl font-bold transition-all duration-300  mt-5">
             <img v-if="isNavbarOpen" src="/assets/img/iuh_logo chính thức.png" alt="logo" class="w-full">
 
           </router-link>
         </div>
 
         <!-- Menu mở rộng -->
-        <ul v-if="isNavbarOpen" class="mt-5">
+        <ul v-if="isNavbarOpen" class="text-xs mt-5">
           <li class="mb-2">
-            <a href="#"
-              @click.prevent="toggleMenu('overview')"
+            <a href="#" @click.prevent="toggleMenu('overview')"
               class="flex justify-between items-center font-bold cursor-pointer p-3 rounded-lg  transition-all duration-300"
-              :class="{ 'text-blue-500': openMenus.overview }"
-            >
+              :class="{ 'text-blue-500': openMenus.overview }">
               <div class="flex items-center gap-3 text-blue-500">
                 <i class="pi pi-users "></i>
                 <span>NGƯỜI DÙNG</span>
@@ -90,10 +81,9 @@ const toggleNavbar = () => {
             </a>
 
             <transition name="slide">
-              <ul v-if="openMenus.overview" class=" w-full mt-2 space-y-1 list-none">
+              <ul v-if="true" class=" w-full mt-2 space-y-1 list-none">
                 <li class="pl-4 border-l-2 border-blue-500 hover:text-blue-500 "
-                :class="{ 'border-l-2 border-transparent': $route.path !== '/' }"
-                   >
+                  :class="{ 'border-l-2 border-transparent': $route.path !== '/' }">
                   <router-link to="/"
                     class="flex items-center gap-2 p-2   transition-all duration-300 text-gray-600 hover:text-blue-600">
                     <span>Tài khoản</span>
@@ -101,18 +91,15 @@ const toggleNavbar = () => {
 
                 </li>
                 <li class="pl-4 border-l-2 border-blue-500 hover:text-blue-500 "
-                :class="{ 'border-l-2 border-transparent': $route.path !== '/student' }"
-                   >
+                  :class="{ 'border-l-2 border-transparent': $route.path !== '/student' }">
                   <router-link to="/student"
-                    class="flex items-center gap-2 p-2   transition-all duration-300 text-gray-600 hover:text-blue-600"
-                    >
+                    class="flex items-center gap-2 p-2   transition-all duration-300 text-gray-600 hover:text-blue-600">
                     <span>Sinh viên</span>
                   </router-link>
 
                 </li>
                 <li class="pl-4 border-l-2 border-blue-500 hover:text-blue-500 "
-                :class="{ 'border-l-2 border-transparent': $route.path !== '/teacher' }"
-                   >
+                  :class="{ 'border-l-2 border-transparent': $route.path !== '/teacher' }">
                   <router-link to="/teacher"
                     class="flex items-center gap-2 p-2   transition-all duration-300 text-gray-600 hover:text-blue-600">
                     <span>Giảng viên</span>
@@ -124,11 +111,9 @@ const toggleNavbar = () => {
           </li>
 
           <li class="mb-2">
-            <a href="#"
-              @click.prevent="toggleMenu('fundamentals')"
+            <a href="#" @click.prevent="toggleMenu('fundamentals')"
               class="flex justify-between items-center font-bold cursor-pointer p-3 rounded-lg hover:bg-blue-50 transition-all duration-300"
-              :class="{ 'bg-blue-50': openMenus.fundamentals }"
-            >
+              :class="{ 'bg-blue-50': openMenus.fundamentals }">
               <div class="flex items-center gap-3">
                 <i class="pi pi-book text-blue-500"></i>
                 <span>FUNDAMENTALS</span>
@@ -142,20 +127,16 @@ const toggleNavbar = () => {
         <!-- Menu thu gọn -->
         <ul v-else class="flex flex-col items-center gap-y-4 mt-4">
           <li>
-            <a href="#"
-              @click.prevent="toggleMenu('overview')"
+            <a href="#" @click.prevent="toggleMenu('overview')"
               class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-blue-50 transition-all duration-300 group"
-              :class="{ 'bg-blue-50': openMenus.overview }"
-            >
+              :class="{ 'bg-blue-50': openMenus.overview }">
               <i class="pi pi-users text-xl text-gray-600 group-hover:text-blue-500 transition-colors"></i>
             </a>
           </li>
           <li>
-            <a href="#"
-              @click.prevent="toggleMenu('fundamentals')"
+            <a href="#" @click.prevent="toggleMenu('fundamentals')"
               class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-blue-50 transition-all duration-300 group"
-              :class="{ 'bg-blue-50': openMenus.fundamentals }"
-            >
+              :class="{ 'bg-blue-50': openMenus.fundamentals }">
               <i class="pi pi-book text-xl text-gray-600 group-hover:text-blue-500 transition-colors"></i>
             </a>
           </li>
@@ -166,18 +147,21 @@ const toggleNavbar = () => {
 </template>
 
 <style>
-.slide-enter-active, .slide-leave-active {
+.slide-enter-active,
+.slide-leave-active {
   transition: all 0.3s ease-in-out;
   overflow: hidden;
 }
 
-.slide-enter-from, .slide-leave-to {
+.slide-enter-from,
+.slide-leave-to {
   max-height: 0;
   opacity: 0;
   transform: translateX(-10px);
 }
 
-.slide-enter-to, .slide-leave-from {
+.slide-enter-to,
+.slide-leave-from {
   max-height: 400px;
   opacity: 1;
   transform: translateX(0);

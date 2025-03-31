@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
       this.isAuthenticated = status
       localStorage.setItem('isAuthenticated', status)
     },
-    async login(email, password) {
+    async login(username, password) {
       try {
         const apiAuth = axios.create({
           headers: {
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
           withCredentials: true,
         })
         const response = await apiAuth.post('http://localhost:3034/api/v1/auth/login', {
-          email,
+          username,
           password,
         })
         this.token = response.data.access_token

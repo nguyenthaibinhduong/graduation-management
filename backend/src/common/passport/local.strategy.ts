@@ -7,10 +7,10 @@ import { UsersService } from 'src/modules/users/users.service';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly UserService: UsersService) {
-    super({ usernameField: 'email' });
+    super({ usernameField: 'username' });
   }
-  async validate(email: string, password: string) {
-    const user = await this.UserService.validateUser(email, password);
+  async validate(username: string, password: string) {
+    const user = await this.UserService.validateUser(username, password);
     if (!user) {
       throw new UnauthorizedException('Thông tin đăng nhập không đúng');
     }

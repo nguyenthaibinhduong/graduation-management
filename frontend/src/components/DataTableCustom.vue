@@ -24,7 +24,8 @@
               placeholder="Hiện bản ghi" class="w-45" />
             <Button variant="outlined" severity="contrast" size="small" icon="pi pi-file-excel" label="Xuất Excel"
               @click="exportToExcel" />
-            <Button size="small" icon="pi pi-plus" severity="secondary" label="Thêm mới" @click="$emit('add')" />
+            <Button size="small" icon="pi pi-plus" variant="outlined" severity="contrast" label="Thêm mới"
+              @click="$emit('add')" />
           </div>
 
 
@@ -36,7 +37,7 @@
           <Checkbox size="small" v-model="selectedRows" :value="row.id" @change="updateSelectAll" />
         </template>
       </Column>
-      <Column v-for="col in columns" :key="col.field" :field="col.field" :header="col.header">
+      <Column v-for="col in columns" :key="col.field" :field="col.field" :header="col.header" :sortable="col.sortable">
         <template v-slot:body="{ data }">
           {{ getNestedValue(data, col.field) }}
         </template>

@@ -1,9 +1,8 @@
-import { StudentSeeder } from './student.seeder';
-import { UserSeeder } from './user.seeder';
+
+import { MainSeeder } from './main.seeder';
 
 async function main() {
-  await UserSeeder.seed();
-  // await StudentSeeder.seed();
+  await MainSeeder.seed();
   console.log('All seeding completed!');
   process.exit();
 }
