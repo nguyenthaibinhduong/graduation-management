@@ -19,14 +19,14 @@ export class Committee {
 
   @ManyToOne(() => Course, (course) => course.id)
   @JoinColumn({ name: 'course_id' })
-  course: Course;
+  course?: Course;
 
   @ManyToOne(() => Department, (department) => department.id)
   @JoinColumn({ name: 'department_id' })
-  department: Department;
+  department?: Department;
 
   @ManyToMany(() => Project, (project) => project.id)
-  project: Project[];
+  project?: Project[];
 
   @ManyToMany(() => Teacher, (teacher) => teacher.id)
   teacher: Teacher[];
@@ -57,5 +57,5 @@ export class Committee {
 
   @ManyToOne(() => EvaluationForm, (evaluationForm) => evaluationForm.id)
   @JoinColumn({ name: 'evaluation_id' })
-  evaluationForm: EvaluationForm;
+  evaluationForm?: EvaluationForm;
 }
