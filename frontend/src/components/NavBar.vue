@@ -54,7 +54,7 @@ const toggleNavbar = () => {
       <i :class="isNavbarOpen ? 'pi pi-angle-left' : 'pi pi-angle-right'" class="text-xl"></i>
     </Button>
 
-    <div class="min-h-[100vh] shadow-[0_0_20px_0_rgba(0,0,0,0.1)] py-5  z-100 pt-5 overflow-hidden">
+    <div class="min-h-[100%] shadow-[0_0_20px_0_rgba(0,0,0,0.1)] py-5  z-100 pt-5 overflow-hidden">
       <img v-if="!isNavbarOpen" src="/assets/img/iuh_logo-rút gọn.png" alt="logo" class="w-full  mt-[50px]">
 
       <nav class="px-4">
@@ -67,14 +67,14 @@ const toggleNavbar = () => {
         </div>
 
         <!-- Menu mở rộng -->
-        <ul v-if="isNavbarOpen" class="text-xs mt-5">
+        <ul v-if="isNavbarOpen" class="text-md mt-5">
           <li class="mb-2">
             <a href="#" @click.prevent="toggleMenu('overview')"
               class="flex justify-between items-center font-bold cursor-pointer p-3 rounded-lg  transition-all duration-300"
               :class="{ 'text-blue-500': openMenus.overview }">
               <div class="flex items-center gap-3 text-blue-500">
                 <i class="pi pi-users "></i>
-                <span>NGƯỜI DÙNG</span>
+                <span>Người dùng</span>
               </div>
               <i :class="openMenus.overview ? 'pi pi-angle-up' : 'pi pi-angle-down'"
                 class="transition-transform duration-300"></i>

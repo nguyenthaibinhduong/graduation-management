@@ -1,8 +1,8 @@
 <template>
   <div class="z-50 w-full  border-b-[1.5px] border-gray-100">
-    <nav class="w-full flex items-center justify-between px-6 ">
+    <nav class="w-full flex items-center justify-end px-6 py-2 ">
       <!-- Left side with logo/switch -->
-      <SwitchMode />
+
 
       <!-- Right side with user profile -->
       <div class="flex items-center gap-3">
@@ -67,7 +67,6 @@
 import { useAuthStore } from "@/stores/auth";
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from 'vue-router';
-import SwitchMode from "./SwitchMode.vue";
 import Menu from 'primevue/menu';
 import Button from 'primevue/button';
 

@@ -1,7 +1,7 @@
 <template>
-  <div class="w-full flex gap-x-2">
+  <div class="w-full flex gap-x-2 bg-[#f8fafc]">
     <NavBar />
-    <div class="w-full flex-1">
+    <div class="w-full flex-1  px-3">
       <Header />
       <RouterView />
     </div>

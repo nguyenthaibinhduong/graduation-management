@@ -1,35 +1,38 @@
 <template>
-  <div class="px-2">
-    <div class="w-full flex justify-center py-4">
-      <h1 class="text-2xl font-semibold">{{ title }}</h1>
-    </div>
+  <div class="w-full flex justify-center py-4">
+    <h1 class="text-2xl font-semibold">{{ title }}</h1>
+  </div>
+  <Toolbar class="mb-6">
+    <template #start>
+      <Button size="small" severity="contrast" label="New" icon="pi pi-plus" class="mr-2" @click="$emit('add')" />
+      <Button size="small" v-if="selectedRows.length > 0" label="Delete" icon="pi pi-trash" severity="danger" outlined
+        @click="confirmDeleteSelected" :disabled="!selectedProducts || !selectedProducts.length" />
+    </template>
 
-    <DataTable :value="data" stripedRows :loading="loading"
-      class="p-datatable-sm border border-gray-200  rounded-[20px] text-xs py-[20px] pb-[20px]">
+    <template #end>
+      <Button size="small" label="Import" class="mr-2" icon="pi pi-plus" severity="secondary" />
+      <Button size="small" label="Export" icon="pi pi-download" severity="secondary" @click="exportToExcel" />
+    </template>
+  </Toolbar>
+  <div class="mx-auto p-5 bg-white rounded-lg border-[#e6e4e4] border-[1px] text-sm">
+
+
+
+    <DataTable :value="data" scrollable scrollHeight="400px" stripedRows :loading="loading" class="p-datatable-sm"
+      dataKey="id">
+
       <template #header>
-
-
-        <div class="flex flex-wrap items-center justify-between py-3">
+        <div class="flex flex-wrap gap-2 items-center justify-between">
           <div class="flex items-center">
             <Checkbox size="small" v-model="selectStatus" @change="toggleSelectAll" binary />
-            <label v-if="!selectedRows.length > 0" class="ms-2" for="ingredient1"> Chọn tất cả </label>
-            <Button size="small" v-if="selectedRows.length > 0" label="Xóa" @click="$emit('delete', selectedRows)"
-              class="bg-red-600 border border-red-600 text-white ms-2" />
+            <label class="ms-2" for="ingredient1"> Chọn tất cả </label>
           </div>
-          <div class="flex items-center w-full md:w-1/2">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
             <InputText size="small" class="w-full" v-model="search" placeholder="Tìm kiếm..." />
-          </div>
-          <div class="flex items-center gap-3">
-            <Select size="small" v-model="limit" :options="[2, 5, 10, 20]" @change="onLimitChange"
-              placeholder="Hiện bản ghi" class="w-45" />
-            <Button variant="outlined" severity="contrast" size="small" icon="pi pi-file-excel" label="Xuất Excel"
-              @click="exportToExcel" />
-            <Button size="small" icon="pi pi-plus" variant="outlined" severity="contrast" label="Thêm mới"
-              @click="$emit('add')" />
-          </div>
-
-
-
+          </IconField>
         </div>
       </template>
       <Column>
@@ -53,7 +56,7 @@
 
               <!-- Dropdown menu -->
               <OverlayPanel ref="dropdown">
-                <div class="w-[120px] text-sm">
+                <div class="w-[100px] text-sm">
                   <button class="w-full px-3 py-2 hover:bg-gray-100 flex items-center" @click="$emit('edit', data)">
                     <i class="pi pi-pencil mr-2"></i> Sửa
                   </button>
@@ -68,15 +71,23 @@
         </Column>
       </template>
     </DataTable>
-
-    <Paginator v-if="total > limit" :rows="limit" :totalRecords="total" :first="(page - 1) * limit"
-      @page="onPageChange" />
   </div>
+  <Toolbar class="mt-6">
+    <template #start>
+      <Select size="small" v-model="limit" :options="[2, 5, 10, 20]" @change="onLimitChange" placeholder="Hiện bản ghi"
+        class="w-45" />
+    </template>
+
+    <template #end>
+      <Paginator v-if="total > limit" :rows="limit" :totalRecords="total" :first="(page - 1) * limit"
+        @page="onPageChange" />
+    </template>
+  </Toolbar>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
-import { Button, Column, DataTable, InputText, Paginator, Select, Checkbox, OverlayPanel } from 'primevue';
+import { Button, Column, DataTable, InputText, Paginator, Select, Checkbox, OverlayPanel, Toolbar, IconField, InputIcon } from 'primevue';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
