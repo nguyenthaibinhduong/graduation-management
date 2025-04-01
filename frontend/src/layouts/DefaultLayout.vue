@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full flex gap-x-2 bg-[#f8fafc]">
+  <div class="w-full flex gap-x-2 ">
     <NavBar />
     <div class="w-full flex-1  px-3">
       <Header />

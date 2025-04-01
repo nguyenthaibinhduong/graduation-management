@@ -54,7 +54,7 @@ const toggleNavbar = () => {
       <i :class="isNavbarOpen ? 'pi pi-angle-left' : 'pi pi-angle-right'" class="text-xl"></i>
     </Button>
 
-    <div class="min-h-[100%] shadow-[0_0_20px_0_rgba(0,0,0,0.1)] py-5  z-100 pt-5 overflow-hidden">
+    <div class="h-[100%] min-h-[100vh] shadow-[0_0_20px_0_rgba(0,0,0,0.1)] py-5  z-100 pt-5 overflow-hidden">
       <img v-if="!isNavbarOpen" src="/assets/img/iuh_logo-rút gọn.png" alt="logo" class="w-full  mt-[50px]">
 
       <nav class="px-4">
