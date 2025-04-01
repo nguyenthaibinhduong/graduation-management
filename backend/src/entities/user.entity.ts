@@ -36,7 +36,7 @@ export class User {
   birth_date: Date;
 
   @Column()
-  address: string;
+  address?: string;
 
   @Column({ length: 255 })
   phone: string; // Số điện thoại (unique)
