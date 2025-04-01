@@ -70,6 +70,9 @@
           </template>
         </Column>
       </template>
+      <template #empty>
+        <div class="text-center text-gray-500 py-4">Chưa có bản ghi</div>
+      </template>
     </DataTable>
   </div>
   <Toolbar class="mt-6">
