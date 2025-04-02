@@ -39,8 +39,8 @@
 </template>
 <script setup>
 import { ref, onMounted, watchEffect, watch } from 'vue';
-import { Button, Drawer, InputText, DatePicker } from 'primevue';
-import { useUserStore } from '@/stores/users';
+import { Button, Drawer, InputText } from 'primevue';
+import { useUserStore } from '@/stores/store';
 import DataTableCustom from '@/components/DataTableCustom.vue';
 
 

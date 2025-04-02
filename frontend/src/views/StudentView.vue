@@ -115,9 +115,9 @@ import {
   FileUpload,
   Select,
 } from "primevue";
-import { useStudentStore } from "@/stores/students";
-import { useMajorStore } from "@/stores/majors";
-import { useDepartmentStore } from "@/stores/departments";
+import { useStudentStore } from "@/stores/store";
+import { useMajorStore } from "@/stores/store";
+import { useDepartmentStore } from "@/stores/store";
 import DataTableCustom from "@/components/DataTableCustom.vue";
 import * as XLSX from "xlsx";
 
