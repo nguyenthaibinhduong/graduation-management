@@ -29,7 +29,7 @@ export class TeachersController {
     @Body(new ValidationPipe()) teacher: CreateTeacherDto,
   ): Promise<Response<Teacher>> {
     try {
-      const newTeacher = await this.teacherService.create(teacher);
+      const newTeacher = await this.teacherService.createTeacher(teacher);
       return new Response(newTeacher, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
