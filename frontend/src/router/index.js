@@ -8,6 +8,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
+import MajorDepartmentView from '@/views/admin/MajorDepartmentView.vue'
 
 
 
@@ -22,10 +23,11 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: '/', component: DashboardView },
-      { path: '/student', component: StudentView },
-      { path: '/teacher', component: TeacherView },
+      { path: '/student-manangerment', component: StudentView },
+      { path: '/teacher-manangerment', component: TeacherView },
       { path: '/profile', component: ProfileView },
-      { path: '/user', component: UserView },
+      { path: '/account-manangerment', component: UserView },
+      { path: '/department-major-manangerment', component: MajorDepartmentView },
     ],
   },
 ]

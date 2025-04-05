@@ -29,22 +29,23 @@ const toggleNavbar = () => {
 const items = ref([
   {
     label: 'Quản trị',
-    icon: 'pi pi-envelope',
+    icon: 'pi pi-fw pi-home',
     items: [
       {
         label: 'Tài khoản',
-        to: '/user',
-        icon: 'pi pi-fw pi-users',
+        to: '/account-manangerment'
       },
       {
         label: 'Sinh viên',
-        to: '/student',
-        icon: 'pi pi-fw pi-users',
+        to: '/student-manangerment'
       },
       {
         label: 'Giảng viên',
-        to: '/teacher',
-        icon: 'pi pi-fw pi-users',
+        to: '/teacher-manangerment'
+      },
+      {
+        label: 'Khoa & Ngành',
+        to: '/department-major-manangerment'
       }
     ]
   },
@@ -113,9 +114,9 @@ const items = ref([
           </router-link>
         </div>
         <div v-if="isNavbarOpen" class="w-full flex justify-center">
-          <PanelMenu :model="items" class="w-full md:w-80">
+          <PanelMenu :model="items" class="w-full">
             <template #item="{ item }">
-              <router-link v-ripple :to="item.to" class="flex items-center px-4 py-2 cursor-pointer group">
+              <router-link v-ripple :to="item.to" class="flex items-center px-2 py-2 cursor-pointer group">
                 <span :class="[item.icon, 'text-primary group-hover:text-inherit']" />
                 <span :class="['ml-2', { 'font-semibold': item.items }]">{{ item.label }}</span>
                 <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />

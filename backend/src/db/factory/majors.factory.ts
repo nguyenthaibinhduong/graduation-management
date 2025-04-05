@@ -32,10 +32,16 @@ const majorNames = [
   'Luật kinh tế'
 ];
 
+// Hàm tạo mã ngẫu nhiên gồm 6 chữ số
+function generateRandomCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 export class DepartmentFactory {
   static createMany(): Department[] {
     return departmentNames.map(name => {
       const department = new Department();
+      department.code = generateRandomCode();
       department.name = name;
       return department;
     });
@@ -43,10 +49,12 @@ export class DepartmentFactory {
 }
 
 export class MajorFactory {
-  static createMany(): Major[] {
+  static createMany(departments: Department[]): Major[] {
     return majorNames.map(name => {
       const major = new Major();
+      major.code = generateRandomCode();
       major.name = name;
+      major.department = departments[Math.floor(Math.random() * departments.length)];
       return major;
     });
   }

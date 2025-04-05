@@ -24,15 +24,17 @@ export class MainSeeder {
     await positionRepo.save(positions);
     console.log(`✅ Seeded ${positions.length} positions.`);
 
-    // Seed Majors
-    const majors = await MajorFactory.createMany();
-    await majorRepo.save(majors);
-    console.log(`✅ Seeded ${majors.length} majors.`);
-
-    // Seed Departments
+     // Seed Departments
     const departments = await DepartmentFactory.createMany();
     await departRepo.save(departments);
     console.log(`✅ Seeded ${departments.length} departments.`);
+
+    // Seed Majors
+    const majors = await MajorFactory.createMany(departments);
+    await majorRepo.save(majors);
+    console.log(`✅ Seeded ${majors.length} majors.`);
+
+   
 
     // Seed Users
     const users = await UserFactory.createMany(15);

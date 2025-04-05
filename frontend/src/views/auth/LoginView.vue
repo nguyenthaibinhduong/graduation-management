@@ -69,7 +69,7 @@ const router = useRouter();
 const handleLogin = async () => {
   try {
     await authStore.login(username.value, password.value);
-    router.push("/student");
+    router.push("/");
   } catch (error) {
     errorMessage.value = "Email hoặc mật khẩu không đúng!";
   }
