@@ -19,7 +19,7 @@
           <div class="w-full flex justify-center">
             <img
               src="https://res.cloudinary.com/dvimvchbw/image/upload/v1743822679/iuh_logo_chi%CC%81nh_thu%CC%9B%CC%81c_nzlpep.png"
-              alt="Logo" class="w-[300px] mb-1" />
+              alt="Logo" class="w-[200px] mb-1" />
           </div>
           <h2 class="text-center text-2xl font-semibold title pb-5">Đăng nhập hệ thống</h2>
         </template>
