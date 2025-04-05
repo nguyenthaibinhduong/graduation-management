@@ -50,7 +50,7 @@ export class DepartmentController {
     }>
   > {
     try {
-      const departments = await this.departmentService.getAll(
+      const departments = await this.departmentService.getAllDepartment(
         search,
         limit,
         page,
