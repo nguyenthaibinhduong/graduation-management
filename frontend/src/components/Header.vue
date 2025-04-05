@@ -1,5 +1,5 @@
 <template>
-  <div class="z-50 w-full  border-b-[1.5px] border-gray-100">
+  <div class="z-50 w-full  border-b-[1.5px] border-gray-100 ">
     <nav class="w-full flex items-center justify-end px-6 py-2 ">
       <!-- Left side with logo/switch -->
 
@@ -13,7 +13,7 @@
 
           <Button type="button" @click="toggleProfileMenu" aria-label="Profile Menu"
             class="p-button-rounded p-button-text" v-tooltip.bottom="'Profile Menu'" severity="info">
-            <i class="pi pi-user text-xl"></i>
+            <i class="pi pi-user text-xl text-blue-800 "></i>
           </Button>
         </div>
 

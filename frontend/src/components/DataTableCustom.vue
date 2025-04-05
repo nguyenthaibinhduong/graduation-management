@@ -1,12 +1,15 @@
 <template>
+  <ConfirmDialog></ConfirmDialog>
   <div class="w-full flex justify-center py-4">
-    <h1 class="text-2xl font-semibold">{{ title }}</h1>
+    <h1 class="text-2xl font-semibold title">{{ title }}</h1>
   </div>
   <Toolbar class="mb-6">
     <template #start>
-      <Button size="small" severity="contrast" label="New" icon="pi pi-plus" class="mr-2" @click="$emit('add')" />
+
+      <Button size="small" severity="contrast" label="New" icon="pi pi-plus" class="mr-2 btn-submit"
+        @click="$emit('add')" />
       <Button size="small" v-if="selectedRows.length > 0" label="Delete" icon="pi pi-trash" severity="danger" outlined
-        @click="confirmDeleteSelected" :disabled="!selectedProducts || !selectedProducts.length" />
+        @click="confirmDelete()" />
     </template>
 
     <template #end>
@@ -61,7 +64,7 @@
                     <i class="pi pi-pencil mr-2"></i> Sửa
                   </button>
                   <button class="w-full px-3 py-2 hover:bg-gray-100 flex items-center text-red-500"
-                    @click="$emit('delete', data.id)">
+                    @click="confirmDelete(data.id)">
                     <i class="pi pi-trash mr-2"></i> Xóa
                   </button>
                 </div>
@@ -90,7 +93,21 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { Button, Column, DataTable, InputText, Paginator, Select, Checkbox, OverlayPanel, Toolbar, IconField, InputIcon } from 'primevue';
+import {
+  Button,
+  Column,
+  DataTable,
+  InputText,
+  Paginator,
+  Select,
+  Checkbox,
+  OverlayPanel,
+  Toolbar,
+  IconField,
+  InputIcon,
+  ConfirmDialog,
+  useConfirm
+} from 'primevue';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -166,6 +183,34 @@ const exportToExcel = () => {
   XLSX.utils.book_append_sheet(wb, ws, 'Dữ liệu');
   const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   saveAs(new Blob([excelBuffer]), 'Data.xlsx');
+};
+
+const confirm = useConfirm();
+const confirmDelete = (id = null) => {
+  const key = id != null ? "" : "các";
+  confirm.require({
+    message: "Bạn có chắc chắn muốn xóa " + key + " bản ghi này?",
+    header: "Xác nhận xóa",
+    icon: "pi pi-exclamation-circle",
+    rejectProps: {
+      label: "Hủy",
+      severity: "secondary",
+      outlined: true,
+    },
+    acceptProps: {
+      label: "Xóa",
+      severity: "danger",
+    },
+    accept: () => {
+      if (id !== null) {
+        emit("delete", id);
+      } else if (selectedRows.value.length > 0) {
+        emit("delete", selectedRows.value);
+      } else {
+
+      }
+    },
+  });
 };
 
 

@@ -1,5 +1,5 @@
 <script setup>
-import { Button } from 'primevue';
+import { Button, PanelMenu, Badge, TieredMenu } from 'primevue';
 import { ref } from 'vue';
 
 // Trạng thái mở/đóng của các menu
@@ -15,19 +15,6 @@ const openMenus = ref({
 // Thêm trạng thái đóng/mở của navbar
 const isNavbarOpen = ref(true);
 
-// Hàm toggle menu với khả năng mở rộng navbar
-const toggleMenu = (menu) => {
-  if (!isNavbarOpen.value) {
-    isNavbarOpen.value = true;
-    // Đợi một chút để navbar mở ra trước khi mở submenu
-    setTimeout(() => {
-      openMenus.value[menu] = true;
-    }, 300);
-  } else {
-    openMenus.value[menu] = !openMenus.value[menu];
-  }
-};
-
 // Thêm hàm toggle navbar
 const toggleNavbar = () => {
   isNavbarOpen.value = !isNavbarOpen.value;
@@ -39,10 +26,70 @@ const toggleNavbar = () => {
   }
 };
 
+const items = ref([
+  {
+    label: 'Quản trị',
+    icon: 'pi pi-envelope',
+    items: [
+      {
+        label: 'Tài khoản',
+        to: '/user',
+        icon: 'pi pi-fw pi-users',
+      },
+      {
+        label: 'Sinh viên',
+        to: '/student',
+        icon: 'pi pi-fw pi-users',
+      },
+      {
+        label: 'Giảng viên',
+        to: '/teacher',
+        icon: 'pi pi-fw pi-users',
+      }
+    ]
+  },
+  {
+    label: 'Reports',
+    icon: 'pi pi-chart-bar',
+    shortcut: '⌘+R',
+    items: [
+      {
+        label: 'Sales',
+        icon: 'pi pi-chart-line',
+        badge: 3
+      },
+      {
+        label: 'Products',
+        icon: 'pi pi-list',
+        badge: 6
+      }
+    ]
+  },
+  {
+    label: 'Profile',
+    icon: 'pi pi-user',
+    shortcut: '⌘+W',
+    items: [
+      {
+        label: 'Settings',
+        icon: 'pi pi-cog',
+        shortcut: '⌘+O'
+      },
+      {
+        label: 'Privacy',
+        icon: 'pi pi-shield',
+        shortcut: '⌘+P'
+      }
+    ]
+  }
+]);
+
+
+
 </script>
 
 <template>
-  <div class="relative " :class="{ 'w-[250px]': isNavbarOpen, 'w-[50px]': !isNavbarOpen }">
+  <div class="relative bg-white" :class="{ 'w-[18vw]': isNavbarOpen, 'w-[50px]': !isNavbarOpen }">
     <!-- Nút toggle -->
     <Button severity="secondary" @click="toggleNavbar" :class="[
       'absolute -right-0 w-[38px] h-[38px] rounded-full top-5 flex items-center justify-center transition-all duration-300 hover:scale-110 text-blue-600',
@@ -65,82 +112,23 @@ const toggleNavbar = () => {
 
           </router-link>
         </div>
+        <div v-if="isNavbarOpen" class="w-full flex justify-center">
+          <PanelMenu :model="items" class="w-full md:w-80">
+            <template #item="{ item }">
+              <router-link v-ripple :to="item.to" class="flex items-center px-4 py-2 cursor-pointer group">
+                <span :class="[item.icon, 'text-primary group-hover:text-inherit']" />
+                <span :class="['ml-2', { 'font-semibold': item.items }]">{{ item.label }}</span>
+                <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
+                <span v-if="item.shortcut"
+                  class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">
+                  {{ item.shortcut }}
+                </span>
+              </router-link>
+            </template>
 
-        <!-- Menu mở rộng -->
-        <ul v-if="isNavbarOpen" class="text-md mt-5">
-          <li class="mb-2">
-            <a href="#" @click.prevent="toggleMenu('overview')"
-              class="flex justify-between items-center font-bold cursor-pointer p-3 rounded-lg  transition-all duration-300"
-              :class="{ 'text-blue-500': openMenus.overview }">
-              <div class="flex items-center gap-3 text-blue-500">
-                <i class="pi pi-users "></i>
-                <span>Người dùng</span>
-              </div>
-              <i :class="openMenus.overview ? 'pi pi-angle-up' : 'pi pi-angle-down'"
-                class="transition-transform duration-300"></i>
-            </a>
+          </PanelMenu>
+        </div>
 
-            <transition name="slide">
-              <ul v-if="true" class=" w-full mt-2 space-y-1 list-none">
-                <li class="pl-4 border-l-2 border-blue-500 hover:text-blue-500 "
-                  :class="{ 'border-l-2 border-transparent': $route.path !== '/' }">
-                  <router-link to="/"
-                    class="flex items-center gap-2 p-2   transition-all duration-300 text-gray-600 hover:text-blue-600">
-                    <span>Tài khoản</span>
-                  </router-link>
-
-                </li>
-                <li class="pl-4 border-l-2 border-blue-500 hover:text-blue-500 "
-                  :class="{ 'border-l-2 border-transparent': $route.path !== '/student' }">
-                  <router-link to="/student"
-                    class="flex items-center gap-2 p-2   transition-all duration-300 text-gray-600 hover:text-blue-600">
-                    <span>Sinh viên</span>
-                  </router-link>
-
-                </li>
-                <li class="pl-4 border-l-2 border-blue-500 hover:text-blue-500 "
-                  :class="{ 'border-l-2 border-transparent': $route.path !== '/teacher' }">
-                  <router-link to="/teacher"
-                    class="flex items-center gap-2 p-2   transition-all duration-300 text-gray-600 hover:text-blue-600">
-                    <span>Giảng viên</span>
-                  </router-link>
-
-                </li>
-              </ul>
-            </transition>
-          </li>
-
-          <li class="mb-2">
-            <a href="#" @click.prevent="toggleMenu('fundamentals')"
-              class="flex justify-between items-center font-bold cursor-pointer p-3 rounded-lg hover:bg-blue-50 transition-all duration-300"
-              :class="{ 'bg-blue-50': openMenus.fundamentals }">
-              <div class="flex items-center gap-3">
-                <i class="pi pi-book text-blue-500"></i>
-                <span>FUNDAMENTALS</span>
-              </div>
-              <i :class="openMenus.fundamentals ? 'pi pi-angle-up' : 'pi pi-angle-down'"
-                class="transition-transform duration-300"></i>
-            </a>
-          </li>
-        </ul>
-
-        <!-- Menu thu gọn -->
-        <ul v-else class="flex flex-col items-center gap-y-4 mt-4">
-          <li>
-            <a href="#" @click.prevent="toggleMenu('overview')"
-              class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-blue-50 transition-all duration-300 group"
-              :class="{ 'bg-blue-50': openMenus.overview }">
-              <i class="pi pi-users text-xl text-gray-600 group-hover:text-blue-500 transition-colors"></i>
-            </a>
-          </li>
-          <li>
-            <a href="#" @click.prevent="toggleMenu('fundamentals')"
-              class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-blue-50 transition-all duration-300 group"
-              :class="{ 'bg-blue-50': openMenus.fundamentals }">
-              <i class="pi pi-book text-xl text-gray-600 group-hover:text-blue-500 transition-colors"></i>
-            </a>
-          </li>
-        </ul>
       </nav>
     </div>
   </div>

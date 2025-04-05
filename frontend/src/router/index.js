@@ -1,23 +1,27 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import StudentView from '@/views/StudentView.vue'
-import TeacherView from '@/views/TeacherView.vue'
-import UserView from '@/views/UserView.vue'
+import StudentView from '@/views/admin/StudentView.vue'
+import TeacherView from '@/views/admin/TeacherView.vue'
+import UserView from '@/views/admin/UserView.vue'
 import axios from 'axios'
-import ProfileView from '@/views/ProfileView.vue'
+import ProfileView from '@/views/auth/ProfileView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import DashboardView from '@/views/dashboard/DashboardView.vue'
+import LoginView from '@/views/auth/LoginView.vue'
+
+
 
 // Tự động import các component khi cần thiết (lazy-load)
-const views = import.meta.glob('../views/*.vue')
+
 
 const routes = [
-  { path: '/login', name: 'login', component: views['../views/LoginView.vue'] },
+  { path: '/login', name: 'login', component:LoginView },
   {
     path: '/',
     component: DefaultLayout,
     meta: { requiresAuth: true },
     children: [
-      { path: '/', component: UserView },
+      { path: '/', component: DashboardView },
       { path: '/student', component: StudentView },
       { path: '/teacher', component: TeacherView },
       { path: '/profile', component: ProfileView },
