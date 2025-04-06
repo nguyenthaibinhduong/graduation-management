@@ -13,7 +13,8 @@
     </template>
 
     <template #end>
-      <Button size="small" label="Import" class="mr-2" icon="pi pi-plus" severity="secondary" />
+      <Button size="small" label="Import" class="mr-2" icon="pi pi-plus" severity="secondary"
+        @click="$emit('import')" />
       <Button size="small" label="Export" icon="pi pi-download" severity="secondary" @click="exportToExcel" />
     </template>
   </Toolbar>
@@ -119,7 +120,7 @@ const props = defineProps({
   loading: Boolean,
 });
 
-const emit = defineEmits(['edit', 'delete', 'add', 'fetch', 'selectOne', 'selectAll']);
+const emit = defineEmits(['edit', 'delete', 'add', 'fetch', 'import', 'selectOne', 'selectAll']);
 const search = ref('');
 const limit = ref(10);
 const page = ref(1);

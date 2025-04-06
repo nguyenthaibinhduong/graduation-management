@@ -101,7 +101,7 @@
 import { ref, onMounted, watchEffect, watch } from 'vue'
 import { Button, Drawer, InputText, DatePicker, MultiSelect } from 'primevue'
 import { usePositionStore, useTeacherStore } from '@/stores/store'
-import DataTableCustom from '@/components/DataTableCustom.vue'
+import DataTableCustom from '@/components/list/DataTableCustom.vue'
 
 const visibleLeft = ref(false)
 const teacherStore = useTeacherStore()
