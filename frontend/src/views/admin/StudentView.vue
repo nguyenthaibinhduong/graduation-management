@@ -158,12 +158,13 @@ const deleteStudent = async (ids) => {
   await studentStore.deleteItem(ids);
 };
 
-const editStudent = (student) => {
-  editedStudentId.value = student.id;
+const editStudent = (dataEdit) => {
+  editedStudentId.value = dataEdit.id;
+  const clonedData = JSON.parse(JSON.stringify(dataEdit));
   newStudent.value = {
-    ...student,
-    major_id: student.major,
-    department_id: student.department
+    ...clonedData,
+    major_id: dataEdit.major,
+    department_id: dataEdit.department
   };
   isEditing.value = true;
   visibleLeft.value = true;
@@ -179,7 +180,17 @@ const cancelForm = () => {
   isEditing.value = false;
   editedStudentId.value = null;
   isImport.value = false;
-  Object.keys(newStudent.value).forEach((key) => (newStudent.value[key] = ""));
+  newStudent.value = {
+    code: "",
+    user: {
+      email: "",
+      fullname: "",
+      birth_date: null,
+      phone: ""
+    },
+    major_id: 0,
+    department_id: 0
+  };
 };
 
 

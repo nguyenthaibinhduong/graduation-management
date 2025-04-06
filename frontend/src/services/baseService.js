@@ -1,11 +1,11 @@
-import api from "@/api/api"
+import api from '@/api/api'
 
 const baseService = (resource) => ({
   fetchAll: async (page = 1, limit = 10, search = '') => {
     const params = { page, limit }
     if (search) params.search = search
     const { data } = await api.get(`/${resource}`, { params })
-    
+
     return data.data
   },
 
@@ -21,10 +21,9 @@ const baseService = (resource) => ({
     if (!ids.length) {
       return api.delete(`/${resource}/${ids}`)
     } else {
-      return api.post(`/${resource}/remove-multi`,ids)
+      return api.post(`/${resource}/remove-multi`, ids)
     }
-    
-  }
+  },
 })
 
 export default baseService
