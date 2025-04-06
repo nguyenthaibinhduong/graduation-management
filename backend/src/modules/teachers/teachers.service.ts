@@ -7,6 +7,7 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { Position } from 'src/entities/position.entity';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Injectable()
 export class TeachersService extends BaseService<Teacher> {
@@ -116,7 +117,7 @@ export class TeachersService extends BaseService<Teacher> {
 
   async updateTeacher(
     id: number,
-    teacher: CreateTeacherDto,
+    teacher: UpdateTeacherDto,
   ): Promise<Teacher | null> {
     const { positionIds, ...teacherData } = teacher;
 

@@ -18,9 +18,10 @@ import { TeachersService } from './teachers.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { Teacher } from 'src/entities/teacher.entity';
 import { Response } from 'src/common/globalClass';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Controller('teachers')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class TeachersController {
   constructor(private readonly teacherService: TeachersService) {}
 
@@ -48,7 +49,11 @@ export class TeachersController {
     Response<{ items: Teacher[]; total: number; limit?: number; page?: number }>
   > {
     try {
-      const teachers = await this.teacherService.getAll(search, limit, page);
+      const teachers = await this.teacherService.getAllTeachers(
+        search,
+        limit,
+        page,
+      );
       return new Response(teachers, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -73,12 +78,11 @@ export class TeachersController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body(new ValidationPipe()) teacher: CreateTeacherDto,
+    @Body(new ValidationPipe()) teacher: UpdateTeacherDto,
   ): Promise<Response<Teacher>> {
     try {
-      const updatedTeacher = await this.teacherService.update(
+      const updatedTeacher = await this.teacherService.updateTeacher(
         id,
-        { where: { id } },
         teacher,
       );
       return updatedTeacher

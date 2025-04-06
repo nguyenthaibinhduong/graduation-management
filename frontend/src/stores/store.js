@@ -9,3 +9,5 @@ export const useTeacherStore = createBaseStore('teachers')
 export const useStudentStore = createBaseStore('students')
 
 export const useUserStore = createBaseStore('users')
+
+export const usePositionStore = createBaseStore('positions')
