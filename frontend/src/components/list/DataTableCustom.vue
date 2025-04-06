@@ -56,16 +56,17 @@
             <div class="relative">
               <!-- Nút ba chấm -->
               <Button icon="pi pi-ellipsis-h" class="w-[30px] h-[30px] ms-2 bg-transparent border-none text-black"
-                @click="toggleDropdown($event, data.id)" />
+                @click="toggleDropdown($event, data)" />
 
               <!-- Dropdown menu -->
               <OverlayPanel ref="dropdown">
                 <div class="w-[100px] text-sm">
-                  <button class="w-full px-3 py-2 hover:bg-gray-100 flex items-center" @click="$emit('edit', data)">
+                  <button class="w-full px-3 py-2 hover:bg-gray-100 flex items-center"
+                    @click="$emit('edit', selectedItem)">
                     <i class="pi pi-pencil mr-2"></i> Sửa
                   </button>
                   <button class="w-full px-3 py-2 hover:bg-gray-100 flex items-center text-red-500"
-                    @click="confirmDelete(data.id)">
+                    @click="confirmDelete(selectedItem.id)">
                     <i class="pi pi-trash mr-2"></i> Xóa
                   </button>
                 </div>
@@ -127,8 +128,10 @@ const page = ref(1);
 const selectedRows = ref([]);
 const selectStatus = ref(false);
 const dropdown = ref(null);
+const selectedItem = ref(null);
 
-const toggleDropdown = (event) => {
+const toggleDropdown = (event, data) => {
+  selectedItem.value = data;
   dropdown.value.toggle(event);
 };
 
