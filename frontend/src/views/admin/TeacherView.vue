@@ -46,7 +46,7 @@
 import { ref, onMounted, watchEffect, watch } from 'vue';
 import { Button, Drawer, InputText, DatePicker } from 'primevue';
 import { useTeacherStore } from '@/stores/store';
-import DataTableCustom from '@/components/DataTableCustom.vue';
+import DataTableCustom from '@/components/list/DataTableCustom.vue';
 
 
 const visibleLeft = ref(false);

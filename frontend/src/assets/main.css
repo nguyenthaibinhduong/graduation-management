@@ -48,3 +48,8 @@ body {
 .p-floatlabel:has(.p-inputwrapper-focus) label {
   color: var(--color-1);
 }
+
+.p-drawer-close-button {
+  width: 0px;
+  display: none;
+}
