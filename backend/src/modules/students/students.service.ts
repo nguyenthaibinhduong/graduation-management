@@ -32,7 +32,7 @@ export class StudentsService extends BaseService<Student> {
       .leftJoinAndSelect('student.department', 'department');
 
     if (search) {
-      queryBuilder.where('user.username LIKE :search', { search: `%${search}%` });
+      queryBuilder.where('user.fullname LIKE :search', { search: `%${search}%` });
     }
     const total = await queryBuilder.getCount();
     if (limit && page) {

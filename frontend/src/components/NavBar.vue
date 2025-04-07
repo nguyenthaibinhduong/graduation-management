@@ -1,5 +1,5 @@
 <script setup>
-import { Button, PanelMenu, Badge, TieredMenu } from 'primevue';
+import { Button, PanelMenu, Badge, TieredMenu, Menu } from 'primevue';
 import { ref } from 'vue';
 
 // Trạng thái mở/đóng của các menu
@@ -29,11 +29,12 @@ const toggleNavbar = () => {
 const items = ref([
   {
     label: 'Quản trị',
-    icon: 'pi pi-fw pi-home',
     items: [
       {
         label: 'Tài khoản',
+        icon: 'pi pi-chart-line',
         to: '/account-manangerment'
+
       },
       {
         label: 'Sinh viên',
@@ -114,7 +115,7 @@ const items = ref([
           </router-link>
         </div>
         <div v-if="isNavbarOpen" class="w-full flex justify-center">
-          <PanelMenu :model="items" class="w-full">
+          <Menu :model="items" class="w-full">
             <template #item="{ item }">
               <router-link v-ripple :to="item.to" class="flex items-center px-2 py-2 cursor-pointer group">
                 <span :class="[item.icon, 'text-primary group-hover:text-inherit']" />
@@ -127,7 +128,7 @@ const items = ref([
               </router-link>
             </template>
 
-          </PanelMenu>
+          </Menu>
         </div>
 
       </nav>

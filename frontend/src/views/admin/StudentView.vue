@@ -10,32 +10,8 @@
     @delete="deleteStudent" @import="importStudent" @selectOne="handleSelectData" @selectAll="handleSelectData" />
 
 
-  <Drawer class="w-full" v-model:visible="visibleLeft" position="right" :closable="false">
-    <template #header>
-      <div class="flex justify-between items-center w-full">
-        <div class="flex items-center gap-4">
-          <Button v-on:click="cancelForm" icon="pi pi-arrow-left" variant="text" rounded />
-          <div>
-            <h2 class="text-lg font-semibold  text-black">
-              {{ isEditing ? 'Cập nhật thông tin sinh viên' : 'Thêm mới sinh viên' }}
-            </h2>
-          </div>
-
-        </div>
-
-        <div class="flex items-center gap-2">
-          <Button @click="cancelForm" severity="danger">
-            Hủy bỏ
-          </Button>
-          <Button v-if="!isImport" @click="saveStudent" class="btn-submit te">
-            Lưu
-          </Button>
-          <Button v-if="isImport" label="Nhập dữ liệu" icon="pi pi-upload" class=""
-            :disabled="errors.length || !excelData.length" @click="submitDataImport" />
-        </div>
-
-      </div>
-    </template>
+  <MyDrawer class="w-full" title="sinh viên" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveStudent"
+    :showImport="isImport" v-model:visible="visibleLeft" position="right" :closable="false">
     <div v-if="!isImport" class="grid grid-cols-2 mt-5 gap-x-10">
       <!-- Thông tin cá nhân -->
       <div>
@@ -48,7 +24,6 @@
           <MyInput v-model="newStudent.user.address" title="Địa chỉ" id="student_address" />
         </div>
       </div>
-
       <!-- Thông tin học vụ -->
       <div>
         <h3 class="text-lg font-semibold mb-6">Thông tin học vụ</h3>
@@ -81,16 +56,17 @@
 
 
     </div>
-  </Drawer>
+  </MyDrawer>
 
 </template>
 <script setup>
 import { ref, onMounted, watchEffect } from "vue";
 import * as XLSX from "xlsx";
-import { Button, Column, DataTable, Drawer, FileUpload, Message } from "primevue";
+import { Column, DataTable, FileUpload, Message } from "primevue";
 import { useStudentStore, useMajorStore, useDepartmentStore } from "@/stores/store";
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import MyInput from "@/components/form/MyInput.vue";
+import MyDrawer from "@/components/drawer/MyDrawer.vue";
 
 
 const visibleLeft = ref(false);
