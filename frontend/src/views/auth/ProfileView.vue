@@ -1,17 +1,17 @@
 <template>
-    <Card >
+  <Card>
     <template #title>Thông tin cá nhân</template>
     <template #content>
-          <div class="flex items-center gap-2">
-            <label class="font-semibold">Email:</label>
-            <span>{{ authStore.user?.email }}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <label class="font-semibold">Vai trò:</label>
-            <span>{{ authStore.user?.role }}</span>
-          </div>
+      <div class="flex items-center gap-2">
+        <label class="font-semibold">Email:</label>
+        <span>{{ authStore.user?.email }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="font-semibold">Vai trò:</label>
+        <span>{{ authStore.user?.role }}</span>
+      </div>
     </template>
-</Card>
+  </Card>
 </template>
 
 <script setup>
@@ -22,10 +22,8 @@ import { Card } from 'primevue';
 const authStore = useAuthStore()
 
 onMounted(() => {
-    authStore.fetchUser()
+  authStore.fetchUser()
 })
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

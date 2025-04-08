@@ -32,7 +32,6 @@ const items = ref([
     items: [
       {
         label: 'Tài khoản',
-        icon: 'pi pi-chart-line',
         to: '/account-manangerment'
 
       },
@@ -43,6 +42,10 @@ const items = ref([
       {
         label: 'Giảng viên',
         to: '/teacher-manangerment'
+      },
+      {
+        label: 'Học kỳ',
+        to: '/course-manangerment'
       },
       {
         label: 'Khoa & Ngành',
