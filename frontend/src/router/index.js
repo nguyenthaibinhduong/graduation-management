@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/auth'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import MajorDepartmentView from '@/views/admin/MajorDepartmentView.vue'
+import CourseView from '@/views/admin/CourseView.vue'
 
 
 
@@ -25,6 +26,7 @@ const routes = [
       { path: '/', component: DashboardView },
       { path: '/student-manangerment', component: StudentView },
       { path: '/teacher-manangerment', component: TeacherView },
+      { path: '/course-manangerment', component: CourseView },
       { path: '/profile', component: ProfileView },
       { path: '/account-manangerment', component: UserView },
       { path: '/department-major-manangerment', component: MajorDepartmentView },

@@ -28,11 +28,10 @@ const toggleNavbar = () => {
 
 const items = ref([
   {
-    label: 'Quản trị',
+    label: 'Giáo vụ',
     items: [
       {
         label: 'Tài khoản',
-        icon: 'pi pi-chart-line',
         to: '/account-manangerment'
 
       },
@@ -45,20 +44,20 @@ const items = ref([
         to: '/teacher-manangerment'
       },
       {
+        label: 'Học kỳ',
+        to: '/course-manangerment'
+      },
+      {
         label: 'Khoa & Ngành',
         to: '/department-major-manangerment'
       }
     ]
   },
   {
-    label: 'Reports',
-    icon: 'pi pi-chart-bar',
-    shortcut: '⌘+R',
+    label: 'Giảng viên',
     items: [
       {
-        label: 'Sales',
-        icon: 'pi pi-chart-line',
-        badge: 3
+        label: 'Đề tài',
       },
       {
         label: 'Products',

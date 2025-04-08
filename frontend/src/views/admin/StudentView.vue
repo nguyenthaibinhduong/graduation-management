@@ -7,7 +7,7 @@
     { field: 'major.name', header: 'Ngành học', sortable: true },
     { field: 'department.name', header: 'Khoa', sortable: true }
   ]" :total="studentStore?.total" :loading="loading" @fetch="fetchStudent" @add="addStudent" @edit="editStudent"
-    @delete="deleteStudent" @import="importStudent" @selectOne="handleSelectData" @selectAll="handleSelectData" />
+    @delete="deleteStudent" @selectOne="handleSelectData" @selectAll="handleSelectData" />
 
 
   <MyDrawer class="w-full" title="sinh viên" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveStudent"
@@ -22,6 +22,7 @@
             type="date" dateFormat="dd/mm/yy" />
           <MyInput v-model="newStudent.user.email" title="Email" id="student_email" />
           <MyInput v-model="newStudent.user.address" title="Địa chỉ" id="student_address" />
+          <MyInput v-model="newStudent.user.phone" title="Số điện thoại" id="student_phone" />
         </div>
       </div>
       <!-- Thông tin học vụ -->
@@ -29,10 +30,11 @@
         <h3 class="text-lg font-semibold mb-6">Thông tin học vụ</h3>
         <div class="grid grid-cols-1 md:grid-cols-1 gap-10">
           <MyInput v-model="newStudent.code" title="Mã sinh viên" id="student_code" :disabled="isEditing" />
-          <MyInput v-model="newStudent.major_id" title="Chuyên ngành" id="major" type="select" :options="majors"
-            optionLabel="name" />
           <MyInput v-model="newStudent.department_id" title="Khoa" id="department" type="select" :options="departments"
             optionLabel="name" />
+          <MyInput v-model="newStudent.major_id" title="Chuyên ngành" id="major" type="select" :options="majors"
+            optionLabel="name" />
+
         </div>
       </div>
     </div>
@@ -60,7 +62,7 @@
 
 </template>
 <script setup>
-import { ref, onMounted, watchEffect } from "vue";
+import { ref, onMounted, watchEffect, watch } from "vue";
 import * as XLSX from "xlsx";
 import { Column, DataTable, FileUpload, Message } from "primevue";
 import { useStudentStore, useMajorStore, useDepartmentStore } from "@/stores/store";
@@ -79,6 +81,7 @@ const majors = ref([]);
 const loading = ref(false);
 const isEditing = ref(false);
 const isImport = ref(false);
+
 const editedStudentId = ref(null);
 const newStudent = ref({
   code: "",
@@ -94,16 +97,26 @@ const newStudent = ref({
 const maxDate = ref(new Date());
 maxDate.value.setFullYear(maxDate.value.getFullYear() - 18);
 
-onMounted(() => {
-  studentStore.fetchItems();
-  majorsStore.fetchItems();
-  departmentsStore.fetchItems();
+onMounted(async () => {
+  await studentStore.fetchItems();
+  await majorsStore.fetchItems();
+  await departmentsStore.fetchItems();
 });
 watchEffect(() => {
   students.value = studentStore.items;
   majors.value = majorsStore.items;
   departments.value = departmentsStore.items;
 });
+watch(
+  () => newStudent.value.department_id,
+  (newDeptId) => {
+    if (!isEditing.value) {
+      majors.value = newDeptId.major || [];
+    }
+  },
+  { immediate: true }
+);
+
 
 const fetchStudent = async (newPage, newLimit, newSearch) => {
   await studentStore.fetchItems(
@@ -137,10 +150,13 @@ const deleteStudent = async (ids) => {
 const editStudent = (dataEdit) => {
   editedStudentId.value = dataEdit.id;
   const clonedData = JSON.parse(JSON.stringify(dataEdit));
+  const { major_id, department_id, ...data } = clonedData;
   newStudent.value = {
-    ...clonedData,
-    major_id: dataEdit.major,
-    department_id: dataEdit.department
+    ...data,
+    major_id: clonedData.major,
+    department_id: departments.value.find(
+      (item) => item.id == clonedData.department.id
+    ),
   };
   isEditing.value = true;
   visibleLeft.value = true;

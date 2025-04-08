@@ -46,9 +46,15 @@
       </Column>
       <Column v-for="col in columns" :key="col.field" :field="col.field" :header="col.header" :sortable="col.sortable">
         <template v-slot:body="{ data }">
-          {{ getNestedValue(data, col.field) }}
+          <span v-if="col.type === 'datetime'">
+            {{ dayjs(getNestedValue(data, col.field)).format('DD/MM/YYYY') }}
+          </span>
+          <span v-else>
+            {{ getNestedValue(data, col.field) }}
+          </span>
         </template>
       </Column>
+
 
       <template>
         <Column header="Hành động">
@@ -95,6 +101,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import dayjs from 'dayjs';
 import {
   Button,
   Column,
