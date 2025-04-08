@@ -9,6 +9,14 @@ const baseService = (resource) => ({
     return data.data
   },
 
+  getById: async (id) => {
+    if (id) {
+      const { data } = await api.get(`/${resource}/${id}`)
+    }
+
+    return data.data
+  },
+
   create: async (payload) => {
     return api.post(`/${resource}`, payload)
   },

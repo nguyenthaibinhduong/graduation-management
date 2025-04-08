@@ -33,7 +33,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getProfile(@Request() request: any) {
-    return request.user;
+    return this.userService.getUserDetails(request.user);
   }
 
   @Post('refresh-token')

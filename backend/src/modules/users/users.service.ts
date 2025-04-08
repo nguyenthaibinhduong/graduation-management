@@ -26,7 +26,7 @@ export class UsersService extends BaseService<User> {
   //   const user = await this.userRepository.findOneBy({ email });
   //   return user;
   // }
-    async findByUsername(username: string) {
+  async findByUsername(username: string) {
     const user = await this.userRepository.findOneBy({ username });
     return user;
   }
@@ -86,25 +86,36 @@ export class UsersService extends BaseService<User> {
   }
 
   async getAllUser(
-      role ?:string,
-      search?: string,
-      limit?: number,
-      page?: number,
-    ): Promise<{ items: User[]; total: number; limit?: number; page?: number }> {
-      const where = search ? [
-        { fullname: Like(`%${search}%`) }
-      ] :
-        role
-    ? { role }
-    : {};
-      const options: any = { where};
-      if (limit && page) {
-        options.take = limit;
-        options.skip = (page - 1) * limit;
-      }
-      const items = await this.repository.find(options);
-      const total = await this.repository.count();
-  
-      return { items, total, ...(limit && { limit }), ...(page && { page }) };
+    role?: string,
+    search?: string,
+    limit?: number,
+    page?: number,
+  ): Promise<{ items: User[]; total: number; limit?: number; page?: number }> {
+    const where = search
+      ? [{ fullname: Like(`%${search}%`) }]
+      : role
+        ? { role }
+        : {};
+    const options: any = { where };
+    if (limit && page) {
+      options.take = limit;
+      options.skip = (page - 1) * limit;
     }
+    const items = await this.repository.find(options);
+    const total = await this.repository.count();
+
+    return { items, total, ...(limit && { limit }), ...(page && { page }) };
+  }
+
+  async getUserDetails(user: any): Promise<any> {
+    const userData = await this.userRepository.findOne({
+      where: { id: user.id },
+      relations: {
+        teacher: user.role === 'teacher',
+        student:
+          user.role === 'student' ? { department: true, major: true } : false,
+      },
+    });
+    return userData;
+  }
 }
