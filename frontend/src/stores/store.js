@@ -13,3 +13,5 @@ export const useUserStore = createBaseStore('users')
 export const usePositionStore = createBaseStore('positions')
 
 export const useCourseStore = createBaseStore('courses')
+
+export const useEnrollmentStore = createBaseStore('enrollment_sessions')

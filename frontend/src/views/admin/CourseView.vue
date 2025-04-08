@@ -89,7 +89,11 @@ const cancelForm = () => {
   visibleLeft.value = false;
   isEditing.value = false;
   editedCourseId.value = null;
-  newData.value = null;
+  newData.value = {
+    name: "",
+    start_time: null,
+    end_time: null
+  };
 };
 
 

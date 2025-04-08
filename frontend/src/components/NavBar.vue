@@ -48,6 +48,10 @@ const items = ref([
         to: '/course-manangerment'
       },
       {
+        label: 'Đợt đăng ký',
+        to: '/enrollment-sessions-manangerment'
+      },
+      {
         label: 'Khoa & Ngành',
         to: '/department-major-manangerment'
       }

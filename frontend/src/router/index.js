@@ -10,6 +10,8 @@ import DashboardView from '@/views/dashboard/DashboardView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import MajorDepartmentView from '@/views/admin/MajorDepartmentView.vue'
 import CourseView from '@/views/admin/CourseView.vue'
+import EnrollmentView from '@/views/admin/EnrollmentView.vue'
+
 
 
 
@@ -27,6 +29,7 @@ const routes = [
       { path: '/student-manangerment', component: StudentView },
       { path: '/teacher-manangerment', component: TeacherView },
       { path: '/course-manangerment', component: CourseView },
+       { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
       { path: '/profile', component: ProfileView },
       { path: '/account-manangerment', component: UserView },
       { path: '/department-major-manangerment', component: MajorDepartmentView },
