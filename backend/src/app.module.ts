@@ -14,6 +14,7 @@ import { MajorsModule } from './modules/majors/majors.module';
 import { PositionsModule } from './modules/positions/positions.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { CoursesModule } from './modules/courses/courses.module';
+import { EnrollmentSessionModule } from './modules/enrollment_session/enrollment_session.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CoursesModule } from './modules/courses/courses.module';
     PositionsModule,
     DepartmentModule,
     CoursesModule,
+    EnrollmentSessionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { EnrollmentSession } from './enrollment_session.entity';
 
 @Entity('courses')
 export class Course {
@@ -13,4 +14,7 @@ export class Course {
 
   @Column()
   end_time: Date;
+  
+  @OneToMany(() => EnrollmentSession, (enrollment) => enrollment.department)
+  enrollmentSessions: EnrollmentSession[];
 }

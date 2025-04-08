@@ -2,7 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Department } from './department.entity';
@@ -25,11 +25,11 @@ export class EnrollmentSession {
   @Column()
   content: string;
 
-  @OneToOne(() => Department, (department) => department.id)
+  @ManyToOne(() => Department, (department) => department.enrollmentSessions, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'department_id' })
   department: Department;
 
-  @OneToOne(() => Course, (course) => course.id)
+  @ManyToOne(() => Course, (course) => course.enrollmentSessions, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'course_id' })
   course: Course;
 }

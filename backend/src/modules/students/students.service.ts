@@ -25,24 +25,29 @@ export class StudentsService extends BaseService<Student> {
   ) {
     super(studentRepository);
   }
-  async getAllStudent(search?: string,limit?: number,page?: number,): Promise<{ items: Student[]; total: number; limit?: number; page?: number }> {
-    const queryBuilder = this.repository.createQueryBuilder('student')
-      .leftJoinAndSelect('student.user', 'user')
-      .leftJoinAndSelect('student.major', 'major')
-      .leftJoinAndSelect('student.department', 'department');
+  async getAllStudent(
+  search?: string,
+  limit?: number,
+  page?: number,
+): Promise<{ items: Student[]; total: number; limit?: number; page?: number }> {
+  const where = search
+    ? {
+        user: {
+          fullname: Like(`%${search}%`),
+        },
+      }
+    : {};
 
-    if (search) {
-      queryBuilder.where('user.fullname LIKE :search', { search: `%${search}%` });
-    }
-    const total = await queryBuilder.getCount();
-    if (limit && page) {
-      queryBuilder.skip((page - 1) * limit).take(limit);
-    }
+  const [items, total] = await this.repository.findAndCount({
+    where,
+    relations: { user:true, major:true, department:true},
+    skip: limit && page ? (page - 1) * limit : undefined,
+    take: limit,
+  });
 
-    const items = await queryBuilder.getMany();
+  return { items, total, ...(limit && { limit }), ...(page && { page }) };
+}
 
-    return { items, total, ...(limit && { limit }), ...(page && { page }) };
-  }
 
   async createStudent(student: CreateStudentDto): Promise<Student> {
     const { department_id, major_id, user, ...data } = student;
