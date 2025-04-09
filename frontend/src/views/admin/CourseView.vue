@@ -67,6 +67,7 @@ const addCourse = () => {
 };
 
 const saveCourse = async () => {
+  console.log("newData.value", newData.value);
   isEditing.value
     ? await courseStore.updateItem(editedCourseId.value, newData.value)
     : await courseStore.addItem(newData.value);
@@ -80,6 +81,7 @@ const deleteCourse = async (ids) => {
 
 const editCourse = (dataEdit) => {
   newData.value = dataEdit
+  editedCourseId.value = dataEdit.id;
   isEditing.value = true;
   visibleLeft.value = true;
 };

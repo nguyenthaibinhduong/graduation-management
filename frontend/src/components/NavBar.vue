@@ -56,36 +56,6 @@ const items = ref([
         to: '/department-major-manangerment'
       }
     ]
-  },
-  {
-    label: 'Giảng viên',
-    items: [
-      {
-        label: 'Đề tài',
-      },
-      {
-        label: 'Products',
-        icon: 'pi pi-list',
-        badge: 6
-      }
-    ]
-  },
-  {
-    label: 'Profile',
-    icon: 'pi pi-user',
-    shortcut: '⌘+W',
-    items: [
-      {
-        label: 'Settings',
-        icon: 'pi pi-cog',
-        shortcut: '⌘+O'
-      },
-      {
-        label: 'Privacy',
-        icon: 'pi pi-shield',
-        shortcut: '⌘+P'
-      }
-    ]
   }
 ]);
 

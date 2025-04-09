@@ -86,8 +86,9 @@ const addEnrollment = () => {
 };
 
 const saveEnrollment = async () => {
+  const { course, department, ...dta } = newData.value;
   const data = {
-    ...newData.value,
+    ...dta,
     course_id: newData.value.course_id?.id || '',
     department_id: newData.value.department_id?.id || ''
   };

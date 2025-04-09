@@ -88,21 +88,6 @@ const menuItems = ref([
         icon: 'pi pi-user',
         command: () => navigateTo({ path: '/profile' })
       },
-      {
-        label: 'Users',
-        icon: 'pi pi-users',
-        command: () => navigateTo({ path: '/user' })
-      },
-      {
-        label: 'Students',
-        icon: 'pi pi-user',
-        command: () => navigateTo({ path: '/student' })
-      },
-      {
-        label: 'Teachers',
-        icon: 'pi pi-briefcase',
-        command: () => navigateTo({ path: '/teacher' })
-      }
     ]
   },
   {
