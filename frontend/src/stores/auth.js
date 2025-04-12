@@ -93,5 +93,18 @@ export const useAuthStore = defineStore('auth', {
         }
       }
     },
+
+    async updatePassword(oldPassword, newPassword) {
+      try {
+        const response = await api.put('auth/change-password', {
+          oldPassword,
+          newPassword,
+        })
+        showToast(response.data.message, 'success')
+      } catch (error) {
+        showToast(error.response?.data?.message, 'error')
+        console.error('Error updating password:', error)
+      }
+    },
   },
 })

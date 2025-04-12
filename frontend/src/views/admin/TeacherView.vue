@@ -5,10 +5,8 @@
     :columns="[
       { field: 'code', header: 'Mã giảng viên', sortable: true },
       { field: 'user.fullname', header: 'Họ và tên', sortable: true },
-      { field: 'user.fullname', header: 'Họ và tên', sortable: true },
       { field: 'user.email', header: 'Email', sortable: true },
       { field: 'user.phone', header: 'Số điện thoại', sortable: true },
-      { field: 'major', header: 'Ngành dạy', sortable: true }, //Them sau khi sua database
       { field: 'degree', header: 'Học vị', sortable: true },
       { field: 'position', header: 'Chức vụ', sortable: true },
     ]"
@@ -19,89 +17,56 @@
     @edit="editTeacher"
     @delete="deleteTeacher"
   />
-  <Drawer
-    class="w-2/5"
+  <MyDrawer
+    class="w-full"
+    title="giảng viên"
     v-model:visible="visibleLeft"
-    :header="isEditing ? 'Sửa giảng viên' : 'Thêm giảng viên'"
+    :isEditing="isEditing"
+    :onCancel="cancelForm"
+    :onSave="saveTeacher"
+    :showImport="isImport"
     position="right"
+    :closable="false"
   >
-    <div class="grid grid-cols-1 gap-5 w-full">
-      <div class="p-field mb-2 mt-2">
-        <div class="flex flex-col gap-2">
-          <label for="name">Tên Giảng Viên</label>
-          <InputText class="w-full" id="name" v-model="newTeacher.user.fullname" />
-        </div>
-      </div>
-      <div class="p-field mb-2">
-        <div class="flex flex-col gap-2">
-          <label for="teacher_code">Mã Giảng Viên</label>
-          <InputText class="w-full" id="teacher_code" v-model="newTeacher.code" />
-        </div>
-      </div>
-      <div class="p-field mb-2">
-        <div class="flex flex-col gap-2">
-          <label for="date_of_birth">Ngày Sinh</label>
-          <DatePicker class="w-full" v-model="newTeacher.user.birth_date" />
-        </div>
-      </div>
-      <div class="p-field mb-2">
-        <div class="flex flex-col gap-2">
-          <label for="email">Email</label>
-          <InputText class="w-full" id="email" v-model="newTeacher.user.email" />
-        </div>
-      </div>
-      <div class="p-field mb-2">
-        <div class="flex flex-col gap-2">
-          <label for="phone">Số Điện Thoại</label>
-          <InputText class="w-full" id="phone" v-model="newTeacher.user.phone" />
-        </div>
-      </div>
-      <div class="p-field mb-2">
-        <div class="flex flex-col gap-2">
-          <label for="address">Địa Chỉ</label>
-          <InputText class="w-full" id="address" v-model="newTeacher.user.address" />
-        </div>
-      </div>
-      <!-- <div class="p-field mb-2">
-        <div class="flex flex-col gap-2">
-          <label for="major">Chuyên Ngành</label>
-          <InputText class="w-full" id="major" />
-        </div>
-      </div> -->
-      <div class="p-field mb-2">
-        <div class="flex flex-col gap-2">
-          <label for="degree">Học Vị</label>
-          <InputText class="w-full" id="degree" v-model="newTeacher.degree" />
-        </div>
-      </div>
-      <div class="p-field mb-2">
-        <div class="flex flex-col gap-2">
-          <label for="positions">Chức Vụ</label>
-          <MultiSelect
-            class="w-full"
-            id="positions"
-            :options="positions"
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Chọn chức vụ"
-            filter
-            :showClear="true"
-            v-model="newTeacher.positionIds"
-          />
-        </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-6">Thông tin cá nhân</h3>
+      <div class="grid grid-cols-1 md:grid-cols-1 gap-10">
+        <MyInput v-model="newTeacher.code" title="Mã giảng viên" id="code" :disabled="isEditing" />
+        <MyInput v-model="newTeacher.user.fullname" title="Họ và tên" id="fullname" />
+        <MyInput
+          v-model="newTeacher.user.birth_date"
+          :maxDate="maxDate"
+          title="Ngày sinh"
+          id="date_of_birth"
+          type="date"
+          dateFormat="dd/mm/yy"
+        />
+        <MyInput v-model="newTeacher.user.email" title="Email" id="email" />
+        <MyInput v-model="newTeacher.user.address" title="Địa chỉ" id="address" />
+        <MyInput v-model="newTeacher.user.phone" title="Số điện thoại" id="phone" />
+        <MyInput v-model="newTeacher.degree" title="Học vị" id="degree" />
+        <MyInput
+          type="multiselect"
+          v-model="newTeacher.positionIds"
+          title="Chức vụ"
+          id="positions"
+          :options="positions"
+          optionLabel="name"
+          optionValue="id"
+          filter
+          :showClear="true"
+        />
       </div>
     </div>
-    <div class="w-full grid grid-cols-2 gap-2 mt-10">
-      <Button label="Lưu" @click="saveTeacher" class="w-full" />
-      <Button label="Hủy" @click="cancelForm" class="w-full bg-red-500 text-white border-red-500" />
-    </div>
-  </Drawer>
+  </MyDrawer>
 </template>
 <script setup>
 import { ref, onMounted, watchEffect, watch } from 'vue'
 import { Button, Drawer, InputText, DatePicker, MultiSelect } from 'primevue'
 import { usePositionStore, useTeacherStore } from '@/stores/store'
 import DataTableCustom from '@/components/list/DataTableCustom.vue'
+import MyDrawer from '@/components/drawer/MyDrawer.vue'
+import MyInput from '@/components/form/MyInput.vue'
 
 const visibleLeft = ref(false)
 const teacherStore = useTeacherStore()

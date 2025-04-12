@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Req,
   Request,
   Res,
@@ -34,6 +35,25 @@ export class AuthController {
   @Get('me')
   getProfile(@Request() request: any) {
     return this.userService.getUserDetails(request.user);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Put('change-password')
+  async updatePassword(
+    @Request() request: any,
+    @Body() data: { oldPassword: string; newPassword: string },
+  ) {
+    try {
+      const userId = request.user.id;
+      const { oldPassword, newPassword } = data;
+      return await this.userService.updatePassword(
+        userId,
+        oldPassword,
+        newPassword,
+      );
+    } catch (error) {
+      console.error('Error in updatePassword:', error);
+      throw error;
+    }
   }
 
   @Post('refresh-token')

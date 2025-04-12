@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { BaseService } from 'src/common/base.service';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -117,5 +117,23 @@ export class UsersService extends BaseService<User> {
       },
     });
     return userData;
+  }
+
+  async updatePassword(
+    id: number,
+    oldpassword: string,
+    newPassword: string,
+  ): Promise<any> {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new Error('Không tìm thấy nguời dùng');
+    }
+    const isMatch = await bcrypt.compare(oldpassword, user.password);
+    if (!isMatch) {
+      throw new ConflictException('Mật khẩu cũ không đúng');
+    }
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashPassword;
+    return this.userRepository.save(user);
   }
 }

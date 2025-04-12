@@ -18,6 +18,7 @@ import { HttpStatus, Message } from 'src/common/globalEnum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -86,7 +87,7 @@ export class UsersController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body(new ValidationPipe()) user: CreateUserDto,
+    @Body(new ValidationPipe()) user: UpdateUserDto,
   ): Promise<Response<User>> {
     try {
       const updatedUser = await this.userService.update(

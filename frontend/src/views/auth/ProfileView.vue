@@ -4,7 +4,15 @@
       <template #title>
         <div class="w-full flex justify-between items-center pb-10">
           <h2 class="text-xl font-bold text-blue-800">Thông tin tài khoản</h2>
-          <Button label="Chỉnh sửa" icon="pi pi-pencil" class="btn-submit" @click="visibleLeft = true" />
+          <div class="flex gap-2">
+            <Button
+              label="Chỉnh sửa"
+              icon="pi pi-pencil"
+              class="btn-submit"
+              @click="openEditForm"
+            />
+            <Button label="Đổi mật khẩu" icon="pi pi-key" @click="openPasswordForm" />
+          </div>
         </div>
       </template>
       <template #content>
@@ -40,7 +48,9 @@
           <!--  -->
           <div class="flex items-center gap-2">
             <label class="font-semibold text-gray-700">Ngày sinh:</label>
-            <span>{{ dayjs(authStore.user?.birth_date).format("MM/DD/YYYY") || 'Chưa cập nhật' }}</span>
+            <span>{{
+              dayjs(authStore.user?.birth_date).format('MM/DD/YYYY') || 'Chưa cập nhật'
+            }}</span>
           </div>
           <div class="flex items-center gap-2">
             <label class="font-semibold text-gray-700">Địa chỉ:</label>
@@ -66,48 +76,144 @@
                 authStore.user?.role === 'student'
                   ? 'Sinh viên'
                   : authStore.user?.role === 'teacher'
-                    ? 'Giảng viên'
-                    : 'Quản trị viên'
+                  ? 'Giảng viên'
+                  : 'Quản trị viên'
               }}
             </span>
           </div>
           <div class="flex items-center gap-2">
             <label class="font-semibold text-gray-700">Ngày tạo:</label>
-            <span>{{ dayjs(authStore.user?.created_at).format("MM/DD/YYYY") }}</span>
+            <span>{{ dayjs(authStore.user?.created_at).format('MM/DD/YYYY') }}</span>
           </div>
           <div class="flex items-center gap-2">
             <label class="font-semibold text-gray-700">Ngày cập nhật:</label>
-            <span>{{ dayjs(authStore.user?.updated_at).format("MM/DD/YYYY") }}</span>
+            <span>{{ dayjs(authStore.user?.updated_at).format('MM/DD/YYYY') }}</span>
           </div>
         </div>
-
       </template>
     </Card>
   </div>
-  <MyDrawer class="w-full" title="thông tin cá nhân" v-model:visible="visibleLeft" position="right" :closable="false"
-    :isEditing="isEditing" :onCancel="cancelForm">
-    <h1>Đưa form vào đây</h1>
+  <!-- Chinh sua thong tin user -->
+  <MyDrawer
+    class="w-full"
+    title="thông tin cá nhân"
+    v-model:visible="visibleEditUser"
+    position="right"
+    :closable="false"
+    :isEditing="isEditing"
+    :onCancel="cancelForm"
+    :onSave="saveUser"
+  >
+    <div>
+      <h3 class="text-lg font-semibold mb-6">Thông tin cá nhân</h3>
+      <div class="grid md:grid gap-10">
+        <MyInput v-model="user.email" title="Email" id="email" />
+        <MyInput v-model="user.phone" title="Số điện thoại" id="phone" />
+        <MyInput v-model="user.address" title="Địa chỉ" id="address" />
+      </div>
+    </div>
+  </MyDrawer>
+  <!-- Doi mat khau -->
+  <MyDrawer
+    class="w-full"
+    title="mật khẩu"
+    v-model:visible="visibleEditPassword"
+    position="right"
+    :closable="false"
+    :isEditing="isEditing"
+    :onCancel="cancelForm"
+    :onSave="savePassword"
+  >
+    <div class="">
+      <div class="grid md:grid gap-6 w-full">
+        <MyInput
+          v-model="password.oldPassword"
+          title="Mật khẩu cũ"
+          id="oldPassword"
+          type="password"
+        />
+        <MyInput
+          v-model="password.newPassword"
+          title="Mật khẩu mới"
+          id="newPassword"
+          type="password"
+        />
+        <MyInput
+          v-model="password.confirmPassword"
+          title="Xác nhận mật khẩu mới"
+          id="confirmPassword"
+          type="password"
+        />
+      </div>
+    </div>
   </MyDrawer>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/stores/auth'
 import { Card, Button } from 'primevue'
 import MyDrawer from '@/components/drawer/MyDrawer.vue'
-// Fetch user data
+import MyInput from '@/components/form/MyInput.vue'
+import { useUserStore } from '@/stores/store'
+// Stores
 const authStore = useAuthStore()
-const visibleLeft = ref(false)
+const userStore = useUserStore()
+// Visible state
+const visibleEditUser = ref(false)
+const visibleEditPassword = ref(false)
 const isEditing = ref(true)
-
+// User data
+const user = ref({
+  email: '',
+  phone: '',
+  address: '',
+})
+// Password data
+const password = ref({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+})
 
 onMounted(() => {
   authStore.fetchUser()
 })
 
 const cancelForm = () => {
-  visibleLeft.value = false
+  visibleEditUser.value = false
+  visibleEditPassword.value = false
 }
-
+const openEditForm = () => {
+  if (authStore.user) {
+    user.value = {
+      email: authStore.user.email || '',
+      phone: authStore.user.phone || '',
+      address: authStore.user.address || '',
+    }
+  }
+  visibleEditUser.value = true
+}
+const openPasswordForm = () => {
+  password.value = {
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  }
+  visibleEditPassword.value = true
+}
+const saveUser = async () => {
+  await userStore.updateItem(userId.value, user.value)
+  await authStore.fetchUser()
+  visibleEditUser.value = false
+}
+const savePassword = async () => {
+  if (password.value.newPassword !== password.value.confirmPassword) {
+    alert('Mật khẩu xác nhận không khớp')
+    return
+  }
+  await authStore.updatePassword(password.value.oldPassword, password.value.newPassword)
+  visibleEditPassword.value = false
+}
 </script>
