@@ -45,6 +45,9 @@ export class User {
   @Exclude()
   password: string; // Mật khẩu (lưu trữ sau khi mã hóa)
 
+  @Column({ length: 255 })
+  avatar: string; 
+
   @Column({ type: 'enum', enum: UserRole })
   role: UserRole;
 

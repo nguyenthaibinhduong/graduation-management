@@ -34,7 +34,12 @@
             optionLabel="name" />
           <MyInput v-model="newStudent.major_id" title="Chuyên ngành" id="major" type="select" :options="majors"
             optionLabel="name" />
-
+          <div class="card flex flex-col items-center gap-6">
+            <FileUpload mode="basic" @select="onFileSelect" customUpload auto severity="secondary"
+              class="p-button-outlined" />
+            <img v-if="src || newStudent.user.avatar" :src="src ?? newStudent.user.avatar" alt="Image"
+              class="shadow-md rounded-xl w-full sm:w-64" />
+          </div>
         </div>
       </div>
     </div>
@@ -78,6 +83,8 @@ const departmentsStore = useDepartmentStore();
 const students = ref([]);
 const departments = ref([]);
 const majors = ref([]);
+const src = ref(null);
+const file = ref(null);
 const loading = ref(false);
 const isEditing = ref(false);
 const isImport = ref(false);
@@ -89,7 +96,8 @@ const newStudent = ref({
     email: "",
     fullname: "", // Cung cấp giá trị hợp lệ
     birth_date: null, // Định dạng YYYY-MM-DD (ISO)
-    phone: "" // Loại bỏ khoảng trắng nếu cần
+    phone: "",// Loại bỏ khoảng trắng nếu cần
+    avatar: ""
   },
   major_id: 0, // Để null thay vì chuỗi rỗng nếu chưa có giá trị
   department_id: 0
@@ -135,10 +143,17 @@ const saveStudent = async () => {
     major_id: newStudent.value.major_id?.id || '',
     department_id: newStudent.value.department_id?.id || ''
   };
-
+  if (file.value != null) {
+    if (isEditing.value && newData?.user?.avatar) {
+      await studentStore.deleteFileItem(newData.user.avatar);
+    }
+    const url = await studentStore.uploadItem(file.value);
+    newData.user.avatar = url;
+  }
   isEditing.value
     ? await studentStore.updateItem(editedStudentId.value, newData)
     : await studentStore.addItem(newData);
+
 
   cancelForm();
 };
@@ -172,13 +187,16 @@ const cancelForm = () => {
   isEditing.value = false;
   editedStudentId.value = null;
   isImport.value = false;
+  src.value = null;
+  file.value = null;
   newStudent.value = {
     code: "",
     user: {
       email: "",
       fullname: "",
       birth_date: null,
-      phone: ""
+      phone: "",
+      avatar: ""
     },
     major_id: 0,
     department_id: 0
@@ -257,5 +275,15 @@ const handleSelectData = (ids) => {
 };
 
 
+async function onFileSelect(event) {
+  const filedata = event.files[0];
 
+  // Preview ảnh
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    src.value = e.target.result;
+  };
+  reader.readAsDataURL(filedata);
+  file.value = filedata;
+}
 </script>

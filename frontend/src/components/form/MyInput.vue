@@ -7,6 +7,7 @@
         <InputText v-else-if="type === 'text'" :id="id" v-bind="$attrs" class="w-4/5" />
         <Select v-else-if="type === 'select'" :id="id" v-bind="$attrs" class="w-4/5" />
         <InputNumber v-else-if="type === 'number'" :id="id" v-bind="$attrs" class="w-4/5" />
+
     </div>
 </template>
 
