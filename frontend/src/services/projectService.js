@@ -11,7 +11,6 @@ const projectService = (resource) => ({
 
     return data.data
   },
-
 })
 
 export default projectService

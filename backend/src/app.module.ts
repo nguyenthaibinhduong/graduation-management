@@ -16,6 +16,7 @@ import { DepartmentModule } from './modules/department/department.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { EnrollmentSessionModule } from './modules/enrollment_session/enrollment_session.module';
 import { ProjectsModule } from './modules/projects/projects.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ProjectsModule } from './modules/projects/projects.module';
     CoursesModule,
     EnrollmentSessionModule,
     ProjectsModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
