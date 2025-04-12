@@ -54,9 +54,34 @@ const items = ref([
       {
         label: 'Khoa & Ngành',
         to: '/department-major-manangerment'
+      },
+      {
+        label: 'Đề tài',
+        to: '/project-manangerment'
+      },
+    ]
+  },
+  {
+    label: 'Giảng viên',
+    items: [
+      {
+        label: 'Đề tài',
+        to: '/teacher-project'
+
+      }
+    ]
+  },
+  {
+    label: 'Sinh viên',
+    items: [
+      {
+        label: 'Đề tài',
+        to: '/student-project'
+
       }
     ]
   }
+
 ]);
 
 

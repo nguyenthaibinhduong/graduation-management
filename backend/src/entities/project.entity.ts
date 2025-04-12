@@ -13,6 +13,8 @@ import { EnrollmentSession } from './enrollment_session.entity';
 import { Committee } from './committee.entity';
 import { Group } from './group.entity';
 import { Score } from './score.entity';
+import { Student } from './student.entity';
+import { Course } from './course.entity';
 
 @Entity('projects')
 export class Project {
@@ -29,7 +31,16 @@ export class Project {
   content: string;
 
   @ManyToOne(() => Teacher, (teacher) => teacher.id)
+  @JoinColumn({ name: 'teacher_id' })
   teacher: Teacher;
+
+  @ManyToOne(() => Student, (student) => student.id)
+  @JoinColumn({ name: 'student_id' })
+  student: Student;
+
+   @ManyToOne(() => Course, (course) => course.id)
+  @JoinColumn({ name: 'course_id' })
+  course: Course;
 
   @ManyToMany(() => Committee, (committee) => committee.id)
   @JoinTable({ name: 'project_committees' })
@@ -44,13 +55,14 @@ export class Project {
 
   @Column({
     type: 'enum',
-    enum: ['process', 'pending', 'approve'],
+    enum: ['propose', 'pending', 'approve'],
     default: 'pending',
   })
-  status: 'process' | 'pending' | 'approve';
+  status: 'propose' | 'pending' | 'approve';
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 2 })
   max_total_group: number;
+
 
   //session_id
   @OneToOne(

@@ -11,6 +11,9 @@ import LoginView from '@/views/auth/LoginView.vue'
 import MajorDepartmentView from '@/views/admin/MajorDepartmentView.vue'
 import CourseView from '@/views/admin/CourseView.vue'
 import EnrollmentView from '@/views/admin/EnrollmentView.vue'
+import TeacherProjectView from '@/views/teacher/TeacherProjectView.vue'
+import StudentProjectView from '@/views/student/StudentProjectView.vue'
+import ProjectView from '@/views/admin/ProjectView.vue'
 
 
 
@@ -29,12 +32,16 @@ const routes = [
       { path: '/student-manangerment', component: StudentView },
       { path: '/teacher-manangerment', component: TeacherView },
       { path: '/course-manangerment', component: CourseView },
-       { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
+      { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
+       { path: '/project-manangerment', component: ProjectView },
       { path: '/profile', component: ProfileView },
       { path: '/account-manangerment', component: UserView },
       { path: '/department-major-manangerment', component: MajorDepartmentView },
+      { path: '/teacher-project', component: TeacherProjectView },
+      { path: '/student-project', component: StudentProjectView },
     ],
   },
+  
 ]
 
 const router = createRouter({

@@ -14,6 +14,10 @@ export class Course {
 
   @Column()
   end_time: Date;
+
+  @Column({ type: 'boolean', default: false })
+  is_current: boolean;
+
   
   @OneToMany(() => EnrollmentSession, (enrollment) => enrollment.department)
   enrollmentSessions: EnrollmentSession[];
