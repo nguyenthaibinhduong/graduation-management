@@ -15,7 +15,8 @@ export function createBaseStore(entity) {
       
     }
 
-    const addItem = async (itemData) => {
+    const addItem = async (itemData ) => {
+
       await baseService(entity).create(itemData)
       await fetchItems()
       showToast("Thêm thành công!", "success");
@@ -32,7 +33,14 @@ export function createBaseStore(entity) {
       await fetchItems()
       showToast("Xóa thành công!", "success");
     }
+    const uploadItem = async (file) => {
+       const uploadResponse = await baseService(entity).upload(file)
+        if(uploadResponse?.data?.url) return uploadResponse.data.url
+    }
+    const deleteFileItem = async (url) => {
+       return await baseService(entity).deleteFile(url)
+    }
 
-    return { items, total, fetchItems, addItem, updateItem, deleteItem }
+    return { items, total, fetchItems, addItem, updateItem, deleteItem ,uploadItem , deleteFileItem}
   })
 }

@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import { v2 , UploadApiResponse } from 'cloudinary';
 import * as streamifier from 'streamifier';
+import * as path from 'path';
 
 @Injectable()
 export class UploadService {
@@ -20,10 +21,10 @@ export class UploadService {
   ];
 
   // Hàm upload file
-  async uploadFile(
+    async uploadFile(
     file: Express.Multer.File, 
     folder = 'QLKL',
-    mimetypeAccept = '', 
+    mimetypeAccept = [], 
     sizeAccept = 5
   ): Promise<UploadApiResponse> {
     if (!file) throw new BadRequestException('Chưa có tệp tin nào được chọn');
@@ -33,7 +34,7 @@ export class UploadService {
       throw new BadRequestException('Tệp tin không được hỗ trợ');
     }
 
-    if (mimetypeAccept && !file.mimetype.includes(mimetypeAccept)) {
+    if (mimetypeAccept && !mimetypeAccept.includes(file.mimetype)) {
       throw new BadRequestException('Tệp tin không được hỗ trợ');
     }
 
@@ -69,5 +70,49 @@ export class UploadService {
       // Tạo stream từ buffer và upload lên Cloudinary
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
-  }
+    }
+    
+    async deleteFileByUrl(fileUrl: string): Promise<any> {
+        if (!fileUrl) {
+        throw new BadRequestException('URL không hợp lệ');
+        }
+
+        const { publicId, resourceType } = this.extractPublicId(fileUrl);
+
+        try {
+            const result = await this.cloudinary.uploader.destroy(publicId, {
+                resource_type: resourceType, // image, video, raw
+            });
+            return result;
+        } catch (error) {
+        throw new BadRequestException('Không thể xóa tệp: ' + error.message);
+        }
+    }
+
+   private extractPublicId(fileUrl: string): { publicId: string; resourceType: 'image' | 'video' | 'raw' } {
+    try {
+        const url = new URL(fileUrl);
+        const pathname = url.pathname; // /<cloud_name>/<resource_type>/upload/v<version>/<folder?>/filename.ext
+
+        const parts = pathname.split('/'); // ['', 'cloud_name', 'resource_type', 'upload', 'v12345678', ...folder?, filename.ext]
+        const fileWithExt = parts.pop(); // filename.ext
+        const fileName = fileWithExt.split('.')[0]; // filename without extension
+
+        // Lấy resource_type ('image', 'video', 'raw') từ vị trí parts[2]
+        const resourceType = parts[2] as 'image' | 'video' | 'raw';
+
+        // Lấy phần public_id = folder?/fileName
+        const folderParts = parts.slice(5); // sau 'v<version>'
+        const publicId = folderParts.length > 0 ? `${folderParts.join('/')}/${fileName}` : fileName;
+
+        return {
+        publicId,
+        resourceType,
+        };
+    } catch (error) {
+        throw new Error('URL không hợp lệ hoặc không thể tách public_id');
+    }
+    }
+
+
 }
