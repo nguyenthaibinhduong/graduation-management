@@ -42,7 +42,7 @@ export class UploadController {
           uploadOptions.types,
           uploadOptions.maxSize
         );
-      return {
+        return {
           url: result.secure_url,
         };
     } else {

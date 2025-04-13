@@ -12,8 +12,9 @@
 
 
           <Button type="button" @click="toggleProfileMenu" aria-label="Profile Menu"
-            class="p-button-rounded p-button-text" v-tooltip.bottom="'Profile Menu'" severity="info">
-            <i class="pi pi-user text-xl text-blue-800 "></i>
+            class="p-button-rounded p-button-text text-blue-800" v-tooltip.bottom="'Profile Menu'">
+            <img v-if="avatar" :src="avatar" alt="User Avatar" class="w-8 h-8 rounded-full object-cover" />
+            <h6 class="font-medium m-0">{{ userName }}</h6>
           </Button>
         </div>
 
@@ -77,6 +78,8 @@ const router = useRouter();
 const profileMenu = ref(null);
 const windowWidth = ref(window.innerWidth);
 
+const userName = computed(() => authStore.user?.fullname || 'User');
+const avatar = computed(() => authStore.user?.avatar || 'https://avatar.iran.liara.run/username?username=' + authStore.user?.fullname);
 
 // Create unified navigation items
 const menuItems = ref([
@@ -84,7 +87,7 @@ const menuItems = ref([
     label: 'Navigation',
     items: [
       {
-        label: 'Profile',
+        label: 'Thông tin cá nhân',
         icon: 'pi pi-user',
         command: () => navigateTo({ path: '/profile' })
       },
@@ -97,7 +100,7 @@ const menuItems = ref([
     label: 'Account',
     items: [
       {
-        label: 'Logout',
+        label: 'Đăng xuất ',
         icon: 'pi pi-sign-out',
         command: () => handleLogout()
       }
