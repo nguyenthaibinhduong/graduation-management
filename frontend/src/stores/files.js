@@ -1,34 +1,19 @@
+import fileService from '@/services/fileServices'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import projectService from '@/services/projectService'
-import { showToast } from '@/utils/toast'
 
-export function createProjectStore(entity="projects") {
+
+export function createFileStore(entity="file") {
   return defineStore(entity, () => {
-    const items = ref([])
-    const total = ref()
 
-    const fetchItemsForStudent = async (student_id = null, course_id = null, page = 1, limit = 10, search = '') => {
-      const data = await projectService(entity).fetchAll(null,student_id,course_id,page, limit, search)
-      items.value = data.items
-      total.value = data.total
-      
+    const uploadFile = async (file,type) => {
+       const uploadResponse = await fileService(type).upload(file)
+        if(uploadResponse?.data?.url) return uploadResponse.data.url
     }
-    const fetchItemsForTeacher = async (teacher_id = null,student_id=null, course_id = null, page = 1, limit = 10, search = '') => {
-      const data = await projectService(entity).fetchAll(teacher_id,student_id,course_id,page, limit, search)
-      items.value = data.items
-      total.value = data.total
-      
-      }
-      
-    const fetchItems = async (page = 1, limit = 10, search = '') => {
-      const data = await projectService(entity).fetchAll(null,null,null,page, limit, search)
-      items.value = data.items
-      total.value = data.total
+    const deleteFileItem = async (url) => {
+       return await fileService().deleteFile(url)
     }
-
     
 
-    return { items, total, fetchItems,fetchItemsForStudent,fetchItemsForTeacher }
+    return { uploadFile , deleteFileItem}
   })
 }

@@ -70,7 +70,7 @@
 import { ref, onMounted, watchEffect, watch } from "vue";
 import * as XLSX from "xlsx";
 import { Column, DataTable, FileUpload, Message } from "primevue";
-import { useStudentStore, useMajorStore, useDepartmentStore } from "@/stores/store";
+import { useStudentStore, useMajorStore, useDepartmentStore, useFileStore } from "@/stores/store";
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import MyInput from "@/components/form/MyInput.vue";
 import MyDrawer from "@/components/drawer/MyDrawer.vue";
@@ -79,6 +79,7 @@ import MyDrawer from "@/components/drawer/MyDrawer.vue";
 const visibleLeft = ref(false);
 const studentStore = useStudentStore();
 const majorsStore = useMajorStore();
+const fileStore = useFileStore();
 const departmentsStore = useDepartmentStore();
 const students = ref([]);
 const departments = ref([]);
@@ -145,9 +146,9 @@ const saveStudent = async () => {
   };
   if (file.value != null) {
     if (isEditing.value && newData?.user?.avatar) {
-      await studentStore.deleteFileItem(newData.user.avatar);
+      await fileStore.deleteFileItem(newData.user.avatar);
     }
-    const url = await studentStore.uploadItem(file.value);
+    const url = await fileStore.uploadFile(file.value, 'avatar');
     newData.user.avatar = url;
   }
   isEditing.value

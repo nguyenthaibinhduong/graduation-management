@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import projectService from '@/services/projectService'
-import { showToast } from '@/utils/toast'
 
 export function createProjectStore(entity="projects") {
   return defineStore(entity, () => {
