@@ -16,6 +16,8 @@
                 <MyInput v-model="newData.title" title="Tên đề tài" id="name" required />
                 <MyInput v-model="newData.description" title="Mô tả" id="description" required />
                 <MyInput v-model="newData.content" title="Nội dung" id="content" required />
+                <MyInput v-model="newData.teacher_id" title="Giáo viên tham chiếu" id="teacher" type="select"
+                    :options="teachers" optionLabel="user.fullname" />
                 <MyInput v-model="newData.max_total_group" title="Số lượng nhóm tham gia" id="max_total_group"
                     required />
             </div>
@@ -25,7 +27,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watchEffect, watch } from "vue";
-import { useProjectStore } from "@/stores/store";
+import { useProjectStore, useTeacherStore } from "@/stores/store";
 import { useAuthStore } from '@/stores/auth'
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import MyInput from "@/components/form/MyInput.vue";
@@ -35,8 +37,10 @@ import MyDrawer from "@/components/drawer/MyDrawer.vue";
 const visibleLeft = ref(false);
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
+const teacherStore = useTeacherStore()
 const projects = ref([]);
 const student = ref(null);
+const teachers = ref([]);
 const loading = ref(false);
 const isImport = ref(false);
 const isEditing = ref(false);
@@ -46,14 +50,14 @@ const newData = ref({
     title: "",
     description: "",
     content: "",
-    max_total_group: ""
+    max_total_group: "",
+    teacher_id: null,
 });
 const maxDate = ref(new Date());
 
 onMounted(async () => {
-    await authStore.fetchUser(); // lấy dữ liệu user và student
-
-    // Đợi khi student đã có dữ liệu rồi mới fetch project
+    await authStore.fetchUser();
+    await teacherStore.fetchItems();
     if (authStore?.user?.student?.id) {
         await projectStore.fetchItemsForStudent(authStore.user.student.id);
     } else {
@@ -63,7 +67,16 @@ onMounted(async () => {
 watchEffect(() => {
     projects.value = authStore.user?.student ? projectStore.items : [];
     student.value = authStore.user?.student || null;
-    console.log("projects", projects.value);
+    teachers.value = (teacherStore.items || []).map(teacher => {
+        const { user, position, ...rest } = teacher;
+        return {
+            ...rest,
+            user: {
+                id: user.id,
+                fullname: user.fullname
+            }
+        };
+    });
 });
 
 
@@ -81,10 +94,13 @@ const addProject = () => {
 };
 
 const saveProject = async () => {
-    console.log("newData.value", newData.value);
+    const data = {
+        ...newData.value,
+        teacher_id: newData.value.teacher_id?.id || ''
+    };
     isEditing.value
-        ? await projectStore.updateItem(editedProjectId.value, newData.value)
-        : await projectStore.addItem(newData.value);
+        ? await projectStore.updateItem(editedProjectId.value, data)
+        : await projectStore.addItem(data);
 
     cancelForm();
 };
@@ -94,8 +110,13 @@ const deleteProject = async (ids) => {
 };
 
 const editProject = (dataEdit) => {
-    newData.value = dataEdit
     editedProjectId.value = dataEdit.id;
+    const clonedData = JSON.parse(JSON.stringify(dataEdit));
+    const { teacher_id, ...data } = clonedData;
+    newData.value = {
+        ...data,
+        teacher_id: clonedData.teacher,
+    };
     isEditing.value = true;
     visibleLeft.value = true;
 };
@@ -109,7 +130,8 @@ const cancelForm = () => {
         title: "",
         description: "",
         content: "",
-        max_total_group: ""
+        max_total_group: "",
+        teacher_id: null,
     };
 };
 
