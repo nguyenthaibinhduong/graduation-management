@@ -77,6 +77,9 @@ const authStore = useAuthStore();
 const router = useRouter();
 const profileMenu = ref(null);
 const windowWidth = ref(window.innerWidth);
+onMounted(() => {
+  authStore.fetchUser();
+});
 
 const userName = computed(() => authStore.user?.fullname || 'User');
 const avatar = computed(() => authStore.user?.avatar || 'https://avatar.iran.liara.run/username?username=' + authStore.user?.fullname);

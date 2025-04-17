@@ -49,11 +49,16 @@
           <span v-if="col.type === 'datetime'">
             {{ dayjs(getNestedValue(data, col.field)).format('DD/MM/YYYY') }}
           </span>
+          <span v-else-if="col.type === 'image'">
+            <img class="rounded-xl" v-if="getNestedValue(data, col.field) !== 'N/A'"
+              :src="getNestedValue(data, col.field)" alt="image" style="max-width: 100px; max-height: 100px;" />
+          </span>
           <span v-else>
             {{ getNestedValue(data, col.field) }}
           </span>
         </template>
       </Column>
+
 
 
       <template>

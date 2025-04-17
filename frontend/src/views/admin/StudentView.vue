@@ -1,9 +1,9 @@
 <template>
   <DataTableCustom title="Danh sách Sinh Viên" :data="students" :columns="[
     { field: 'code', header: 'Mã sinh viên', sortable: true },
+    { field: 'user.avatar', header: 'Ảnh đại diện', type: 'image' },
     { field: 'user.fullname', header: 'Họ và tên', sortable: true },
     { field: 'user.email', header: 'Email', sortable: true },
-    { field: 'user.phone', header: 'Số điện thoại', sortable: true },
     { field: 'major.name', header: 'Ngành học', sortable: true },
     { field: 'department.name', header: 'Khoa', sortable: true }
   ]" :total="studentStore?.total" :loading="loading" @fetch="fetchStudent" @add="addStudent" @edit="editStudent"

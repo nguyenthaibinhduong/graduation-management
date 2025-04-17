@@ -6,10 +6,12 @@ import {
   JoinColumn,
   ManyToMany,
   JoinTable,
+  ManyToOne,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Committee } from './committee.entity';
 import { Position } from './position.entity';
+import { Department } from './department.entity';
 
 @Entity('teachers')
 export class Teacher {
@@ -34,6 +36,10 @@ export class Teacher {
     name: 'teacher_positions',
   })
   position: Position[];
+
+  @ManyToOne(() => Department, (department) => department.teachers)
+  @JoinColumn({ name: 'department_id' })
+  department: Department;
 
   @Column()
   degree: string;
