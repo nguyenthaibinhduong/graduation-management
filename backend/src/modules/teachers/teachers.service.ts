@@ -96,7 +96,8 @@ export class TeachersService extends BaseService<Teacher> {
     const queryBuilder = this.teacherRepository
       .createQueryBuilder('teacher')
       .leftJoinAndSelect('teacher.user', 'user')
-      .leftJoinAndSelect('teacher.position', 'position');
+      .leftJoinAndSelect('teacher.position', 'position')
+      .leftJoinAndSelect('teacher.department', 'department');
 
     if (search) {
       queryBuilder.where('user.username LIKE :search', {

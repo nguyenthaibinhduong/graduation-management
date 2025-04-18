@@ -6,24 +6,34 @@
     { field: 'user.email', header: 'Email', sortable: true },
     { field: 'user.phone', header: 'Số điện thoại', sortable: true },
     { field: 'degree', header: 'Học vị', sortable: true },
-    { field: 'position', header: 'Chức vụ', sortable: true },
+    { field: 'position.name', header: 'Chức vụ', sortable: true },
+    { field: 'department.name', header: 'Khoa', sortable: true },
   ]" :total="teacherStore?.total" :loading="loading" @fetch="fetchTeacher" @add="addTeacher" @edit="editTeacher"
     @delete="deleteTeacher" />
   <MyDrawer class="w-full" title="giảng viên" v-model:visible="visibleLeft" :isEditing="isEditing"
     :onCancel="cancelForm" :onSave="saveTeacher" :showImport="isImport" position="right" :closable="false">
-    <div>
-      <h3 class="text-lg font-semibold mb-6">Thông tin cá nhân</h3>
-      <div class="grid grid-cols-1 md:grid-cols-1 gap-10">
-        <MyInput v-model="newTeacher.code" title="Mã giảng viên" id="code" :disabled="isEditing" />
-        <MyInput v-model="newTeacher.user.fullname" title="Họ và tên" id="fullname" />
-        <MyInput v-model="newTeacher.user.birth_date" :maxDate="maxDate" title="Ngày sinh" id="date_of_birth"
-          type="date" dateFormat="dd/mm/yy" />
-        <MyInput v-model="newTeacher.user.email" title="Email" id="email" />
-        <MyInput v-model="newTeacher.user.address" title="Địa chỉ" id="address" />
-        <MyInput v-model="newTeacher.user.phone" title="Số điện thoại" id="phone" />
-        <MyInput v-model="newTeacher.degree" title="Học vị" id="degree" />
-        <MyInput type="multiselect" v-model="newTeacher.positionIds" title="Chức vụ" id="positions" :options="positions"
-          optionLabel="name" optionValue="id" filter :showClear="true" />
+    <div class="grid grid-cols-2 gap-x-10">
+      <div>
+        <h3 class="text-lg font-semibold mb-6">Thông tin cá nhân</h3>
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-10">
+          <MyInput v-model="newTeacher.user.fullname" title="Họ và tên" id="fullname" />
+          <MyInput v-model="newTeacher.user.birth_date" title="Ngày sinh" id="date_of_birth" type="date"
+            dateFormat="dd/mm/yy" />
+          <MyInput v-model="newTeacher.user.email" title="Email" id="email" />
+          <MyInput v-model="newTeacher.user.address" title="Địa chỉ" id="address" />
+          <MyInput v-model="newTeacher.user.phone" title="Số điện thoại" id="phone" />
+        </div>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold mb-6">Thông tin cá nhân</h3>
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-10">
+          <MyInput v-model="newTeacher.code" title="Mã giảng viên" id="code" :disabled="isEditing" />
+          <MyInput v-model="newTeacher.degree" title="Học vị" id="degree" />
+          <MyInput type="multiselect" v-model="newTeacher.positionIds" title="Chức vụ" id="positions"
+            :options="positions" optionLabel="name" optionValue="id" filter :showClear="true" />
+          <MyInput v-model="newTeacher.department_id" title="Khoa" id="department" type="select" :options="departments"
+            optionLabel="name" />
+        </div>
       </div>
     </div>
   </MyDrawer>
@@ -31,7 +41,7 @@
 <script setup>
 import { ref, onMounted, watchEffect, watch } from 'vue'
 import { Button, Drawer, InputText, DatePicker, MultiSelect } from 'primevue'
-import { usePositionStore, useTeacherStore } from '@/stores/store'
+import { useDepartmentStore, usePositionStore, useTeacherStore } from '@/stores/store'
 import DataTableCustom from '@/components/list/DataTableCustom.vue'
 import MyDrawer from '@/components/drawer/MyDrawer.vue'
 import MyInput from '@/components/form/MyInput.vue'
@@ -39,8 +49,10 @@ import MyInput from '@/components/form/MyInput.vue'
 const visibleLeft = ref(false)
 const teacherStore = useTeacherStore()
 const positionStore = usePositionStore()
+const departmentsStore = useDepartmentStore()
 const teachers = ref([])
 const positions = ref([])
+const departments = ref([])
 const loading = ref(false)
 const isEditing = ref(false)
 const editedTeacherId = ref(null)
@@ -50,15 +62,17 @@ const newTeacher = ref({
   positionIds: [],
   user: {
     fullname: '',
-    birth_date: '',
+    birth_date: null,
     email: '',
     phone: '',
     address: '',
   },
+  department_id: null
 })
 onMounted(async () => {
   teacherStore.fetchItems()
   positionStore.fetchItems()
+  departmentsStore.fetchItems()
 })
 watchEffect(() => {
   positions.value = positionStore.items
@@ -66,6 +80,7 @@ watchEffect(() => {
     ...teacher,
     position: teacher.position.map((pos) => pos.name).join(', '),
   }))
+  departments.value = departmentsStore.items
 })
 
 const fetchTeacher = async (newPage, newLimit, newSearch) => {
