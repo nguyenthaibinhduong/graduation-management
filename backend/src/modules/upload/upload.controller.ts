@@ -28,7 +28,14 @@ export class UploadController {
       } else if (type === 'file') {
         uploadOptions = {
           folder: 'QLKL/user-files',
-          types: ['application/pdf'],
+          types: [
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'application/pdf', 
+            'application/msword', 
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          ],
           maxSize: 20
         };
       } else {

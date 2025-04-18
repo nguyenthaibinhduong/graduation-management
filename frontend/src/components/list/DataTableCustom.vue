@@ -53,6 +53,14 @@
             <img class="rounded-xl" v-if="getNestedValue(data, col.field) !== 'N/A'"
               :src="getNestedValue(data, col.field)" alt="image" style="max-width: 100px; max-height: 100px;" />
           </span>
+          <span v-else-if="col.type === 'status'">
+            <template v-if="col.statuses">
+              <span v-if="getStatus(col.statuses, getNestedValue(data, col.field))"
+                :class="`px-2 py-1 text-sm rounded-xl ${getStatus(col.statuses, getNestedValue(data, col.field)).class}`">
+                {{ getStatus(col.statuses, getNestedValue(data, col.field)).label }}
+              </span>
+            </template>
+          </span>
           <span v-else>
             {{ getNestedValue(data, col.field) }}
           </span>
@@ -160,7 +168,9 @@ watch(selectedRows, (newSelection) => {
 const getNestedValue = (obj, field) => {
   return field.split('.').reduce((acc, key) => acc?.[key], obj) || "N/A";
 };
-
+const getStatus = (statuses, value) => {
+  return statuses.find((s) => s.value === value);
+}
 const toggleSelectAll = () => {
   if (selectStatus.value) {
     selectedRows.value = props.data.map(row => row.id);
