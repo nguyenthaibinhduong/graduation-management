@@ -24,13 +24,17 @@ import { Response } from 'src/common/globalClass';
 export class ProjectsController {
   constructor(private readonly projectService: ProjectsService) {}
 
-  @Post()
+  @Post('create/:type')
   async create(
+    @Param('type') type: string,
     @Body(new ValidationPipe()) project: CreateProjectDto,
   ): Promise<Response<Project>> {
     try {
-      const newProject = await this.projectService.create(project);
-      return new Response(newProject, HttpStatus.SUCCESS, Message.SUCCESS);
+      if (type == 'student') {
+        const newProject = await this.projectService.createProjectByStudent(project);
+        return new Response(newProject, HttpStatus.SUCCESS, Message.SUCCESS);
+      }
+      
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -73,42 +77,55 @@ export class ProjectsController {
     }
   }
 
-  @Put(':id')
+  @Put('update/:type/:id')
   async update(
+    @Param('type') type: string,
     @Param('id') id: number,
     @Body(new ValidationPipe()) project: CreateProjectDto,
   ): Promise<Response<Project>> {
     try {
-      const updatedProject = await this.projectService.update(
-        id,
-        { where: { id } },
-        project,
-      );
-      return updatedProject
+      if (type == 'student') {
+        const updatedProject = await this.projectService.updateProjectByStudent(id, project);
+         return updatedProject
         ? new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
+      }
+      
+     
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  @Delete('delete/:type/:id/:student_id')
+  async remove( @Param('type') type: string ,@Param('id') id: number, @Param('student_id') student_id: number): Promise<Response<void>> {
     try {
-      await this.projectService.delete(id);
-      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+      if (type == "student") {
+        await this.projectService.deleteByStudent(id,student_id);
+        return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+      }
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 
-  @Post('remove-multi')
+  @Post('remove-multi/:type')
   async removeMulti(
-    @Body() ids: number[],
+     @Param('type') type: string,
+    @Body() body:  {ids: number[] ,student_id: number},
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.projectService.delete(ids);
-      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+      if (type == "student") {
+        const {ids , student_id } = body
+        await this.projectService.deleteByStudent(ids,student_id);
+        return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+      }
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },

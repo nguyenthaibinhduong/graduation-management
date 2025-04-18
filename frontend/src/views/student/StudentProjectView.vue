@@ -4,7 +4,16 @@
         { field: 'description', header: 'Mô tả' },
         { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
         { field: 'course.name', header: 'Học kỳ' },
-        { field: 'status', header: 'Trạng thái' },
+        {
+            field: 'status',
+            header: 'Trạng thái',
+            type: 'status',
+            statuses: [
+                { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
+                { value: 'pending', label: 'Đang chờ', class: 'bg-yellow-100 text-yellow-700' },
+                { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' }
+            ]
+        }
     ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
         @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" />
 
@@ -16,8 +25,8 @@
                 <MyInput v-model="newData.title" title="Tên đề tài" id="name" required />
                 <MyInput v-model="newData.description" title="Mô tả" id="description" required />
                 <MyInput v-model="newData.content" title="Nội dung" id="content" required />
-                <MyInput v-model="newData.teacher_id" title="Giáo viên tham chiếu" id="teacher" type="select"
-                    :options="teachers" optionLabel="user.fullname" />
+                <MyInput v-model="newData.teacher_id" title="Giáo viên tham chiếu" id="teacher_id" type="select"
+                    :options="teachers" optionLabel="user.fullname" optionValue="id" />
                 <MyInput v-model="newData.max_total_group" title="Số lượng nhóm tham gia" id="max_total_group"
                     required />
             </div>
@@ -47,11 +56,13 @@ const isEditing = ref(false);
 
 const editedProjectId = ref(null);
 const newData = ref({
+
     title: "",
     description: "",
     content: "",
     max_total_group: "",
     teacher_id: null,
+    student_id: null,
 });
 const maxDate = ref(new Date());
 
@@ -67,16 +78,19 @@ onMounted(async () => {
 watchEffect(() => {
     projects.value = authStore.user?.student ? projectStore.items : [];
     student.value = authStore.user?.student || null;
-    teachers.value = (teacherStore.items || []).map(teacher => {
-        const { user, position, ...rest } = teacher;
-        return {
-            ...rest,
-            user: {
-                id: user.id,
-                fullname: user.fullname
-            }
-        };
-    });
+    newData.value.student_id = authStore.user?.student?.id;
+    teachers.value = (teacherStore.items || [])
+        .filter((teacher) => teacher?.department?.id == student.value?.department?.id)
+        .map((teacher) => {
+            const { user, position, ...rest } = teacher;
+            return {
+                ...rest,
+                user: {
+                    id: user.id,
+                    fullname: user.fullname
+                }
+            };
+        });
 });
 
 
@@ -95,27 +109,31 @@ const addProject = () => {
 
 const saveProject = async () => {
     const data = {
-        ...newData.value,
-        teacher_id: newData.value.teacher_id?.id || ''
+        ...newData.value
+
     };
     isEditing.value
-        ? await projectStore.updateItem(editedProjectId.value, data)
-        : await projectStore.addItem(data);
+        ? await projectStore.updateItem(editedProjectId.value, data, 'student')
+        : await projectStore.addItem(data, 'student');
 
+    if (authStore?.user?.student?.id) {
+        await projectStore.fetchItemsForStudent(authStore.user.student.id);
+    }
     cancelForm();
 };
 
 const deleteProject = async (ids) => {
-    await projectStore.deleteItem(ids);
+    await projectStore.deleteItem(ids, student.value?.id, 'student');
+    if (authStore?.user?.student?.id) {
+        await projectStore.fetchItemsForStudent(authStore.user.student.id);
+    }
 };
 
 const editProject = (dataEdit) => {
     editedProjectId.value = dataEdit.id;
-    const clonedData = JSON.parse(JSON.stringify(dataEdit));
-    const { teacher_id, ...data } = clonedData;
     newData.value = {
-        ...data,
-        teacher_id: clonedData.teacher,
+        teacher_id: dataEdit?.teacher?.id,
+        ...dataEdit,
     };
     isEditing.value = true;
     visibleLeft.value = true;

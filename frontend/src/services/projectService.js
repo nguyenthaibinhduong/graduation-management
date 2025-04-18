@@ -11,6 +11,27 @@ const projectService = (resource) => ({
 
     return data.data
   },
+   create: async (payload,type) => {
+    return api.post(`/${resource}/create/${type}`, payload)
+  },
+   
+  update: async (id,payload,type) => {
+    return api.put(`/${resource}/update/${type}/${id}`, payload)
+  },
+
+  delete: async (type, obj_id, ids) => {
+    if (!ids.length) { 
+
+      return  api.delete(`/${resource}/delete/${type}/${ids}/${obj_id}`)
+    } else {
+      if (type == "student") {
+         const body = { ids, student_id:obj_id }
+      }
+     
+      return  api.post(`/${resource}/remove-multi/${type}`,body)
+    }
+  }
+   
 })
 
 export default projectService

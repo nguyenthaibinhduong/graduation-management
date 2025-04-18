@@ -4,7 +4,7 @@
         { field: 'description', header: 'Mô tả' },
         { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
         { field: 'course.name', header: 'Học kỳ' },
-        { field: 'status', header: 'Trạng thái' },
+
     ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
         @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" />
 

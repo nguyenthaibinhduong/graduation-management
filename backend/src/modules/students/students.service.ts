@@ -44,6 +44,11 @@ export class StudentsService extends BaseService<Student> {
     skip: limit && page ? (page - 1) * limit : undefined,
     take: limit,
   });
+  items.forEach((student) => {
+    if (student.user) {
+      delete student.user.password;
+    }
+  });
 
   return { items, total, ...(limit && { limit }), ...(page && { page }) };
 }
