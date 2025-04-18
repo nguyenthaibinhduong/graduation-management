@@ -8,6 +8,7 @@ import {
   ValidateIf,
   Matches,
   IsArray,
+  isNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -26,4 +27,8 @@ export class CreateTeacherDto {
   @IsOptional()
   @IsInt({ each: true })
   positionIds?: number[];
+
+  @IsNotEmpty()
+  @IsInt()
+  departmentId: any;
 }

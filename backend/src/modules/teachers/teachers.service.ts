@@ -8,6 +8,8 @@ import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { Position } from 'src/entities/position.entity';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { Department } from 'src/entities/department.entity';
+import { ne } from '@faker-js/faker/.';
 
 @Injectable()
 export class TeachersService extends BaseService<Teacher> {
@@ -18,13 +20,15 @@ export class TeachersService extends BaseService<Teacher> {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Position)
     private readonly positionRepository: Repository<Position>,
+    @InjectRepository(Department)
+    private readonly departmentRepository: Repository<Department>,
     private readonly dataSource: DataSource,
   ) {
     super(teacherRepository);
   }
 
   async createTeacher(teacher: CreateTeacherDto): Promise<Teacher> {
-    const { user, positionIds, ...teacherData } = teacher;
+    const { user, positionIds, departmentId, ...teacherData } = teacher;
 
     //Kiem tra neu giao vien da ton tai
     const existingTeacher = await this.teacherRepository.findOne({
@@ -67,7 +71,13 @@ export class TeachersService extends BaseService<Teacher> {
         });
         newTeacher.position = positions;
       }
+      //Teacher department
+      const department = await this.departmentRepository.findOneBy({
+        id: departmentId,
+      });
+      newTeacher.department = department;
 
+      //Save teacher
       const savedTeacher = await queryRunner.manager.save(newTeacher);
 
       //Commit transaction
@@ -113,6 +123,12 @@ export class TeachersService extends BaseService<Teacher> {
 
     const items = await queryBuilder.getMany();
 
+    items.forEach((item) => {
+      if (item.user) {
+        delete item.user.password;
+      }
+    });
+
     return { items, total, ...(limit && { limit }), ...(page && { page }) };
   }
 
@@ -120,7 +136,7 @@ export class TeachersService extends BaseService<Teacher> {
     id: number,
     teacher: UpdateTeacherDto,
   ): Promise<Teacher | null> {
-    const { positionIds, ...teacherData } = teacher;
+    const { positionIds, departmentId, ...teacherData } = teacher;
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -141,12 +157,17 @@ export class TeachersService extends BaseService<Teacher> {
         ...existingTeacher.user,
         ...teacherData.user,
       });
+      // Update department
+      const updatedDepartment = await this.departmentRepository.findOneBy({
+        id: departmentId,
+      });
 
       // Update teacher
       const updatedTeacher = await this.teacherRepository.save({
         ...existingTeacher,
         ...teacherData,
         user: updatedUser,
+        department: updatedDepartment,
       });
 
       // Update positions
