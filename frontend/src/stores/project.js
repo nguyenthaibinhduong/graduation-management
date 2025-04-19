@@ -6,6 +6,7 @@ import { showToast } from '@/utils/toast'
 export function createProjectStore(entity="projects") {
   return defineStore(entity, () => {
     const items = ref([])
+    const item = ref([])
     const total = ref()
 
     const fetchItemsForStudent = async (student_id = null, course_id = null, page = 1, limit = 10, search = '') => {
@@ -25,6 +26,11 @@ export function createProjectStore(entity="projects") {
       const data = await projectService(entity).fetchAll(null,null,null,page, limit, search)
       items.value = data.items
       total.value = data.total
+    }
+
+    const findItem = async (ids,obj_id,type) => {
+      const data = await projectService(entity).getById(type, obj_id, ids)
+      item.value= data
     }
 
    const addItem = async (itemData ,type) => {

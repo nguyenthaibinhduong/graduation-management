@@ -63,10 +63,10 @@ export class ProjectsController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<Project>> {
+  @Get('find/:type/:id/:obj_id')
+  async findOne(@Param('type') type: string, @Param('id') id: number,@Param('obj_id') obj_id: number): Promise<Response<Project>> {
     try {
-      const project = await this.projectService.getById({ where: { id } });
+      const project = await this.projectService.getProjectById(id,obj_id,type);
       return project
         ? new Response(project, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);

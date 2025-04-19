@@ -175,6 +175,24 @@ async getAllProjectForObject(
   }
 
 
+  async getProjectById(id: any, obj_id: number, type: string): Promise<Project> {
+    const project = await this.repository.findOne({ where: { id }, relations: ['student', 'teacher','course'] });
+    if (!project) throw new NotFoundException('Đề tài không tồn tại');
+
+    if (type === 'student' && project.student?.id !== obj_id)
+      throw new NotFoundException('Không có quyền truy cập đề tài này');
+
+    if (type === 'teacher' && project.teacher?.id !== obj_id)
+      throw new NotFoundException('Không có quyền truy cập đề tài này');
+
+    return project;
+  }
+
+  //  async updateStatus(id: any, obj_id: number, type: string): Promise<Project> {
+   
+  // }
+
+
   async deleteProject(ids: number[] | number, obj_id: number, type :string): Promise<void> {
     const idArray = Array.isArray(ids) ? ids : [ids];
     if (type === "student") {
