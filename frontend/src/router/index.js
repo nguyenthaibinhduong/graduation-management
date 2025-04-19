@@ -14,6 +14,7 @@ import EnrollmentView from '@/views/admin/EnrollmentView.vue'
 import TeacherProjectView from '@/views/teacher/TeacherProjectView.vue'
 import StudentProjectView from '@/views/student/StudentProjectView.vue'
 import ProjectView from '@/views/admin/ProjectView.vue'
+import ProjectDetailView from '@/views/project/ProjectDetailView.vue'
 
 
 
@@ -39,6 +40,7 @@ const routes = [
       { path: '/department-major-manangerment', component: MajorDepartmentView },
       { path: '/teacher-project', component: TeacherProjectView },
       { path: '/student-project', component: StudentProjectView },
+      { path: '/project-detail/:id', component: ProjectDetailView },
     ],
   },
   

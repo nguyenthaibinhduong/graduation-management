@@ -18,18 +18,24 @@
         @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" />
 
 
-    <MyDrawer class="w-full" title="đề tài" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveProject"
+    <MyDrawer class="w-full" title="đề tài đề xuất" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveProject"
         :showImport="isImport" v-model:visible="visibleLeft" position="right" :closable="false">
         <div class="grid grid-cols-2 mt-5 gap-x-10">
             <div class="flex flex-col gap-4">
                 <MyInput v-model="newData.title" title="Tên đề tài" id="name" required />
-                <MyInput v-model="newData.description" title="Mô tả" id="description" required />
-                <MyInput v-model="newData.content" title="Nội dung" id="content" required />
-                <MyInput v-model="newData.teacher_id" title="Giáo viên tham chiếu" id="teacher_id" type="select"
-                    :options="teachers" optionLabel="user.fullname" optionValue="id" />
                 <MyInput v-model="newData.max_total_group" title="Số lượng nhóm tham gia" id="max_total_group"
                     required />
             </div>
+            <div class="flex flex-col gap-4">
+                <MyInput v-model="newData.description" title="Mô tả" id="description" required />
+                <MyInput v-model="newData.teacher_id" title="Giáo viên tham chiếu" id="teacher_id" type="select"
+                    :options="teachers" optionLabel="user.fullname" optionValue="id" />
+            </div>
+
+        </div>
+        <div class="w-full flex flex-col mt-10">
+            <MyInput type="editor" v-model="newData.content" title="Nội dung" id="content" editorStyle="height: 320px"
+                required />
         </div>
     </MyDrawer>
 

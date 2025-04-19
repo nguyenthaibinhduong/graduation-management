@@ -9,11 +9,14 @@
     <InputNumber v-else-if="type === 'number'" :id="id" v-bind="$attrs" class="w-4/5" />
     <MultiSelect v-else-if="type === 'multiselect'" :id="id" v-bind="$attrs" class="w-4/5" />
     <Password v-else-if="type === 'password'" :id="id" v-bind="$attrs" class="w-4/5" />
+
   </div>
+  <Editor v-if="type === 'editor'" :id="id" v-bind="$attrs" class="w-full" />
 </template>
 
 <script setup>
 import { DatePicker, InputNumber, InputText, Select, MultiSelect, Password } from 'primevue'
+import Editor from 'primevue/editor';
 import { defineProps } from 'vue'
 
 const props = defineProps({

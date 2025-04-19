@@ -11,6 +11,14 @@ const projectService = (resource) => ({
 
     return data.data
   },
+
+  getById: async (type, obj_id, id) => {
+    if (id) {
+      return  api.delete(`/${resource}/find/${type}/${id}/${obj_id}`)
+    }
+
+    return data.data
+  },
    create: async (payload,type) => {
     return api.post(`/${resource}/create/${type}`, payload)
   },
@@ -24,9 +32,7 @@ const projectService = (resource) => ({
 
       return  api.delete(`/${resource}/delete/${type}/${ids}/${obj_id}`)
     } else {
-      if (type == "student") {
-         const body = { ids, student_id:obj_id }
-      }
+       const body = { ids, obj_id }
      
       return  api.post(`/${resource}/remove-multi/${type}`,body)
     }
