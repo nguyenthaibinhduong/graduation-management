@@ -36,6 +36,8 @@ export class Student {
   @ManyToMany(() => Group, (group) => group.students)
   @JoinTable({
     name: 'student_groups',
+    joinColumn: { name: 'student_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'group_id', referencedColumnName: 'id' },
   })
   groups: Group[];
 }

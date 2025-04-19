@@ -29,6 +29,5 @@ export class CreateTeacherDto {
   positionIds?: number[];
 
   @IsNotEmpty()
-  @IsInt()
   departmentId: any;
 }

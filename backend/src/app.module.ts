@@ -17,6 +17,8 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { EnrollmentSessionModule } from './modules/enrollment_session/enrollment_session.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { ScoreModule } from './modules/score/score.module';
+import { CommitteesModule } from './modules/committees/committees.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { UploadModule } from './modules/upload/upload.module';
     EnrollmentSessionModule,
     ProjectsModule,
     UploadModule,
+    ScoreModule,
+    CommitteesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
