@@ -4,21 +4,37 @@
         { field: 'description', header: 'Mô tả' },
         { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
         { field: 'course.name', header: 'Học kỳ' },
+        {
+            field: 'status',
+            header: 'Trạng thái',
+            type: 'status',
+            statuses: [
+                { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
+                { value: 'pending', label: 'Đang chờ', class: 'bg-yellow-100 text-yellow-700' },
+                { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' }
+            ]
+        }
 
     ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
         @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" />
 
 
-    <MyDrawer class="w-full" title="đề tài" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveProject"
+    <MyDrawer class="w-full" title="đề tài dự kiến" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveProject"
         :showImport="isImport" v-model:visible="visibleLeft" position="right" :closable="false">
         <div class="grid grid-cols-2 mt-5 gap-x-10">
             <div class="flex flex-col gap-4">
                 <MyInput v-model="newData.title" title="Tên đề tài" id="name" required />
-                <MyInput v-model="newData.description" title="Mô tả" id="description" required />
-                <MyInput v-model="newData.content" title="Nội dung" id="content" required />
                 <MyInput v-model="newData.max_total_group" title="Số lượng nhóm tham gia" id="max_total_group"
                     required />
             </div>
+            <div class="flex flex-col gap-4">
+                <MyInput v-model="newData.description" title="Mô tả" id="description" required />
+            </div>
+
+        </div>
+        <div class="w-full flex flex-col mt-10">
+            <MyInput type="editor" v-model="newData.content" title="Nội dung" id="content" editorStyle="height: 300px"
+                required />
         </div>
     </MyDrawer>
 
@@ -46,14 +62,13 @@ const newData = ref({
     title: "",
     description: "",
     content: "",
-    max_total_group: ""
+    max_total_group: "",
+    teacher_id: null,
 });
 const maxDate = ref(new Date());
 
 onMounted(async () => {
-    await authStore.fetchUser(); // lấy dữ liệu user và teacher
-
-    // Đợi khi teacher đã có dữ liệu rồi mới fetch project
+    await authStore.fetchUser();
     if (authStore?.user?.teacher?.id) {
         await projectStore.fetchItemsForTeacher(authStore.user.teacher.id);
     }
@@ -61,7 +76,7 @@ onMounted(async () => {
 watchEffect(() => {
     projects.value = authStore.user?.teacher ? projectStore.items : [];
     teacher.value = authStore.user?.teacher || null;
-    console.log("projects", projects.value);
+    newData.value.teacher_id = authStore.user?.teacher?.id || null
 });
 
 
@@ -79,16 +94,20 @@ const addProject = () => {
 };
 
 const saveProject = async () => {
-    console.log("newData.value", newData.value);
     isEditing.value
-        ? await projectStore.updateItem(editedProjectId.value, newData.value)
-        : await projectStore.addItem(newData.value);
-
+        ? await projectStore.updateItem(editedProjectId.value, newData.value, 'teacher')
+        : await projectStore.addItem(newData.value, 'teacher');
+    if (authStore?.user?.teacher?.id) {
+        await projectStore.fetchItemsForTeacher(authStore.user.teacher.id);
+    }
     cancelForm();
 };
 
 const deleteProject = async (ids) => {
-    await projectStore.deleteItem(ids);
+    await projectStore.deleteItem(ids, teacher.value?.id, 'teacher');
+    if (authStore?.user?.teacher?.id) {
+        await projectStore.fetchItemsForTeacher(authStore.user.teacher.id);
+    }
 };
 
 const editProject = (dataEdit) => {
@@ -107,7 +126,9 @@ const cancelForm = () => {
         title: "",
         description: "",
         content: "",
-        max_total_group: ""
+        max_total_group: "",
+        teacher_id: null,
+
     };
 };
 

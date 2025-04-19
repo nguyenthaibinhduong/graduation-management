@@ -24,9 +24,7 @@ const projectService = (resource) => ({
 
       return  api.delete(`/${resource}/delete/${type}/${ids}/${obj_id}`)
     } else {
-      if (type == "student") {
-         const body = { ids, student_id:obj_id }
-      }
+       const body = { ids, obj_id }
      
       return  api.post(`/${resource}/remove-multi/${type}`,body)
     }

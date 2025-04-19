@@ -30,10 +30,8 @@ export class ProjectsController {
     @Body(new ValidationPipe()) project: CreateProjectDto,
   ): Promise<Response<Project>> {
     try {
-      if (type == 'student') {
-        const newProject = await this.projectService.createProjectByStudent(project);
+       const newProject = await this.projectService.createProject(project,type);
         return new Response(newProject, HttpStatus.SUCCESS, Message.SUCCESS);
-      }
       
     } catch (error) {
       throw new HttpException(
@@ -84,12 +82,10 @@ export class ProjectsController {
     @Body(new ValidationPipe()) project: CreateProjectDto,
   ): Promise<Response<Project>> {
     try {
-      if (type == 'student') {
-        const updatedProject = await this.projectService.updateProjectByStudent(id, project);
+      const updatedProject = await this.projectService.updateProject(id, project,type);
          return updatedProject
         ? new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
-      }
       
      
     } catch (error) {
@@ -100,13 +96,11 @@ export class ProjectsController {
     }
   }
 
-  @Delete('delete/:type/:id/:student_id')
-  async remove( @Param('type') type: string ,@Param('id') id: number, @Param('student_id') student_id: number): Promise<Response<void>> {
+  @Delete('delete/:type/:id/:obj_id')
+  async remove( @Param('type') type: string ,@Param('id') id: number, @Param('obj_id') obj_id: number): Promise<Response<void>> {
     try {
-      if (type == "student") {
-        await this.projectService.deleteByStudent(id,student_id);
+      await this.projectService.deleteProject(id,obj_id,type);
         return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
-      }
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -118,12 +112,12 @@ export class ProjectsController {
   @Post('remove-multi/:type')
   async removeMulti(
      @Param('type') type: string,
-    @Body() body:  {ids: number[] ,student_id: number},
+    @Body() body:  {ids: number[] ,obj_id: number},
   ): Promise<Response<void> | HttpException> {
     try {
       if (type == "student") {
-        const {ids , student_id } = body
-        await this.projectService.deleteByStudent(ids,student_id);
+        const {ids , obj_id } = body
+        await this.projectService.deleteProject(ids,obj_id,type);
         return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
       }
     } catch (error) {
