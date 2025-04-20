@@ -14,6 +14,8 @@ const baseService = (resource) => ({
     return data.data
   },
 
+  
+
   create: async (payload) => {
     return api.post(`/${resource}`, payload)
   },

@@ -10,10 +10,10 @@
       type: 'status',
       statuses: [
         { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
-        { value: 'pending', label: 'Đang chờ', class: 'bg-yellow-100 text-yellow-700' },
-        { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
-      ],
-    },
+        { value: 'pending', label: 'Đang chờ duyệt', class: 'bg-yellow-100 text-yellow-700' },
+        { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' }
+      ]
+    }
   ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
     @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail" />
 

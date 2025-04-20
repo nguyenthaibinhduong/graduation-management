@@ -48,8 +48,11 @@ export function createProjectStore(entity="projects") {
       showToast("Xoá thành công!", "success");
     }
 
-    
+    const updateStatusItem = async (data, type)=>{
+      await projectService(entity).updateStatus(data, type)
+      showToast("Đã cập nhật trạng thái !", "success");
+    }
 
-    return { items,item ,total, fetchItems,fetchItemsForStudent,fetchItemsForTeacher,addItem,updateItem,deleteItem,findItem }
+    return { items,item ,total,updateStatusItem, fetchItems,fetchItemsForStudent,fetchItemsForTeacher,addItem,updateItem,deleteItem,findItem }
   })
 }

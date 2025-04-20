@@ -5,7 +5,7 @@
         <div class="w-full flex justify-between items-center pb-6">
           <h2 class="text-xl font-bold text-blue-800">Đề tài {{ project.title || '' }}</h2>
           <span :class="statusClass(project.status)">
-            {{ statusLabel(project.status) }}
+            {{ statusLabel(projectStore?.item?.status) }}
           </span>
         </div>
       </template>
@@ -41,7 +41,18 @@
           <span class="mt-10" v-html="project.content || 'Chưa cập nhật'"></span>
         </div>
       </template>
+      <template #footer>
+        <div class="w-full flex justify-end">
+          <Button @click="sendStatus" class="btn-submit p-2 rounded-md"
+            v-if="project?.status == 'propose' && authStore.user?.role == 'teacher'">Gửi
+            duyệt</Button>
+          <Button @click="Approve" class="btn-submit p-2 rounded-md"
+            v-if="project?.status == 'pending' && authStore.user?.role == 'admin'">Duyệt đề tài</Button>
+        </div>
+      </template>
+
     </Card>
+
   </div>
 </template>
 
@@ -55,12 +66,38 @@ import { Card } from 'primevue'
 const authStore = useAuthStore()
 const projectStore = useProjectStore()
 const project = ref(null)
+const updateData = ref({
+  id: null,
+  obj_id: null,
+  status: ''
+})
 const route = useRoute()
+onMounted(async () => {
+  try {
+    await authStore.fetchUser()
+
+    const user = authStore.user
+    if (!user) throw new Error('Không thể lấy thông tin người dùng')
+
+    const projectId = route.params.id
+    const obj_id = user?.student?.id || user?.teacher?.id
+    await projectStore.findItem(projectId, obj_id, user.role)
+  } catch (error) {
+    console.error('Có lỗi xảy ra:', error)
+  }
+})
+
+
+
+watchEffect(() => {
+  project.value = projectStore.item
+})
+
 
 const statusLabel = (status) => {
   const statuses = {
     propose: 'Đề xuất',
-    pending: 'Đang chờ',
+    pending: 'Đang chờ duyệt',
     approve: 'Đã duyệt',
   }
   return statuses[status] || 'Không xác định'
@@ -75,21 +112,32 @@ const statusClass = (status) => {
   return classes[status] || ''
 }
 
-onMounted(async () => {
-  try {
-    await authStore.fetchUser()
 
-    const user = authStore.user
-    if (!user) throw new Error('Không thể lấy thông tin người dùng')
-
-    const projectId = route.params.id
-    await projectStore.findItem(projectId, user.id, user.role)
-  } catch (error) {
-    console.error('Có lỗi xảy ra:', error)
+const sendStatus = async () => {
+  const projectId = route.params.id
+  updateData.value.id = projectId
+  if (authStore.user?.teacher && authStore.user?.role == "teacher") {
+    updateData.value.obj_id = authStore.user?.teacher?.id
+    updateData.value.status = "pending"
+    await projectStore.updateStatusItem(updateData.value, authStore.user.role);
+    await projectStore.findItem(projectId, authStore.user?.teacher?.id, authStore.user.role)
   }
-})
 
-watchEffect(() => {
-  project.value = projectStore.item
-})
+
+}
+
+const Approve = async () => {
+  const projectId = route.params.id
+  updateData.value.id = projectId
+  if (authStore.user?.role == "admin") {
+
+    updateData.value.obj_id = project.teacher?.id
+    updateData.value.status = "approve"
+    await projectStore.updateStatusItem(updateData.value, authStore.user.role);
+    await projectStore.findItem(projectId, project.teacher?.id, authStore.user.role)
+
+  }
+
+
+}
 </script>

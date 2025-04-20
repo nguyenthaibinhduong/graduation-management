@@ -1,10 +1,20 @@
 <template>
-    <DataTableCustom title="Danh sách đề tài - Sinh viên" :data="projects" :columns="[
+    <DataTableCustom title="Danh sách đề tài - Admin" :data="projects" :columns="[
         { field: 'title', header: 'Tên đề tài', },
         { field: 'description', header: 'Mô tả' },
         { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
         { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
         { field: 'course.name', header: 'Học kỳ' },
+        {
+            field: 'status',
+            header: 'Trạng thái',
+            type: 'status',
+            statuses: [
+                { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
+                { value: 'pending', label: 'Đang chờ duyệt', class: 'bg-yellow-100 text-yellow-700' },
+                { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' }
+            ]
+        }
     ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
         @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail" />
 
