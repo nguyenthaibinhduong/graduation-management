@@ -7,12 +7,19 @@ export function createBaseStore(entity) {
   return defineStore(entity, () => {
     const items = ref([])
     const total = ref()
-
+    const item = ref([])
     const fetchItems = async (page = 1, limit = 10, search = '') => {
       const data = await baseService(entity).fetchAll(page, limit, search)
       items.value = data.items
       total.value = data.total
       
+    }
+
+    const findItem = async (id) => {
+      if (id) {
+        const data = await baseService(entity).getById(id)
+        item.value = data
+      }
     }
 
     const addItem = async (itemData ) => {
@@ -35,6 +42,6 @@ export function createBaseStore(entity) {
     }
     
 
-    return { items, total, fetchItems, addItem, updateItem, deleteItem }
+    return { items,item, total, fetchItems, addItem, updateItem, deleteItem }
   })
 }

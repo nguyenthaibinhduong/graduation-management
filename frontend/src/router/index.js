@@ -15,6 +15,7 @@ import TeacherProjectView from '@/views/teacher/TeacherProjectView.vue'
 import StudentProjectView from '@/views/student/StudentProjectView.vue'
 import ProjectView from '@/views/admin/ProjectView.vue'
 import ProjectDetailView from '@/views/project/ProjectDetailView.vue'
+import EvaluationFormView from '@/views/admin/EvaluationFormView.vue'
 
 
 
@@ -34,6 +35,7 @@ const routes = [
       { path: '/teacher-manangerment', component: TeacherView },
       { path: '/course-manangerment', component: CourseView },
       { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
+      { path: '/evaluation-form-manangerment', component: EvaluationFormView },
        { path: '/project-manangerment', component: ProjectView },
       { path: '/profile', component: ProfileView },
       { path: '/account-manangerment', component: UserView },

@@ -10,10 +10,7 @@ const baseService = (resource) => ({
   },
 
   getById: async (id) => {
-    if (id) {
-      const { data } = await api.get(`/${resource}/${id}`)
-    }
-
+   const { data } = await api.get(`/${resource}/${id}`)
     return data.data
   },
 
