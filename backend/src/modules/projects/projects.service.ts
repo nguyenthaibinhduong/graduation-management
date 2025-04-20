@@ -176,7 +176,12 @@ async getAllProjectForObject(
 
 
   async getProjectById(id: any, obj_id: number, type: string): Promise<Project> {
-    const project = await this.projectRepository.findOne({ where: { id }, relations: { student:true, teacher:true, course:true} });
+    const project = await this.projectRepository.findOne({ where: { id }, relations: {
+      student: { user: true },
+      teacher: { user: true },
+      course: true
+    }
+ });
     if (!project) throw new NotFoundException('Đề tài không tồn tại');
 
     if (type === 'student' && project.student?.id != obj_id)
@@ -184,6 +189,15 @@ async getAllProjectForObject(
 
     if (type === 'teacher' && project.teacher?.id != obj_id)
       throw new NotFoundException('Không có quyền truy cập đề tài này');
+
+   
+      if (project.teacher?.user) {
+        project.teacher.user = { id: project.teacher.user.id, fullname: project.teacher.user.fullname } as any;
+      }
+      if (project.student?.user) {
+        project.student.user = { id: project.student.user.id, fullname: project.student.user.fullname } as any;
+      }
+  
 
     return project;
   }

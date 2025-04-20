@@ -3,45 +3,42 @@
     <Card class="w-full">
       <template #title>
         <div class="w-full flex justify-between items-center pb-6">
-          <h2 class="text-xl font-bold text-blue-800">Chi tiết Đề Tài</h2>
+          <h2 class="text-xl font-bold text-blue-800">Đề tài {{ project.title || '' }}</h2>
+          <span :class="statusClass(project.status)">
+            {{ statusLabel(project.status) }}
+          </span>
         </div>
       </template>
       <template #content>
-        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-100 rounded-lg p-5 text-blue-600">
           <div class="flex items-center gap-2">
-            <label class="font-semibold text-gray-700">Tên đề tài:</label>
-            <span>{{ project.title || 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <label class="font-semibold text-gray-700">Mô tả:</label>
+            <label class="font-semibold text-blue-700">Mô tả:</label>
             <span>{{ project.description || 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="flex items-center gap-2 col-span-2">
-            <label class="font-semibold text-gray-700">Nội dung:</label>
-            <span v-html="project.content || 'Chưa cập nhật'"></span>
           </div>
 
           <div class="flex items-center gap-2">
-            <label class="font-semibold text-gray-700">Giáo viên hướng dẫn:</label>
+            <label class="font-semibold text-blue-700">Giáo viên hướng dẫn:</label>
             <span>{{ project.teacher?.user?.fullname || 'Chưa xác định' }}</span>
           </div>
 
           <div class="flex items-center gap-2">
-            <label class="font-semibold text-gray-700">Sinh viên thực hiện:</label>
+            <label class="font-semibold text-blue-700">Sinh viên thực hiện:</label>
             <span>{{ project.student?.user?.fullname || 'Chưa xác định' }}</span>
           </div>
 
           <div class="flex items-center gap-2">
-            <label class="font-semibold text-gray-700">Học kỳ:</label>
+            <label class="font-semibold text-blue-700">Học kỳ:</label>
             <span>{{ project.course?.name || 'Chưa xác định' }}</span>
           </div>
 
-          <div class="flex items-center gap-2">
-            <label class="font-semibold text-gray-700">Trạng thái:</label>
-            <span :class="statusClass(project.status)">
-              {{ statusLabel(project.status) }}
-            </span>
-          </div>
+
+
+
+        </div>
+        <h2 class="w-full text-center font-bold text-2xl py-5">Nội dung</h2>
+        <div class="w-full border border-gray-400 p-5 rounded-lg">
+
+          <span class="mt-10" v-html="project.content || 'Chưa cập nhật'"></span>
         </div>
       </template>
     </Card>
