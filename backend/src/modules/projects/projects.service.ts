@@ -50,7 +50,8 @@ async getAllProjectForObject(
     } else if (teacher_id) { 
       options.relations = ['student','student.user','student.department', 'course'];
     } else {
-      options.relations = ['teacher','teacher.user','student','student.user','student.department', 'course'];
+      options.relations = ['teacher', 'teacher.user', 'student', 'student.user', 'student.department', 'course'];
+      where.status = In(['pending', 'approve']);
     }
     const [items, total] = await this.projectRepository.findAndCount(options);
     items.forEach(item => {
@@ -202,9 +203,41 @@ async getAllProjectForObject(
     return project;
   }
 
-  //  async updateStatus(id: any, obj_id: number, type: string): Promise<Project> {
-   
-  // }
+async updateStatus(data: any, type: string): Promise<void> {
+  try {
+    const { id, status, obj_id } = data;
+
+    const project = await this.projectRepository.findOne({
+      where: { id },
+      relations: {
+        student: true,
+        teacher: true
+      }
+    });
+
+    if (!project) {
+      throw new NotFoundException('Đề tài không tồn tại');
+    }
+    if (type != 'admin') {
+        if (type === 'student' && project.student?.id !== obj_id) {
+        throw new NotFoundException('Không có quyền truy cập đề tài này');
+      }
+
+      if (type === 'teacher' && project.teacher?.id !== obj_id) {
+        throw new NotFoundException('Không có quyền truy cập đề tài này');
+      }
+    }
+    
+
+    // Cập nhật trạng thái
+    project.status = status;
+    await this.projectRepository.save(project);
+
+  } catch (error) {
+    throw new BadRequestException(`Lỗi: ${error.message}`);
+  }
+}
+
 
 
   async deleteProject(ids: number[] | number, obj_id: number, type :string): Promise<void> {
