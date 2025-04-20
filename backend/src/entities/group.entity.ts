@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Student } from './student.entity';
 import { Project } from './project.entity';
 import { Score } from './score.entity';
@@ -14,7 +20,7 @@ export class Group {
   @Column()
   total_member: number;
 
-  @ManyToMany(() => Student, (student) => student.id)
+  @ManyToMany(() => Student, (student) => student.groups)
   students: Student[];
 
   @ManyToMany(() => Project, (project) => project.id)

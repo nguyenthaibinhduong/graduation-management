@@ -18,6 +18,8 @@ import { EnrollmentSessionModule } from './modules/enrollment_session/enrollment
 import { ProjectsModule } from './modules/projects/projects.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { EvaluationFormModule } from './modules/evaluation_form/evaluation_form.module';
+import { ScoreModule } from './modules/score/score.module';
+import { CommitteesModule } from './modules/committees/committees.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { EvaluationFormModule } from './modules/evaluation_form/evaluation_form.
     ProjectsModule,
     UploadModule,
     EvaluationFormModule,
+    ScoreModule,
+    CommitteesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

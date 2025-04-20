@@ -69,7 +69,7 @@
             :showClear="true"
           />
           <MyInput
-            v-model="newTeacher.department_id"
+            v-model="newTeacher.departmentId"
             title="Khoa"
             id="department"
             type="select"
@@ -111,7 +111,7 @@ const newTeacher = ref({
     address: '',
     avatar: '',
   },
-  department_id: null,
+  departmentId: null,
 })
 onMounted(async () => {
   teacherStore.fetchItems()
@@ -137,6 +137,7 @@ const addTeacher = () => {
   visibleLeft.value = true
 }
 const saveTeacher = async () => {
+  console.log('newTeacher', newTeacher.value)
   if (isEditing.value) {
     await teacherStore.updateItem(editedTeacherId.value, newTeacher.value)
   } else {
