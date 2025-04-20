@@ -17,6 +17,7 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { EnrollmentSessionModule } from './modules/enrollment_session/enrollment_session.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { EvaluationFormModule } from './modules/evaluation_form/evaluation_form.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { UploadModule } from './modules/upload/upload.module';
     EnrollmentSessionModule,
     ProjectsModule,
     UploadModule,
+    EvaluationFormModule,
   ],
   controllers: [AppController],
   providers: [AppService],
