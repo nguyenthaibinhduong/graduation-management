@@ -13,10 +13,7 @@ const projectService = (resource) => ({
   },
 
   getById: async (type, obj_id, id) => {
-    if (id) {
-      return  api.delete(`/${resource}/find/${type}/${id}/${obj_id}`)
-    }
-
+    const { data }  = await api.get(`/${resource}/find/${type}/${id}/${obj_id}`)
     return data.data
   },
    create: async (payload,type) => {

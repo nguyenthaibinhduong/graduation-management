@@ -67,11 +67,12 @@ export class ProjectsController {
   async findOne(@Param('type') type: string, @Param('id') id: number,@Param('obj_id') obj_id: number): Promise<Response<Project>> {
     try {
       const project = await this.projectService.getProjectById(id,obj_id,type);
-      return project
-        ? new Response(project, HttpStatus.SUCCESS, Message.SUCCESS)
-        : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
+      return new Response(project, HttpStatus.SUCCESS, Message.SUCCESS)
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 

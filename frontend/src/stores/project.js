@@ -30,7 +30,7 @@ export function createProjectStore(entity="projects") {
 
     const findItem = async (ids,obj_id,type) => {
       const data = await projectService(entity).getById(type, obj_id, ids)
-      item.value= data
+      item.value = data
     }
 
    const addItem = async (itemData ,type) => {
@@ -50,6 +50,6 @@ export function createProjectStore(entity="projects") {
 
     
 
-    return { items, total, fetchItems,fetchItemsForStudent,fetchItemsForTeacher,addItem,updateItem,deleteItem }
+    return { items,item ,total, fetchItems,fetchItemsForStudent,fetchItemsForTeacher,addItem,updateItem,deleteItem,findItem }
   })
 }
