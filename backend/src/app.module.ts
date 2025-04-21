@@ -20,6 +20,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { EvaluationFormModule } from './modules/evaluation_form/evaluation_form.module';
 import { ScoreModule } from './modules/score/score.module';
 import { CommitteesModule } from './modules/committees/committees.module';
+import { GroupsModule } from './modules/groups/groups.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { CommitteesModule } from './modules/committees/committees.module';
     EvaluationFormModule,
     ScoreModule,
     CommitteesModule,
+    GroupsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

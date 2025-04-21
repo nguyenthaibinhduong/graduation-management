@@ -26,8 +26,8 @@ export class StudentFactory {
 export class GroupFactory {
   static create(totalMember: number): Group {
     const group = new Group();
-    group.name = faker.company.name(); // Generate a random group name
-    group.total_member = totalMember; // Set the total number of members
+    group.name = faker.company.name();
+    group.total_member = totalMember;
     return group;
   }
 

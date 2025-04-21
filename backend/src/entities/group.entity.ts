@@ -1,7 +1,10 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToMany,
+  ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -20,11 +23,14 @@ export class Group {
   @Column()
   total_member: number;
 
-  @ManyToMany(() => Student, (student) => student.groups)
+  @OneToMany(() => Student, (student) => student.group)
   students: Student[];
 
-  @ManyToMany(() => Project, (project) => project.id)
-  projects: Project[];
+  @ManyToOne(() => Project, (project) => project.groups, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'project_id' })
+  project: Project;
 
   @OneToOne(() => Score, (score) => score.id)
   score: Score;

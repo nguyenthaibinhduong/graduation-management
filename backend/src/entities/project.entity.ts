@@ -5,6 +5,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -38,7 +39,7 @@ export class Project {
   @JoinColumn({ name: 'student_id' })
   student: Student;
 
-   @ManyToOne(() => Course, (course) => course.id)
+  @ManyToOne(() => Course, (course) => course.id)
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
@@ -46,8 +47,7 @@ export class Project {
   @JoinTable({ name: 'project_committees' })
   committee: Committee[];
 
-  @ManyToMany(() => Group, (group) => group.id)
-  @JoinTable({ name: 'project_groups' })
+  @OneToMany(() => Group, (group) => group.project)
   groups: Group[];
 
   @OneToOne(() => Score, (score) => score.project)
@@ -62,7 +62,6 @@ export class Project {
 
   @Column({ type: 'int', default: 2 })
   max_total_group: number;
-
 
   //session_id
   @OneToOne(

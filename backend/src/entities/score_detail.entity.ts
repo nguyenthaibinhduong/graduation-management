@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -13,7 +14,7 @@ export class ScoreDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => Score, (score) => score.id)
+  @ManyToOne(() => Score, (score) => score.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'score_id' })
   score: Score;
 

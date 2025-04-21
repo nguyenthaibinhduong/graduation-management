@@ -20,8 +20,8 @@ export class Score {
   @OneToOne(() => Project, (project) => project.id)
   project: Project;
 
-  @Column({ type: 'double' })
-  total_score: number;
+  @Column({ type: 'double', nullable: true })
+  total_score?: number;
 
   @Column({ type: 'varchar', length: 255 })
   comment: string;
