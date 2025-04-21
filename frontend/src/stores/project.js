@@ -9,21 +9,21 @@ export function createProjectStore(entity="projects") {
     const item = ref([])
     const total = ref()
 
-    const fetchItemsForStudent = async (student_id = null, course_id = null, page = 1, limit = 10, search = '') => {
-      const data = await projectService(entity).fetchAll(null,student_id,course_id,page, limit, search)
+    const fetchItemsForStudent = async (status=null,student_id = null, course_id = null, page = 1, limit = 10, search = '') => {
+      const data = await projectService(entity).fetchAll(null,student_id,course_id,page, limit, search,status)
       items.value = data.items
       total.value = data.total
       
     }
-    const fetchItemsForTeacher = async (teacher_id = null,student_id=null, course_id = null, page = 1, limit = 10, search = '') => {
-      const data = await projectService(entity).fetchAll(teacher_id,student_id,course_id,page, limit, search)
+    const fetchItemsForTeacher = async (status=null,teacher_id = null,student_id=null, course_id = null, page = 1, limit = 10, search = '') => {
+      const data = await projectService(entity).fetchAll(teacher_id,student_id,course_id,page, limit, search,status)
       items.value = data.items
       total.value = data.total
       
       }
       
-    const fetchItems = async (page = 1, limit = 10, search = '') => {
-      const data = await projectService(entity).fetchAll(null,null,null,page, limit, search)
+    const fetchItems = async (status,page = 1, limit = 10, search = '') => {
+      const data = await projectService(entity).fetchAll(null,null,null,page, limit, search,status)
       items.value = data.items
       total.value = data.total
     }
@@ -53,6 +53,11 @@ export function createProjectStore(entity="projects") {
       showToast("Đã cập nhật trạng thái !", "success");
     }
 
-    return { items,item ,total,updateStatusItem, fetchItems,fetchItemsForStudent,fetchItemsForTeacher,addItem,updateItem,deleteItem,findItem }
+    const publicItem = async (data, type)=>{
+      await projectService(entity).public(data, type)
+      showToast("Đã cập nhật trạng thái !", "success");
+    }
+
+    return { items,item ,total,updateStatusItem,publicItem , fetchItems,fetchItemsForStudent,fetchItemsForTeacher,addItem,updateItem,deleteItem,findItem }
   })
 }

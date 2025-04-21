@@ -1,4 +1,15 @@
 <template>
+    <div class="w-full flex gap-x-4 p-2 rounded-lg">
+        <Button size="small" label="Đề tài chưa duyệt" :outlined="statusData !== 'pending'"
+            :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'pending'" />
+        <Button size="small" label="Đề tài đã duyệt" :outlined="statusData !== 'approve'"
+            :severity="statusData === 'approve' ? 'primary' : undefined" @click="statusData = 'approve'" />
+        <Button size="small" label="Đề tài công bố" :outlined="statusData !== 'public'"
+            :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
+        <Button size="small" label="Tất cả" :outlined="statusData !== null"
+            :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
+    </div>
+
     <DataTableCustom title="Danh sách đề tài - Admin" :data="projects" :columns="[
         { field: 'title', header: 'Tên đề tài', },
         { field: 'description', header: 'Mô tả' },
@@ -12,7 +23,8 @@
             statuses: [
                 { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
                 { value: 'pending', label: 'Đang chờ duyệt', class: 'bg-yellow-100 text-yellow-700' },
-                { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' }
+                { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
+                { value: 'public', label: 'Đã công bố', class: 'bg-violet-100 text-violet-700' }
             ]
         }
     ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
@@ -40,6 +52,7 @@ import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import MyInput from "@/components/form/MyInput.vue";
 import MyDrawer from "@/components/drawer/MyDrawer.vue";
 import { useRouter } from "vue-router";
+import { Button } from "primevue";
 
 
 const visibleLeft = ref(false);
@@ -48,6 +61,7 @@ const projects = ref([]);
 const loading = ref(false);
 const isImport = ref(false);
 const isEditing = ref(false);
+const statusData = ref('pending')
 
 const editedProjectId = ref(null);
 const newData = ref({
@@ -58,18 +72,24 @@ const newData = ref({
 });
 const maxDate = ref(new Date());
 
+
 onMounted(async () => {
-    await projectStore.fetchItems();
+    await projectStore.fetchItems(statusData.value);
 });
 watchEffect(() => {
     projects.value = projectStore.items;
 
 });
+watch(statusData, async (newSelection) => {
+    await projectStore.fetchItems(newSelection);
+})
+
 
 
 
 const fetchProject = async (newPage, newLimit, newSearch) => {
     await projectStore.fetchItems(
+        statusData.value,
         newSearch ? 1 : newPage,
         newSearch ? projectStore.total : newLimit,
         newSearch

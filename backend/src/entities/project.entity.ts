@@ -55,10 +55,10 @@ export class Project {
 
   @Column({
     type: 'enum',
-    enum: ['propose', 'pending', 'approve'],
-    default: 'pending',
+    enum: ['propose', 'pending', 'approve','public'],
+    default: 'propose',
   })
-  status: 'propose' | 'pending' | 'approve';
+  status: 'propose' | 'pending' | 'approve' | 'public';
 
   @Column({ type: 'int', default: 2 })
   max_total_group: number;

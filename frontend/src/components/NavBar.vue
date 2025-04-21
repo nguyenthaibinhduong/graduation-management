@@ -28,106 +28,132 @@ const toggleNavbar = () => {
 };
 
 const authStore = useAuthStore();
-// const items = ref([]);
+const items = ref([]);
 
-// onMounted(async () => {
-//   await authStore.fetchUser();
-//   const role = authStore.user?.role; 
+onMounted(async () => {
+  await authStore.fetchUser();
+  const role = authStore.user?.role;
 
-//   if (role === 'admin') {
-//     items.value.push({
-//       label: 'Giáo vụ',
-//       items: [
-//         { label: 'Tài khoản', to: '/account-manangerment' },
-//         { label: 'Sinh viên', to: '/student-manangerment' },
-//         { label: 'Giảng viên', to: '/teacher-manangerment' },
-//         { label: 'Học kỳ', to: '/course-manangerment' },
-//         { label: 'Đợt đăng ký', to: '/enrollment-sessions-manangerment' },
-//         { label: 'Khoa & Ngành', to: '/department-major-manangerment' },
-//         { label: 'Đề tài', to: '/project-manangerment' },
-//       ],
-//     });
-//   }
+  if (role === 'admin') {
+    items.value.push({
+      label: 'Giáo vụ',
+      items: [
+        {
+          label: 'Tài khoản',
+          to: '/account-manangerment'
 
-//   if (role === 'teacher') {
-//     items.value.push({
-//       label: 'Giảng viên',
-//       items: [
-//         { label: 'Đề tài', to: '/teacher-project' }
-//       ]
-//     });
-//   }
-
-//   if (role === 'student') {
-//     items.value.push({
-//       label: 'Sinh viên',
-//       items: [
-//         { label: 'Đề tài', to: '/student-project' }
-//       ]
-//     });
-//   }
-// });
-const items = ref([
-  {
-    label: 'Giáo vụ',
-    items: [
-      {
-        label: 'Tài khoản',
-        to: '/account-manangerment'
-
-      },
-      {
-        label: 'Sinh viên',
-        to: '/student-manangerment'
-      },
-      {
-        label: 'Giảng viên',
-        to: '/teacher-manangerment'
-      },
-      {
-        label: 'Học kỳ',
-        to: '/course-manangerment'
-      },
-      {
-        label: 'Đợt đăng ký',
-        to: '/enrollment-sessions-manangerment'
-      },
-      {
-        label: 'Phiếu đánh giá',
-        to: '/evaluation-form-manangerment'
-      },
-      {
-        label: 'Khoa & Ngành',
-        to: '/department-major-manangerment'
-      },
-      {
-        label: 'Đề tài',
-        to: '/project-manangerment'
-      },
-    ]
-  },
-  {
-    label: 'Giảng viên',
-    items: [
-      {
-        label: 'Đề tài',
-        to: '/teacher-project'
-
-      }
-    ]
-  },
-  {
-    label: 'Sinh viên',
-    items: [
-      {
-        label: 'Đề tài',
-        to: '/student-project'
-
-      }
-    ]
+        },
+        {
+          label: 'Sinh viên',
+          to: '/student-manangerment'
+        },
+        {
+          label: 'Giảng viên',
+          to: '/teacher-manangerment'
+        },
+        {
+          label: 'Học kỳ',
+          to: '/course-manangerment'
+        },
+        {
+          label: 'Đợt đăng ký',
+          to: '/enrollment-sessions-manangerment'
+        },
+        {
+          label: 'Phiếu đánh giá',
+          to: '/evaluation-form-manangerment'
+        },
+        {
+          label: 'Khoa & Ngành',
+          to: '/department-major-manangerment'
+        },
+        {
+          label: 'Đề tài',
+          to: '/project-manangerment'
+        }
+      ],
+    });
   }
 
-]);
+  if (role === 'teacher') {
+    items.value.push({
+      label: 'Giảng viên',
+      items: [
+        { label: 'Đề tài', to: '/teacher-project' }
+      ]
+    });
+  }
+
+  if (role === 'student') {
+    items.value.push({
+      label: 'Sinh viên',
+      items: [
+        { label: 'Đề tài', to: '/student-project' }
+      ]
+    });
+  }
+});
+// const items = ref([
+//   {
+//     label: 'Giáo vụ',
+//     items: [
+//       {
+//         label: 'Tài khoản',
+//         to: '/account-manangerment'
+
+//       },
+//       {
+//         label: 'Sinh viên',
+//         to: '/student-manangerment'
+//       },
+//       {
+//         label: 'Giảng viên',
+//         to: '/teacher-manangerment'
+//       },
+//       {
+//         label: 'Học kỳ',
+//         to: '/course-manangerment'
+//       },
+//       {
+//         label: 'Đợt đăng ký',
+//         to: '/enrollment-sessions-manangerment'
+//       },
+//       {
+//         label: 'Phiếu đánh giá',
+//         to: '/evaluation-form-manangerment'
+//       },
+//       {
+//         label: 'Khoa & Ngành',
+//         to: '/department-major-manangerment'
+//       },
+//       {
+//         label: 'Đề tài',
+//         to: '/project-manangerment'
+//       },
+//     ]
+//   },
+//   {
+//     label: 'Giảng viên',
+//     items: [
+//       {
+//         label: 'Đề tài',
+//         to: '/teacher-project'
+
+//       }
+//     ]
+//   },
+//   {
+//     label: 'Sinh viên',
+//     items: [
+//       {
+//         label: 'Đề tài',
+//         to: '/student-project'
+
+//       }
+//     ]
+//   }
+
+// ]);
 
 
 

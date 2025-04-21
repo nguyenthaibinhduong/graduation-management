@@ -1,5 +1,6 @@
+import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { Project } from "src/entities/project.entity";
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
 import { In, Like, Repository } from 'typeorm';
@@ -7,8 +8,7 @@ import { CreateProjectDto } from "./dto/create-project.dto";
 import { Student } from "src/entities/student.entity";
 import { Teacher } from "src/entities/teacher.entity";
 import { Course } from "src/entities/course.entity";
-import { throwError } from "rxjs";
-
+import { User } from 'src/entities/user.entity';
 @Injectable()
 export class ProjectsService extends BaseService<Project> {
   constructor(
@@ -25,13 +25,28 @@ async getAllProjectForObject(
   search?: string,
   limit?: number,
   page?: number,
-
-): Promise<{ items: Project[]; total: number; limit?: number; page?: number; teacher_id?: number,course_id?: number,student_id?: number }> {
-    const where: any = {
+  status?:string
+): Promise<{ items: Project[]; total: number; limit?: number; page?: number; teacher_id?: number,course_id?: number,student_id?: number  }> {
+  let where :any = {}
+  if (status === "public" && student_id) {
+    const student = await this.repository.manager.findOne(Student, {
+      where: { id: student_id },
+      relations : { department:true}
+    })
+    if(!student) throw new NotFoundException("Không có quyền truy cập ")
+    where = {
+      session: { department: {id : student?.department?.id} },
+      ...(course_id && { course: { id: course_id } }),
+      
+    };
+  } else {
+     where= {
       teacher: { id: teacher_id },
       ...(course_id && { course: { id: course_id } }),
-      ...(student_id && { student: { id: student_id } }),
+      ...((student_id ) && { student: { id: student_id }  }),
     };
+  }
+  
 
     if (search) {
       where.title = Like(`%${search}%`);
@@ -46,12 +61,14 @@ async getAllProjectForObject(
         options.skip = (page - 1) * limit;
       }
     if (student_id) {
-      options.relations = ['teacher','teacher.user', 'course'];
+      options.relations = ['teacher', 'teacher.user', 'course'];
+      where.status = status ? status:In(['propose','pending', 'approve','public']);
     } else if (teacher_id) { 
-      options.relations = ['student','student.user','student.department', 'course'];
+      options.relations = ['student', 'teacher', 'student.user', 'student.department', 'course'];
+      where.status = status ? status:In(['propose','pending', 'approve','public']);
     } else {
       options.relations = ['teacher', 'teacher.user', 'student', 'student.user', 'student.department', 'course'];
-      where.status = In(['pending', 'approve']);
+      where.status = status ? status:In(['pending', 'approve','public']);
     }
     const [items, total] = await this.projectRepository.findAndCount(options);
     items.forEach(item => {
@@ -71,6 +88,7 @@ async getAllProjectForObject(
       teacher_id,
       student_id,
       course_id,
+
      
     };
   }
@@ -236,7 +254,44 @@ async updateStatus(data: any, type: string): Promise<void> {
   } catch (error) {
     throw new BadRequestException(`Lỗi: ${error.message}`);
   }
+  }
+  
+
+ async publicProject(data: any, type: string): Promise<void> {
+  try {
+    const { id, session_id, user_id } :any= data;
+
+    const user = await this.projectRepository.manager.findOne(User, {
+      where: { id: user_id },
+    });
+
+    if (!user || user.role !== 'admin' || type !== 'admin') {
+      throw new UnauthorizedException('Bạn không có quyền thực hiện hành động này');
+    }
+
+    const project = await this.projectRepository.findOne({
+      where: { id, status: 'approve' },
+    });
+    if (!project) {
+      throw new NotFoundException('Đề tài không hợp lệ hoặc chưa được duyệt');
+    }
+
+    const session = await this.projectRepository.manager.findOne(EnrollmentSession, {
+      where: { id: session_id },
+    });
+    if (!session) {
+      throw new NotFoundException('Đợt đăng ký không tồn tại');
+    }
+
+    project.status = 'public';
+    project.session = session;
+    await this.projectRepository.save(project);
+
+  } catch (error) {
+    throw new InternalServerErrorException(`Lỗi hệ thống: ${error.message}`);
+  }
 }
+
 
 
 

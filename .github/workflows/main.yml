@@ -1,0 +1,32 @@
+name: Gửi Email khi có Push
+
+on:
+  push:
+    branches:
+      - '*'  # Bất kỳ nhánh nào
+
+jobs:
+  send_email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gửi Email khi có Push
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Có commit mới được Push : ${{ github.ref_name }}"
+          body: |
+            Thông báo mới từ GitHub Repo
+
+            Nhánh: ${{ github.ref_name }}
+            Người push: ${{ github.actor }}
+            Commit: ${{ github.event.head_commit.message }}
+            Repository: ${{ github.repository }}
+
+            Hãy kiểm tra ngay để theo dõi sự thay đổi!
+
+          to: ${{ secrets.EMAIL_RECIPIENTS }}
+          from: ${{ secrets.EMAIL_USERNAME }}
