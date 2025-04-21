@@ -5,7 +5,8 @@
         <Button size="small" label="Tất cả" :outlined="statusData == 'public'"
             :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
     </div>
-    <DataTableCustom :title="statusData == 'public' ? 'Danh sách đề tài công bố - đăng ký' : 'Danh sách đề tài đề xuất'"
+    <DataTableCustom :block="statusData == 'public' ? ['toolbar', 'selectAll', 'search'] : []"
+        :title="statusData == 'public' ? 'Danh sách đề tài công bố - đăng ký' : 'Danh sách đề tài đề xuất'"
         :data="projects" :columns="[
             { field: 'title', header: 'Tên đề tài', },
             { field: 'description', header: 'Mô tả' },

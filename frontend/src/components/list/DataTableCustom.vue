@@ -3,18 +3,19 @@
   <div class="w-full flex justify-center py-4">
     <h1 class="text-2xl font-semibold title">{{ title }}</h1>
   </div>
-  <Toolbar class="mb-6">
+  <Toolbar class="mb-6" v-if="blockFuntion('toolbar')">
     <template #start>
-      <Button size="small" severity="contrast" label="Tạo mới" icon="pi pi-plus" class="mr-2 btn-submit"
-        @click="$emit('add')" />
+      <Button v-if="blockFuntion('add')" size="small" severity="contrast" label="Tạo mới" icon="pi pi-plus"
+        class="mr-2 btn-submit" @click="$emit('add')" />
       <Button size="small" v-if="selectedRows.length > 0" label="Delete" icon="pi pi-trash" severity="danger" outlined
         @click="confirmDelete()" />
     </template>
 
     <template #end>
-      <Button size="small" label="Import" class="mr-2" icon="pi pi-plus" severity="secondary"
-        @click="$emit('import')" />
-      <Button size="small" label="Export" icon="pi pi-download" severity="secondary" @click="exportToExcel" />
+      <Button v-if="blockFuntion('import')" size="small" label="Import" class="mr-2" icon="pi pi-plus"
+        severity="secondary" @click="$emit('import')" />
+      <Button v-if="blockFuntion('export')" size="small" label="Export" icon="pi pi-download" severity="secondary"
+        @click="exportToExcel" />
     </template>
   </Toolbar>
   <div class="mx-auto p-5 bg-white rounded-lg border-[#e6e4e4] border-[1px] text-sm">
@@ -22,11 +23,11 @@
       v-model:selection="selectedData" selectionMode="single">
       <template #header>
         <div class="flex flex-wrap gap-2 items-center justify-between">
-          <div class="flex items-center">
+          <div v-if="blockFuntion('selectAll')" class="flex items-center">
             <Checkbox size="small" v-model="selectStatus" @change="toggleSelectAll" binary />
             <label class="ms-2" for="ingredient1"> Chọn tất cả </label>
           </div>
-          <IconField>
+          <IconField v-if="blockFuntion('search')">
             <InputIcon>
               <i class="pi pi-search" />
             </InputIcon>
@@ -34,7 +35,7 @@
           </IconField>
         </div>
       </template>
-      <Column>
+      <Column v-if="blockFuntion('selectAll')">
         <template v-slot:body="{ data: row }">
           <Checkbox size="small" v-model="selectedRows" :value="row.id" @change="updateSelectAll" />
         </template>
@@ -132,6 +133,7 @@ const props = defineProps({
   columns: Array,
   total: Number,
   loading: Boolean,
+  block: Array
 })
 
 const emit = defineEmits(['edit', 'delete', 'add', 'fetch', 'import', 'selectOne', 'selectAll', 'rowSelect'])
@@ -148,6 +150,7 @@ const toggleDropdown = (event, data) => {
   dropdown.value.toggle(event)
 }
 
+
 watch([page, limit, search], ([newPage, newLimit, newSearch]) => {
   emit('fetch', newPage, newLimit, newSearch)
 })
@@ -160,9 +163,14 @@ watch(selectedData, (newSelection) => {
   emit('rowSelect', newSelection)
 })
 
-const hasListener = (name) => {
-  const key = 'on' + name[0].toUpperCase() + name.slice(1)
-  return !!instance.vnode.props?.[key]
+
+const blockFuntion = (key) => {
+  if (props?.block) {
+    return !props.block.includes(key);
+  } else {
+    return true
+  }
+
 }
 
 
