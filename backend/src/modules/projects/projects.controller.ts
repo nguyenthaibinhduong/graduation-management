@@ -57,19 +57,38 @@ export class ProjectsController {
     }
   }
 
+  @Post('public-project/:type')
+  async publicProject(
+    @Param('type') type: string,
+    @Body() data: any,
+  ): Promise<Response<void>> {
+    try {
+      const updatedProject = await this.projectService.publicProject(data,type);
+      return new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS);
+      
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
   @Get()
   async findAll(
     @Query('teacher_id') teacher_id?: number,
     @Query('course_id') course_id?: number,
+    @Query('status') status?: string,
     @Query('student_id') student_id?: number,
     @Query('search') search?: string,
     @Query('limit') limit?: number,
     @Query('page') page?: number,
+    
   ): Promise<
     Response<{ items: Project[]; total: number; limit?: number; page?: number }>
   > {
     try {
-      const projects = await this.projectService.getAllProjectForObject(teacher_id,course_id,student_id,search, limit, page);
+      const projects = await this.projectService.getAllProjectForObject(teacher_id,course_id,student_id,search, limit, page, status);
       return new Response(projects, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

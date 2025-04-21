@@ -1,12 +1,13 @@
 import api from '@/api/api'
 
 const projectService = (resource) => ({
-  fetchAll: async (teacher_id = null,student_id=null, course_id = null,page = 1, limit = 10, search = '') => {
+  fetchAll: async (teacher_id = null,student_id=null, course_id = null,page = 1, limit = 10, search = '',status = null) => {
     const params = {  page, limit }
         if (search) params.search = search
         if (teacher_id) {params.teacher_id = teacher_id}
         if (student_id) params.student_id = student_id
-        if (course_id) params.course_id = course_id
+      if (course_id) params.course_id = course_id
+      if (status) params.status = status
     const { data } = await api.get(`/${resource}`, { params })
 
     return data.data
@@ -22,6 +23,10 @@ const projectService = (resource) => ({
    
   updateStatus: async (payload,type) => {
     return api.post(`/${resource}/update-status/${type}`, payload)
+  },
+
+  public: async (payload,type) => {
+    return api.post(`/${resource}/public-project/${type}`, payload)
   },
    
   update: async (id,payload,type) => {
