@@ -23,5 +23,5 @@ jobs:
             👤 Người push: **${{ github.actor }}**
             📝 Commit: ${{ github.event.head_commit.message }}
             📎 Repo: ${{ github.repository }}
-          to: your_email@example.com
-          from: your_email@example.com
+          to: ${{ secrets.EMAIL_RECIPIENTS }}
+          from: ${{ secrets.EMAIL_USERNAME }}
