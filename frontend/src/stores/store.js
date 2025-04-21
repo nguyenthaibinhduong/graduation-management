@@ -18,6 +18,8 @@ export const useCourseStore = createBaseStore('courses')
 
 export const useEnrollmentStore = createBaseStore('enrollment_sessions')
 
+export const useEvaluationStore = createBaseStore('evaluation-forms')
+
 export const useProjectStore = createProjectStore();
 
 export const useFileStore = createFileStore()

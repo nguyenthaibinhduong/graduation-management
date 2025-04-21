@@ -20,6 +20,10 @@ const projectService = (resource) => ({
     return api.post(`/${resource}/create/${type}`, payload)
   },
    
+  updateStatus: async (payload,type) => {
+    return api.post(`/${resource}/update-status/${type}`, payload)
+  },
+   
   update: async (id,payload,type) => {
     return api.put(`/${resource}/update/${type}/${id}`, payload)
   },

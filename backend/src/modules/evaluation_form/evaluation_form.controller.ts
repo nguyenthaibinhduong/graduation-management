@@ -17,16 +17,16 @@ import { EvaluationForm } from 'src/entities/evaluation_form.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 
-@Controller('departments')
+@Controller('evaluation-forms')
 export class EvaluationFormController {
-  constructor(private readonly departmentService: EvaluationFormService) {}
+  constructor(private readonly EvaluationFormService: EvaluationFormService) {}
 
   @Post()
   async create(
     @Body(new ValidationPipe()) department: CreateEvaluationFormDto,
   ): Promise<Response<EvaluationForm>> {
     try {
-      const newEvaluationForm = await this.departmentService.create(department);
+      const newEvaluationForm = await this.EvaluationFormService.create(department);
       return new Response(newEvaluationForm, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -50,12 +50,12 @@ export class EvaluationFormController {
     }>
   > {
     try {
-      const departments = await this.departmentService.getAll(
+      const form = await this.EvaluationFormService.getAll(
         search,
         limit,
         page,
       );
-      return new Response(departments, HttpStatus.SUCCESS, Message.SUCCESS);
+      return new Response(form, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -67,11 +67,9 @@ export class EvaluationFormController {
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Response<EvaluationForm>> {
     try {
-      const department = await this.departmentService.getById({
-        where: { id },
-      });
-      return department
-        ? new Response(department, HttpStatus.SUCCESS, Message.SUCCESS)
+      const form = await this.EvaluationFormService.getDatailEvaluation(id);
+      return form
+        ? new Response(form, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -81,13 +79,13 @@ export class EvaluationFormController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body(new ValidationPipe()) department: UpdateEvaluationFormDto,
+    @Body(new ValidationPipe()) form: UpdateEvaluationFormDto,
   ): Promise<Response<EvaluationForm>> {
     try {
-      const updatedEvaluationForm = await this.departmentService.update(
+      const updatedEvaluationForm = await this.EvaluationFormService.update(
         id,
         { where: { id } },
-        department,
+        form,
       );
       return updatedEvaluationForm
         ? new Response(updatedEvaluationForm, HttpStatus.SUCCESS, Message.SUCCESS)
@@ -100,7 +98,7 @@ export class EvaluationFormController {
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<Response<void>> {
     try {
-      await this.departmentService.delete(id);
+      await this.EvaluationFormService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -112,7 +110,7 @@ export class EvaluationFormController {
     @Body() ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.departmentService.delete(ids);
+      await this.EvaluationFormService.delete(ids);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

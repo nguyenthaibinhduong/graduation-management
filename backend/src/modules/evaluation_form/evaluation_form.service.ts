@@ -14,7 +14,7 @@ export class EvaluationFormService extends BaseService<EvaluationForm> {
     super(enrollmentSessionRepository);
   }
 
-  async getDatailEvaluation(id: string): Promise<EvaluationForm>{
+  async getDatailEvaluation(id: string | number): Promise<EvaluationForm>{
     try {
       const options:any = {
         where: { id },

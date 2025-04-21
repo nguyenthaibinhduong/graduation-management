@@ -40,6 +40,22 @@ export class ProjectsController {
       );
     }
   }
+  @Post('update-status/:type')
+  async updateStatus(
+    @Param('type') type: string,
+    @Body() data: any,
+  ): Promise<Response<void>> {
+    try {
+      const updatedProject = await this.projectService.updateStatus(data,type);
+      return new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS);
+      
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
 
   @Get()
   async findAll(

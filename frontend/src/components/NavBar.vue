@@ -93,6 +93,10 @@ const items = ref([
         to: '/enrollment-sessions-manangerment'
       },
       {
+        label: 'Phiếu đánh giá',
+        to: '/evaluation-form-manangerment'
+      },
+      {
         label: 'Khoa & Ngành',
         to: '/department-major-manangerment'
       },
