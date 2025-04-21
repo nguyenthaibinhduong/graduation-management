@@ -5,21 +5,21 @@
   </div>
   <Toolbar class="mb-6">
     <template #start>
-      <Button size="small" severity="contrast" label="New" icon="pi pi-plus" class="mr-2 btn-submit"
+      <Button size="small" severity="contrast" label="Tạo mới" icon="pi pi-plus" class="mr-2 btn-submit"
         @click="$emit('add')" />
       <Button size="small" v-if="selectedRows.length > 0" label="Delete" icon="pi pi-trash" severity="danger" outlined
         @click="confirmDelete()" />
     </template>
 
     <template #end>
-      <Button size="small" label="Import" class="mr-2" icon="pi pi-plus" severity="secondary"
-        @click="$emit('import')" />
+      <Button v-if="hasListener('import')" size="small" label="Import" class="mr-2" icon="pi pi-plus"
+        severity="secondary" @click="$emit('import')" />
       <Button size="small" label="Export" icon="pi pi-download" severity="secondary" @click="exportToExcel" />
     </template>
   </Toolbar>
   <div class="mx-auto p-5 bg-white rounded-lg border-[#e6e4e4] border-[1px] text-sm">
-    <DataTable :value="data" scrollable scrollHeight="400px" stripedRows :loading="loading" class="p-datatable-sm"
-      dataKey="id" v-model:selection="selectedData" selectionMode="single">
+    <DataTable :value="data" stripedRows :loading="loading" class="p-datatable-sm" dataKey="id"
+      v-model:selection="selectedData" selectionMode="single">
       <template #header>
         <div class="flex flex-wrap gap-2 items-center justify-between">
           <div class="flex items-center">
@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, useAttrs, watch } from 'vue'
 import dayjs from 'dayjs'
 import {
   Button,
@@ -160,6 +160,10 @@ watch(selectedData, (newSelection) => {
   emit('rowSelect', newSelection)
 })
 
+const hasListener = (name) => {
+  const key = 'on' + name[0].toUpperCase() + name.slice(1)
+  return !!instance.vnode.props?.[key]
+}
 
 
 const getNestedValue = (obj, field) => {

@@ -72,6 +72,7 @@ const newData = ref({
 });
 const maxDate = ref(new Date());
 
+
 onMounted(async () => {
     await projectStore.fetchItems(statusData.value);
 });
