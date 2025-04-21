@@ -16,15 +16,12 @@ import StudentProjectView from '@/views/student/StudentProjectView.vue'
 import ProjectView from '@/views/admin/ProjectView.vue'
 import ProjectDetailView from '@/views/project/ProjectDetailView.vue'
 import EvaluationFormView from '@/views/admin/EvaluationFormView.vue'
-
-
-
+import ScoreView from '@/views/teacher/ScoreView.vue'
 
 // Tự động import các component khi cần thiết (lazy-load)
 
-
 const routes = [
-  { path: '/login', name: 'login', component:LoginView },
+  { path: '/login', name: 'login', component: LoginView },
   {
     path: '/',
     component: DefaultLayout,
@@ -36,16 +33,16 @@ const routes = [
       { path: '/course-manangerment', component: CourseView },
       { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
       { path: '/evaluation-form-manangerment', component: EvaluationFormView },
-       { path: '/project-manangerment', component: ProjectView },
+      { path: '/project-manangerment', component: ProjectView },
       { path: '/profile', component: ProfileView },
       { path: '/account-manangerment', component: UserView },
       { path: '/department-major-manangerment', component: MajorDepartmentView },
       { path: '/teacher-project', component: TeacherProjectView },
       { path: '/student-project', component: StudentProjectView },
       { path: '/project-detail/:id', component: ProjectDetailView },
+      { path: '/score/:id', component: ScoreView },
     ],
   },
-  
 ]
 
 const router = createRouter({
