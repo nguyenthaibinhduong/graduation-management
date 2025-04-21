@@ -186,27 +186,5 @@ export class ScoreService {
     }
   }
 
-  async getScoreByProjectId(projectId: number): Promise<ScoreDetail[]> {
-    try {
-      const project = await this.groupRepository.findOne({
-        where: { id: projectId },
-        relations: ['project'],
-      });
-
-      if (!project) {
-        throw new NotFoundException('Dự án không tồn tại');
-      }
-
-      const scoreDetails = await this.scoreDetailRepository.find({
-        where: { score: { project } },
-        relations: ['score'],
-      });
-
-      return scoreDetails;
-    } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy danh sách điểm');
-    }
-  }
-
   //
 }

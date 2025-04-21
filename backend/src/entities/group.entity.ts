@@ -34,4 +34,12 @@ export class Group {
 
   @OneToOne(() => Score, (score) => score.id)
   score: Score;
+
+  //Group status: pending, approved, rejected
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending',
+  })
+  status: 'pending' | 'approved' | 'rejected';
 }
