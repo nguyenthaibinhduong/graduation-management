@@ -17,11 +17,16 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "Push mới trên nhánh: ${{ github.ref_name }}"
+          subject: "Có commit mới được Push : ${{ github.ref_name }}"
           body: |
-            ✅ Đã có push mới trên nhánh **${{ github.ref_name }}**!
-            👤 Người push: **${{ github.actor }}**
-            📝 Commit: ${{ github.event.head_commit.message }}
-            📎 Repo: ${{ github.repository }}
+            Thông báo mới từ GitHub Repo
+
+            Nhánh: ${{ github.ref_name }}
+            Người push: ${{ github.actor }}
+            Commit: ${{ github.event.head_commit.message }}
+            Repository: ${{ github.repository }}
+
+            Hãy kiểm tra ngay để theo dõi sự thay đổi!
+
           to: ${{ secrets.EMAIL_RECIPIENTS }}
           from: ${{ secrets.EMAIL_USERNAME }}
