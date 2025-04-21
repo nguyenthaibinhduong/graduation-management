@@ -86,7 +86,8 @@ onMounted(async () => {
     if (!user) throw new Error('Không thể lấy thông tin người dùng')
 
     const projectId = route.params.id
-    await projectStore.findItem(projectId, user.id, user.role)
+    const objId = user.teacher?.id || user.student?.id
+    await projectStore.findItem(projectId, objId, user.role)
   } catch (error) {
     console.error('Có lỗi xảy ra:', error)
   }
