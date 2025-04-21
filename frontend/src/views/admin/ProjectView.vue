@@ -6,7 +6,7 @@
             :severity="statusData === 'approve' ? 'primary' : undefined" @click="statusData = 'approve'" />
         <Button size="small" label="Đề tài công bố" :outlined="statusData !== 'public'"
             :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
-        <Button size="small" label="Tất cả" :outlined="statusData !== 'public'"
+        <Button size="small" label="Tất cả" :outlined="statusData !== null"
             :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
     </div>
 
