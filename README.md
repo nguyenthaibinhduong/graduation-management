@@ -1,2 +1,2 @@
 # graduation-management
-Hi Hi
+Hi
