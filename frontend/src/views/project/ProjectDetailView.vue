@@ -23,8 +23,8 @@
             <span>{{ project.teacher?.user?.fullname || "Chưa xác định" }}</span>
           </div>
 
-          <div class="flex items-center gap-2">
-            <label class="font-semibold text-blue-700">Sinh viên thực hiện:</label>
+          <div v-if="project.student?.user?.fullname" class="flex items-center gap-2">
+            <label class="font-semibold text-blue-700">Sinh viên đề xuất:</label>
             <span>{{ project.student?.user?.fullname || "Chưa xác định" }}</span>
           </div>
 
@@ -116,10 +116,10 @@ const statusLabel = (status) => {
 
 const statusClass = (status) => {
   const classes = {
-    propose: "bg-blue-100 text-blue-700 px-2 py-1 rounded",
-    pending: "bg-yellow-100 text-yellow-700 px-2 py-1 rounded",
-    approve: "bg-green-100 text-green-700 px-2 py-1 rounded",
-    public: "bg-purple=100 text-purple-700 px-2 py-1 rounded",
+    propose: "bg-blue-100 text-blue-700 p-2 rounded",
+    pending: "bg-yellow-100 text-yellow-700 p-2 rounded",
+    approve: "bg-green-100 text-green-700 p-2 rounded",
+    public: "bg-purple-100 text-purple-700 p-2 rounded",
   };
   return classes[status] || "";
 };

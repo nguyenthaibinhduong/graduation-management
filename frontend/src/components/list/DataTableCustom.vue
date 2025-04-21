@@ -12,8 +12,8 @@
     </template>
 
     <template #end>
-      <Button v-if="hasListener('import')" size="small" label="Import" class="mr-2" icon="pi pi-plus"
-        severity="secondary" @click="$emit('import')" />
+      <Button size="small" label="Import" class="mr-2" icon="pi pi-plus" severity="secondary"
+        @click="$emit('import')" />
       <Button size="small" label="Export" icon="pi pi-download" severity="secondary" @click="exportToExcel" />
     </template>
   </Toolbar>

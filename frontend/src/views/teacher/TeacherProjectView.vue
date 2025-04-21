@@ -1,4 +1,16 @@
 <template>
+  <div class="w-full flex gap-x-4 p-2 rounded-lg">
+    <Button size="small" label="Đề tài sinh viên" :outlined="statusData !== 'propose'"
+      :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'propose'" />
+    <Button size="small" label="Đề tài chưa duyệt" :outlined="statusData !== 'pending'"
+      :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'pending'" />
+    <Button size="small" label="Đề tài đã duyệt" :outlined="statusData !== 'approve'"
+      :severity="statusData === 'approve' ? 'primary' : undefined" @click="statusData = 'approve'" />
+    <Button size="small" label="Đề tài công bố" :outlined="statusData !== 'public'"
+      :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
+    <Button size="small" label="Tất cả" :outlined="statusData !== 'public'"
+      :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
+  </div>
   <DataTableCustom title="Danh sách đề tài - Giảng viên" :data="projects" :columns="[
     { field: 'title', header: 'Tên đề tài' },
     { field: 'description', header: 'Mô tả' },
@@ -11,7 +23,8 @@
       statuses: [
         { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
         { value: 'pending', label: 'Đang chờ duyệt', class: 'bg-yellow-100 text-yellow-700' },
-        { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' }
+        { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
+        { value: 'public', label: 'Đã công bố', class: 'bg-violet-100 text-violet-700' }
       ]
     }
   ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
@@ -42,6 +55,7 @@ import DataTableCustom from '@/components/list/DataTableCustom.vue'
 import MyInput from '@/components/form/MyInput.vue'
 import MyDrawer from '@/components/drawer/MyDrawer.vue'
 import { useRouter } from 'vue-router'
+import { Button } from 'primevue'
 
 const visibleLeft = ref(false)
 const projectStore = useProjectStore()
@@ -51,6 +65,7 @@ const teacher = ref(null)
 const loading = ref(false)
 const isImport = ref(false)
 const isEditing = ref(false)
+const statusData = ref('propose')
 
 const editedProjectId = ref(null)
 const newData = ref({
@@ -65,7 +80,7 @@ const maxDate = ref(new Date())
 onMounted(async () => {
   await authStore.fetchUser()
   if (authStore?.user?.teacher?.id) {
-    await projectStore.fetchItemsForTeacher(authStore.user.teacher.id)
+    await projectStore.fetchItemsForTeacher(statusData.value, authStore.user.teacher.id)
   }
 })
 watchEffect(() => {
@@ -73,9 +88,12 @@ watchEffect(() => {
   teacher.value = authStore.user?.teacher || null
   newData.value.teacher_id = authStore.user?.teacher?.id || null
 })
-
+watch(statusData, async (newSelection) => {
+  await projectStore.fetchItemsForTeacher(newSelection, authStore.user.teacher.id);
+})
 const fetchProject = async (newPage, newLimit, newSearch) => {
   await projectStore.fetchItemsForTeacher(
+    statusData.value,
     teacher.value?.id ?? null,
     newSearch ? 1 : newPage,
     newSearch ? projectStore.total : newLimit,
@@ -92,7 +110,7 @@ const saveProject = async () => {
     ? await projectStore.updateItem(editedProjectId.value, newData.value, 'teacher')
     : await projectStore.addItem(newData.value, 'teacher')
   if (authStore?.user?.teacher?.id) {
-    await projectStore.fetchItemsForTeacher(authStore.user.teacher.id)
+    await projectStore.fetchItemsForTeacher(statusData.value, authStore.user.teacher.id)
   }
   cancelForm()
 }
@@ -100,7 +118,7 @@ const saveProject = async () => {
 const deleteProject = async (ids) => {
   await projectStore.deleteItem(ids, teacher.value?.id, 'teacher')
   if (authStore?.user?.teacher?.id) {
-    await projectStore.fetchItemsForTeacher(authStore.user.teacher.id)
+    await projectStore.fetchItemsForTeacher(statusData.value, authStore.user.teacher.id)
   }
 }
 

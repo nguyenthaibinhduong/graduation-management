@@ -27,11 +27,26 @@ async getAllProjectForObject(
   page?: number,
   status?:string
 ): Promise<{ items: Project[]; total: number; limit?: number; page?: number; teacher_id?: number,course_id?: number,student_id?: number  }> {
-    const where: any = {
+  let where :any = {}
+  if (status === "public" && student_id) {
+    const student = await this.repository.manager.findOne(Student, {
+      where: { id: student_id },
+      relations : { department:true}
+    })
+    if(!student) throw new NotFoundException("Không có quyền truy cập ")
+    where = {
+      session: { department: {id : student?.department?.id} },
+      ...(course_id && { course: { id: course_id } }),
+      
+    };
+  } else {
+     where= {
       teacher: { id: teacher_id },
       ...(course_id && { course: { id: course_id } }),
-      ...(student_id && { student: { id: student_id } }),
+      ...((student_id ) && { student: { id: student_id }  }),
     };
+  }
+  
 
     if (search) {
       where.title = Like(`%${search}%`);
@@ -46,12 +61,14 @@ async getAllProjectForObject(
         options.skip = (page - 1) * limit;
       }
     if (student_id) {
-      options.relations = ['teacher','teacher.user', 'course'];
+      options.relations = ['teacher', 'teacher.user', 'course'];
+      where.status = status ? status:In(['propose','pending', 'approve','public']);
     } else if (teacher_id) { 
-      options.relations = ['student','student.user','student.department', 'course'];
+      options.relations = ['student', 'teacher', 'student.user', 'student.department', 'course'];
+      where.status = status ? status:In(['propose','pending', 'approve','public']);
     } else {
       options.relations = ['teacher', 'teacher.user', 'student', 'student.user', 'student.department', 'course'];
-      where.status = status ?? In(['pending', 'approve','public']);
+      where.status = status ? status:In(['pending', 'approve','public']);
     }
     const [items, total] = await this.projectRepository.findAndCount(options);
     items.forEach(item => {
