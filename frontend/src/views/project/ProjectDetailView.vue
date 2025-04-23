@@ -55,6 +55,9 @@
 
             <Button @click="Public" class="btn-submit p-2 rounded-md"
               v-if="project?.status == 'approve' && authStore.user?.role == 'admin'">Công bố đề tài</Button>
+
+            <Button @click="Public" class="btn-submit p-2 rounded-md"
+              v-if="project?.status == 'public' && authStore.user?.role == 'student'">Đăng ký thực hiện đề tài</Button>
           </div>
         </div>
       </template>
