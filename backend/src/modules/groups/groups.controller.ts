@@ -10,6 +10,8 @@ import {
   HttpException,
   Query,
   Put,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -17,15 +19,19 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { Response } from 'src/common/globalClass';
 import { Group } from 'src/entities/group.entity';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('groups')
+@UseGuards(JwtAuthGuard)
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
+
   @Post()
-  async create(@Body() createGroupDto: any): Promise<Response<Group>> {
+  async create(@Body() createGroupDto: any, @Request() request: any): Promise<Response<Group>> {
     try {
-      const newGroup = await this.groupsService.createGroup(createGroupDto);
+      
+      const newGroup = await this.groupsService.createGroup(createGroupDto,request.user?.id);
       return new Response(newGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

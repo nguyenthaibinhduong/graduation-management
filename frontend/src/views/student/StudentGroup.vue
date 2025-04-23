@@ -12,14 +12,12 @@
             <div class="w-full grid grid-cols-2 text-sm gap-6">
                 <div class="flex flex-col gap-4">
                     <h2 class="text-xl font-bold mb-4 text-center">Thông tin sinh viên 1</h2>
-                    <MyInput v-model="newStudent1.code" title="Mã sinh viên 1" id="student_code"
-                        :disabled="isEditing" />
-                    <MyInput v-model="newStudent1.name" title="Tên sinh viên" id="student_name" />
+                    <MyInput v-model="newStudent1.code" title="Mã sinh viên" id="student_code" disabled />
+                    <MyInput disabled v-model="newStudent1.name" title="Tên sinh viên" id="student_name" />
                 </div>
                 <div class="flex flex-col gap-4 pe-1">
                     <h2 class="text-xl font-bold mb-4 text-center">Thông tin sinh viên 2</h2>
-                    <MyInput v-model="newStudent2.code" title="Mã sinh viên 1" id="student_code"
-                        :disabled="isEditing" />
+                    <MyInput v-model="newStudent2.code" title="Mã sinh viên" id="student_code" :disabled="isEditing" />
                     <MyInput v-model="newStudent2.name" title="Tên sinh viên" id="student_name" />
                 </div>
             </div>
@@ -35,11 +33,12 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import MyInput from "@/components/form/MyInput.vue";
 import { Button, } from "primevue";
 import { useGroupStore } from "@/stores/store";
 import { showToast } from "@/utils/toast";
+import { useAuthStore } from "@/stores/auth";
 
 const newStudent1 = ref({
     code: "",
@@ -47,16 +46,24 @@ const newStudent1 = ref({
 });
 const newStudent2 = ref({
     code: "",
-    name: "",
+
 });
 
 const groupData = ref({
     name: "",
+    user_id: null,
     student_codes: []
 })
 
 
 const groupStore = useGroupStore()
+const authStore = useAuthStore()
+onMounted(async () => {
+    await authStore.fetchUser()
+    newStudent1.value.code = authStore.user?.student?.code
+    newStudent1.value.name = authStore.user?.fullname
+})
+
 const handleCreate = async () => {
     if (!groupData.value?.name) {
         showToast("Chưa điền tên nhóm đăng ký", "error");
@@ -75,7 +82,7 @@ const handleCreate = async () => {
             newStudent2.value?.code || null
         ]
         console.log(groupData.value)
-        // await groupStore.create(groupData.value)
+        await groupStore.addItem(groupData.value)
     }
 
 
