@@ -20,7 +20,7 @@ import { Project } from 'src/entities/project.entity';
 import { Response } from 'src/common/globalClass';
 
 @Controller('projects')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class ProjectsController {
   constructor(private readonly projectService: ProjectsService) {}
 

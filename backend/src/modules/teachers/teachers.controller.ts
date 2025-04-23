@@ -21,7 +21,7 @@ import { Response } from 'src/common/globalClass';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Controller('teachers')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class TeachersController {
   constructor(private readonly teacherService: TeachersService) {}
 

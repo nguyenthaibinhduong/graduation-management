@@ -9,6 +9,7 @@ import {
   Query,
   HttpException,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { EvaluationFormService } from './evaluation_form.service';
 import { CreateEvaluationFormDto } from './dto/create-evaluation_form.dto';
@@ -16,8 +17,10 @@ import { UpdateEvaluationFormDto } from './dto/update-evaluation_form.dto';
 import { EvaluationForm } from 'src/entities/evaluation_form.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('evaluation-forms')
+  @UseGuards(JwtAuthGuard)
 export class EvaluationFormController {
   constructor(private readonly EvaluationFormService: EvaluationFormService) {}
 

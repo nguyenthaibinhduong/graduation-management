@@ -8,6 +8,7 @@ import {
   Delete,
   HttpException,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ScoreService } from './score.service';
 import { CreateScoreDto } from './dto/create-score.dto';
@@ -15,8 +16,10 @@ import { UpdateScoreDto } from './dto/update-score.dto';
 import { CreateScoreDetailDto } from './dto/create_score_detail.dto';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('score')
+@UseGuards(JwtAuthGuard)
 export class ScoreController {
   constructor(private readonly scoreService: ScoreService) {}
 

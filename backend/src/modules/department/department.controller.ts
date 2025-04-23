@@ -9,6 +9,7 @@ import {
   Query,
   HttpException,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
@@ -16,8 +17,10 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Department } from 'src/entities/department.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('departments')
+@UseGuards(JwtAuthGuard)
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
 

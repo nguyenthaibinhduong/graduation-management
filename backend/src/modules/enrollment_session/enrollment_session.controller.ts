@@ -20,7 +20,7 @@ import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { Response } from 'src/common/globalClass';
 
 @Controller('enrollment_sessions')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class EnrollmentSessionsController {
   constructor(private readonly enrollmentSessionService: EnrollmentSessionsService) {}
 
