@@ -25,11 +25,8 @@ export class Teacher {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToMany(() => Committee, (committee) => committee.id)
-  @JoinTable({
-    name: 'teacher_committees',
-  })
-  committee: Committee[];
+  @ManyToMany(() => Committee, (committee) => committee.teachers)
+  committees: Committee[];
 
   @ManyToMany(() => Position, (position) => position.teachers)
   @JoinTable({

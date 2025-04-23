@@ -26,12 +26,16 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
-
   @Post()
-  async create(@Body() createGroupDto: any, @Request() request: any): Promise<Response<Group>> {
+  async create(
+    @Body() createGroupDto: any,
+    @Request() request: any,
+  ): Promise<Response<Group>> {
     try {
-      
-      const newGroup = await this.groupsService.createGroup(createGroupDto,request.user?.id);
+      const newGroup = await this.groupsService.createGroup(
+        createGroupDto,
+        request.user?.id,
+      );
       return new Response(newGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -132,6 +136,21 @@ export class GroupsController {
         projectId,
       );
       return new Response(registeredGroup, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Get('get-group-by-user-id/:userId')
+  async getGroupByUserId(
+    @Param('userId', new ValidationPipe({ transform: true })) userId: number,
+  ): Promise<Response<Group>> {
+    try {
+      const group = await this.groupsService.getGroupByUserId(userId);
+      return new Response(group, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },

@@ -185,6 +185,4 @@ export class ScoreService {
       throw new InternalServerErrorException('Lỗi khi lấy danh sách điểm');
     }
   }
-
-  //
 }
