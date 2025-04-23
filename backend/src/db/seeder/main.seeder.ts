@@ -5,11 +5,7 @@ import { DepartmentFactory, MajorFactory } from '../factory/majors.factory';
 import { Major } from 'src/entities/major.entity';
 import { Department } from 'src/entities/department.entity';
 import { Student } from 'src/entities/student.entity';
-import {
-  GroupFactory,
-  StudentFactory,
-  StudentGroupFactory,
-} from '../factory/student.factory';
+import { GroupFactory, StudentFactory } from '../factory/student.factory';
 import { Position } from 'src/entities/position.entity';
 import { PositionFactory } from '../factory/position.factory';
 import { Group } from 'src/entities/group.entity';
@@ -59,28 +55,6 @@ export class MainSeeder {
     );
     await studRepo.save(students);
     console.log(`✅ Seeded ${students.length} students.`);
-
-    // Seed Groups
-    const groups = await GroupFactory.createMany(5);
-    await groupRepo.save(groups);
-    console.log(`✅ Seeded ${groups.length} groups.`);
-
-    // Fetch Students
-    const student = await studRepo.find({ relations: ['groups'] });
-    console.log(`📌 Found ${student.length} students.`);
-
-    // Fetch Groups
-    const group = await groupRepo.find({ relations: ['students'] });
-    console.log(`📌 Found ${group.length} groups.`);
-
-    // Seed Student-Group Relationships
-    const studentGroups = StudentGroupFactory.createMany(groups, students);
-
-    for (const { group, students: assignedStudents } of studentGroups) {
-      group.students = assignedStudents;
-      await groupRepo.save(group);
-    }
-    console.log('✅ Seeded student-group relationships.');
 
     await AppDataSource.destroy();
     console.log('🎉 Database seeding completed successfully!');

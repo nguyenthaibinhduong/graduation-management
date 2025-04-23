@@ -23,11 +23,9 @@ export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
   @Post()
-  async create(
-    @Body(new ValidationPipe()) createGroupDto: CreateGroupDto,
-  ): Promise<Response<Group>> {
+  async create(@Body() createGroupDto: any): Promise<Response<Group>> {
     try {
-      const newGroup = await this.groupsService.create(createGroupDto);
+      const newGroup = await this.groupsService.createGroup(createGroupDto);
       return new Response(newGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -108,6 +106,26 @@ export class GroupsController {
     try {
       const deletedGroups = await this.groupsService.delete(ids);
       return new Response(deletedGroups, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Post('register-project')
+  async registerProject(
+    @Body('groupId', new ValidationPipe({ transform: true })) groupId: number,
+    @Body('projectId', new ValidationPipe({ transform: true }))
+    projectId: number,
+  ): Promise<Response<void>> {
+    try {
+      const registeredGroup = await this.groupsService.registerProject(
+        groupId,
+        projectId,
+      );
+      return new Response(registeredGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },

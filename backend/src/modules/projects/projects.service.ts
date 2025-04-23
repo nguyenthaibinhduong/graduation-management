@@ -384,6 +384,4 @@ export class ProjectsService extends BaseService<Project> {
       throw new BadRequestException(`Lỗi khi xóa đề tài: ${error.message}`);
     }
   }
-
-  // Đăng ký đề tài
 }
