@@ -12,10 +12,11 @@ import MajorDepartmentView from '@/views/admin/MajorDepartmentView.vue'
 import CourseView from '@/views/admin/CourseView.vue'
 import EnrollmentView from '@/views/admin/EnrollmentView.vue'
 import TeacherProjectView from '@/views/teacher/TeacherProjectView.vue'
-import StudentProjectView from '@/views/student/StudentProjectView.vue'
 import ProjectView from '@/views/admin/ProjectView.vue'
 import ProjectDetailView from '@/views/project/ProjectDetailView.vue'
 import EvaluationFormView from '@/views/admin/EvaluationFormView.vue'
+import StudentProjectView from '@/views/student/StudentProjectView.vue'
+import StudentGroup from '@/views/student/StudentGroup.vue'
 import ScoreView from '@/views/teacher/ScoreView.vue'
 
 // Tự động import các component khi cần thiết (lazy-load)
@@ -29,6 +30,7 @@ const routes = [
     children: [
       { path: '/', component: DashboardView },
       { path: '/student-manangerment', component: StudentView },
+       { path: '/group-manangerment', component: StudentGroup },
       { path: '/teacher-manangerment', component: TeacherView },
       { path: '/course-manangerment', component: CourseView },
       { path: '/enrollment-sessions-manangerment', component: EnrollmentView },

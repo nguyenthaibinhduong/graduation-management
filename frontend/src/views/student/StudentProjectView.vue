@@ -41,6 +41,7 @@
                     :options="teachers" optionLabel="user.fullname" optionValue="id" />
             </div>
 
+
         </div>
         <div class="w-full flex flex-col mt-10">
             <MyInput type="editor" v-model="newData.content" title="Nội dung" id="content" editorStyle="height: 320px"

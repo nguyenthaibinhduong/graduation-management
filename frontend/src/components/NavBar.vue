@@ -88,7 +88,8 @@ onMounted(async () => {
     items.value.push({
       label: 'Sinh viên',
       items: [
-        { label: 'Đề tài', to: '/student-project' }
+        { label: 'Đề tài', to: '/student-project' },
+        { label: 'Nhóm khóa luận', to: '/group-manangerment' }
       ]
     });
   }

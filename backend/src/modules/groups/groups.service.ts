@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { throwError } from 'rxjs';
 import { BaseService } from 'src/common/base.service';
 import { Group } from 'src/entities/group.entity';
 import { Student } from 'src/entities/student.entity';
+import { User } from 'src/entities/user.entity';
 import { In, Repository } from 'typeorm';
 
 @Injectable()
@@ -15,11 +15,18 @@ export class GroupsService extends BaseService<Group> {
     super(groupRepository);
   }
 
-  async createGroup(data: any): Promise<Group> {
+  async createGroup(data: any,user_id:any): Promise<Group> {
     if (!data?.student_codes || data.student_codes.length === 0) {
       throw new Error('Không thể thêm nhóm mà không có sinh viên');
     }
-
+    const user:any = await this.repository.manager.findOne(User, {
+      where: { id: user_id },
+      relations : {student:true}
+    })
+     
+    if (!data.student_codes.includes(user?.student?.code)) {
+      throw new Error('Bạn chỉ được thêm nhóm có thông tin của bạn');
+    }
     // Find students by their codes
     const students = await this.repository.manager.find(Student, {
       where: { code: In(data.student_codes) },
@@ -33,7 +40,7 @@ export class GroupsService extends BaseService<Group> {
         (code: string) => !foundCodes.includes(code),
       );
       throw new Error(
-        `Các sinh viên với mã sau không tồn tại: ${missingCodes.join(', ')}`,
+        `Sinh viên  mã  ${missingCodes.join(', ')}` + ' không tồn tại',
       );
     }
 
