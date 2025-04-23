@@ -15,6 +15,7 @@ export class StudentFactory {
       const student = new Student();
       student.code = user.username; // Lấy mã sinh viên từ username của User
       student.user = user;
+      student.group = null; // Chưa có nhóm
       student.department =
         departments[Math.floor(Math.random() * departments.length)];
       student.major = majors[Math.floor(Math.random() * majors.length)];
@@ -26,8 +27,8 @@ export class StudentFactory {
 export class GroupFactory {
   static create(totalMember: number): Group {
     const group = new Group();
-    group.name = faker.company.name(); // Generate a random group name
-    group.total_member = totalMember; // Set the total number of members
+    group.name = faker.company.name();
+    group.total_member = totalMember;
     return group;
   }
 
@@ -36,31 +37,5 @@ export class GroupFactory {
       const totalMember = faker.number.int({ min: 2, max: 4 });
       return this.create(totalMember);
     });
-  }
-}
-
-export class StudentGroupFactory {
-  static createMany(
-    groups: Group[],
-    students: Student[],
-  ): { group: Group; students: Student[] }[] {
-    return groups.map((group) => {
-      const assignedStudents = this.getRandomStudents(
-        students,
-        group.total_member,
-      );
-      return {
-        group,
-        students: assignedStudents,
-      };
-    });
-  }
-
-  private static getRandomStudents(
-    students: Student[],
-    count: number,
-  ): Student[] {
-    const shuffled = [...students].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
   }
 }

@@ -11,5 +11,5 @@ export class CreateScoreDetailDto {
   scoreId: number;
 
   @IsNotEmpty()
-  studentId: number;
+  studentId: any;
 }

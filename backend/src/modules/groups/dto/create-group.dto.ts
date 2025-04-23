@@ -1,10 +1,13 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateScoreDto {
+export class CreateGroupDto {
   @IsNotEmpty()
   @IsString()
-  comment: string;
+  name: string;
+
+  @IsNotEmpty()
+  total_member: number;
 
   @IsOptional()
-  total_score: number;
+  projectId: any;
 }

@@ -33,11 +33,7 @@ export class Student {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToMany(() => Group, (group) => group.students)
-  @JoinTable({
-    name: 'student_groups',
-    joinColumn: { name: 'student_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'group_id', referencedColumnName: 'id' },
-  })
-  groups: Group[];
+  @ManyToOne(() => Group, (group) => group.students, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'group_id' })
+  group?: Group;
 }
