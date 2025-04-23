@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -28,8 +29,11 @@ export class Committee {
   @ManyToMany(() => Project, (project) => project.id)
   project?: Project[];
 
-  @ManyToMany(() => Teacher, (teacher) => teacher.id)
-  teacher: Teacher[];
+  @ManyToMany(() => Teacher, (teacher) => teacher.committees)
+  @JoinTable({
+    name: 'teacher_committees',
+  })
+  teachers: Teacher[];
 
   @Column({ type: 'varchar', length: 255 })
   name: string;

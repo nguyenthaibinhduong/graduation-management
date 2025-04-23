@@ -91,4 +91,14 @@ export class GroupsService extends BaseService<Group> {
 
     return this.repository.save(group);
   }
+  async getGroupByUserId(userId: number): Promise<Group> {
+    const student = await this.repository.manager.findOne(Student, {
+      where: { id: userId },
+      relations: { group: true },
+    });
+    if (!student) {
+      throw new Error('Sinh viên không tồn tại');
+    }
+    return student.group ?? null; // Null = chưa có nhóm
+  }
 }

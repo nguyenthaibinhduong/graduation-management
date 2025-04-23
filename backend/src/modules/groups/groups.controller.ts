@@ -17,6 +17,7 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { Response } from 'src/common/globalClass';
 import { Group } from 'src/entities/group.entity';
+import { UsersService } from '../users/users.service';
 
 @Controller('groups')
 export class GroupsController {
@@ -126,6 +127,21 @@ export class GroupsController {
         projectId,
       );
       return new Response(registeredGroup, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Get('get-group-by-user-id/:userId')
+  async getGroupByUserId(
+    @Param('userId', new ValidationPipe({ transform: true })) userId: number,
+  ): Promise<Response<Group>> {
+    try {
+      const group = await this.groupsService.getGroupByUserId(userId);
+      return new Response(group, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
