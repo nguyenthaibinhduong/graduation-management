@@ -18,6 +18,7 @@ import EvaluationFormView from '@/views/admin/EvaluationFormView.vue'
 import StudentProjectView from '@/views/student/StudentProjectView.vue'
 import StudentGroup from '@/views/student/StudentGroup.vue'
 import ScoreView from '@/views/teacher/ScoreView.vue'
+import EvaluationFormDetail from '@/views/admin/EvaluationFormDetail.vue'
 
 // Tự động import các component khi cần thiết (lazy-load)
 
@@ -35,6 +36,7 @@ const routes = [
       { path: '/course-manangerment', component: CourseView },
       { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
       { path: '/evaluation-form-manangerment', component: EvaluationFormView },
+       { path: '/evaluation-form-detail/:id', component: EvaluationFormDetail },
       { path: '/project-manangerment', component: ProjectView },
       { path: '/profile', component: ProfileView },
       { path: '/account-manangerment', component: UserView },

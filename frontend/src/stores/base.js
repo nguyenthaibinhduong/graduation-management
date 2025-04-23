@@ -42,6 +42,6 @@ export function createBaseStore(entity) {
     }
     
 
-    return { items,item, total, fetchItems, addItem, updateItem, deleteItem }
+    return { items,item, total, fetchItems, addItem, updateItem, deleteItem,findItem }
   })
 }

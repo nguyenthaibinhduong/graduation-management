@@ -23,10 +23,10 @@ export class EvaluationFormController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) department: CreateEvaluationFormDto,
-  ): Promise<Response<EvaluationForm>> {
+    @Body(new ValidationPipe()) data: CreateEvaluationFormDto,
+  ): Promise<Response<void>> {
     try {
-      const newEvaluationForm = await this.EvaluationFormService.create(department);
+      const newEvaluationForm = await this.EvaluationFormService.createEvaluation(data);
       return new Response(newEvaluationForm, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
