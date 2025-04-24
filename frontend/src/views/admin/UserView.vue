@@ -7,13 +7,13 @@
     { field: 'role', header: 'Vai trò', sortable: true },
   ]" :total="userStore?.total" :loading="loading" @fetch="fetchUser" @add="addUser" @edit="editUser"
     @delete="deleteUser" />
-  <Drawer class="w-2/5" v-model:visible="visibleLeft" :header="isEditing ? 'Sửa giảng viên' : 'Thêm giảng viên'"
+  <Drawer class="w-2/5" v-model:visible="visibleLeft" :header="isEditing ? 'Sửa tài khoản' : 'Thêm tài khoản'"
     position="right">
     <div class="grid grid-cols-1 gap-5 w-full">
       <div class="p-field mb-2 mt-2">
         <div class="flex flex-col gap-2">
-          <label for="name">Email</label>
-          <InputText class="w-full" id="name" v-model="newUser.email" />
+          <label for="name">Tài khoản </label>
+          <InputText class="w-full" id="name" v-model="newUser.username" />
         </div>
       </div>
       <div class="p-field mb-2">
@@ -50,7 +50,7 @@ const users = ref([]);
 const loading = ref(false);
 const isEditing = ref(false);
 const editedUserId = ref(null);
-const newUser = ref({ name: '', email: '', role: '' });
+const newUser = ref({ username: '', password: '', role: '' });
 
 onMounted(() => userStore.fetchItems());
 watchEffect(() => {

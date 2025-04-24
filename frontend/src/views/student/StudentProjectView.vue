@@ -2,7 +2,7 @@
     <div class="w-full flex gap-x-4 p-2 rounded-lg">
         <Button size="small" label="Đề tài có thể đăng ký " :outlined="statusData !== 'public'"
             :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
-        <Button size="small" label="Tất cả" :outlined="statusData == 'public'"
+        <Button size="small" label="Đề tài đề xuất" :outlined="statusData == 'public'"
             :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
     </div>
     <DataTableCustom :block="statusData == 'public' ? ['toolbar', 'selectAll', 'search'] : []"
