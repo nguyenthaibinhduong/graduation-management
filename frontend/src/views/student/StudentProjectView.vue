@@ -5,34 +5,34 @@
         <Button size="small" label="Đề tài đề xuất" :outlined="statusData == 'public'"
             :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
     </div>
-    <DataTableCustom :block="statusData == 'public' ? ['toolbar', 'selectAll', 'search'] : []" :title="statusData == 'public'
-            ? 'Danh sách đề tài công bố - đăng ký'
-            : 'Danh sách đề tài đề xuất'
+    <DataTableCustom v-if() :block="statusData == 'public' ? ['toolbar', 'selectAll', 'search'] : []" :title="statusData == 'public'
+        ? 'Danh sách đề tài công bố - đăng ký'
+        : 'Danh sách đề tài đề xuất'
         " :data="projects" :columns="[
-        { field: 'title', header: 'Tên đề tài' },
-        { field: 'description', header: 'Mô tả' },
-        { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
-        { field: 'course.name', header: 'Học kỳ' },
-        {
-            field: 'status',
-            header: 'Trạng thái',
-            type: 'status',
-            statuses: [
-                { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
-                {
-                    value: 'pending',
-                    label: 'Đang chờ duyệt',
-                    class: 'bg-yellow-100 text-yellow-700',
-                },
-                { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
-                {
-                    value: 'public',
-                    label: 'Đã công bố',
-                    class: 'bg-violet-100 text-violet-700',
-                },
-            ],
-        },
-    ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
+            { field: 'title', header: 'Tên đề tài' },
+            { field: 'description', header: 'Mô tả' },
+            { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
+            { field: 'course.name', header: 'Học kỳ' },
+            {
+                field: 'status',
+                header: 'Trạng thái',
+                type: 'status',
+                statuses: [
+                    { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
+                    {
+                        value: 'pending',
+                        label: 'Đang chờ duyệt',
+                        class: 'bg-yellow-100 text-yellow-700',
+                    },
+                    { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
+                    {
+                        value: 'public',
+                        label: 'Đã công bố',
+                        class: 'bg-violet-100 text-violet-700',
+                    },
+                ],
+            },
+        ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
         @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail" />
 
     <MyDrawer class="w-full" title="đề tài đề xuất" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveProject"

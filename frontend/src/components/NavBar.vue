@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth';
-import { Button, PanelMenu, Badge, TieredMenu, Menu } from 'primevue';
+import { Button, Badge, Menu } from 'primevue';
 import { onMounted, ref } from 'vue';
 
 // Trạng thái mở/đóng của các menu
@@ -162,16 +162,16 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="relative bg-white" :class="{ 'w-[18vw]': isNavbarOpen, 'w-[50px]': !isNavbarOpen }">
+  <div class="relative bg-white" :class="{ 'w-[18vw]': isNavbarOpen, 'w-[0px]': !isNavbarOpen }">
     <!-- Nút toggle -->
     <Button severity="secondary" @click="toggleNavbar" :class="[
       'absolute -right-0 w-[38px] h-[38px] rounded-full top-5 flex items-center justify-center transition-all duration-300 hover:scale-110 text-blue-600',
       {
         'me-2': isNavbarOpen,
-        'me-1': !isNavbarOpen
+        'left-[20px] bg-blue-800 text-white': !isNavbarOpen
       }
     ]">
-      <i :class="isNavbarOpen ? 'pi pi-angle-left' : 'pi pi-angle-right'" class="text-xl"></i>
+      <i :class="isNavbarOpen ? 'pi pi-angle-left' : 'pi pi-bars'" class="text-xl"></i>
     </Button>
 
     <div class="h-[100%] min-h-[100vh] shadow-[0_0_20px_0_rgba(0,0,0,0.1)] py-5  z-100 pt-5 overflow-hidden">

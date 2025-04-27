@@ -30,10 +30,11 @@ export class AuthController {
   // @UseGuards(LocalAuthGuard)
   @Post('/login')
   async login(@Body() body: { username: string; password: string ,captcha: string }, @Req() req: Require, @Res() res: Response) {
-    try {
+     try {
       
-      const ip = req.ip
-      const ipv4 = ip.split(':').slice(-1)[0];
+      const ip = req.ip;
+      const ipv4 = ip.includes('::1') ? '127.0.0.1' : ip;  // Thay ::1 bằng 127.0.0.1 nếu cần
+
       const user = await this.userService.validateUser(body.username,body.password,ipv4,body.captcha);
       if (!user) {
             throw new UnauthorizedException('Thông tin đăng nhập không đúng');
