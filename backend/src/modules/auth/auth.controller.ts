@@ -8,6 +8,7 @@ import {
   Req,
   Request,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -26,10 +27,22 @@ export class AuthController {
   register(@Body() userData: any) {
     return this.userService.register(userData);
   }
-  @UseGuards(LocalAuthGuard)
+  // @UseGuards(LocalAuthGuard)
   @Post('/login')
-  login(@Request() request: any, @Res() res: Response) {
-    return this.authService.login(request.user, res);
+  async login(@Body() body: { username: string; password: string ,captcha: string }, @Req() req: Require, @Res() res: Response) {
+    try {
+      
+      const ip = req.ip
+      const ipv4 = ip.split(':').slice(-1)[0];
+      const user = await this.userService.validateUser(body.username,body.password,ipv4,body.captcha);
+      if (!user) {
+            throw new UnauthorizedException('Thông tin đăng nhập không đúng');
+      }
+      return this.authService.login(user, res);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+    
   }
   @UseGuards(JwtAuthGuard)
   @Get('me')

@@ -9,8 +9,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly UserService: UsersService) {
     super({ usernameField: 'username' });
   }
-  async validate(username: string, password: string) {
-    const user = await this.UserService.validateUser(username, password);
+  async validate(username: string, password: string, ipAddress:string) {
+    const user = await this.UserService.validateUser(username, password,ipAddress,'');
     if (!user) {
       throw new UnauthorizedException('Thông tin đăng nhập không đúng');
     }

@@ -16,6 +16,7 @@ import { Position } from 'src/entities/position.entity';
 import { EvaluationForm } from 'src/entities/evaluation_form.entity';
 import { Committee } from 'src/entities/committee.entity';
 import { ScoreDetail } from 'src/entities/score_detail.entity';
+import { LoginAttempt } from 'src/entities/login_attempts.entity';
 // Load biến môi trường từ file .env
 dotenv.config();
 
@@ -46,6 +47,7 @@ export const AppDataSource = new DataSource({
     EvaluationForm,
     Committee,
     Position,
+    LoginAttempt
   ],
   subscribers: [],
 });

@@ -13,7 +13,7 @@
     <!-- Login form on the right -->
     <div class="w-1/2 flex items-center justify-center">
 
-      <Card class="w-[30rem] bg-white shadow-xl rounded-2xl px-6 py-8">
+      <Card class="w-[30rem] bg-white shadow-xl rounded-2xl px-6 py-2">
 
         <template #title>
           <div class="w-full flex justify-center">
@@ -26,15 +26,18 @@
 
         <template #content>
           <form @submit.prevent="handleLogin" class="flex flex-col gap-4 mt-5">
-            <FloatLabel class="mb-5">
+            <FloatLabel class="mb-2">
               <label for="username">Tên đăng nhập</label>
               <InputText size="large" id="username" v-model="username" type="text" required class="w-full" />
             </FloatLabel>
 
-            <FloatLabel class="mb-5">
+            <FloatLabel class="mb-2">
               <label for="password">Mật khẩu</label>
               <InputText size="large" id="password" v-model="password" type="password" required class="w-full" />
             </FloatLabel>
+            <!-- Google reCAPTCHA widget -->
+
+            <div class="g-recaptcha w-full" :data-sitekey="siteKey"></div>
 
             <Button type="submit" label="ĐĂNG NHẬP" class="mt-2 w-full btn-submit h-[4rem] text-[1.2rem]" />
 
@@ -56,8 +59,9 @@
 
 <script setup>
 import { useAuthStore } from "@/stores/auth";
+import { showToast } from "@/utils/toast";
 import { Card, Button, InputText, FloatLabel } from "primevue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const username = ref("");
@@ -65,14 +69,31 @@ const password = ref("");
 const errorMessage = ref("");
 const authStore = useAuthStore();
 const router = useRouter();
+const siteKey = "6LfrVyYrAAAAANAgXCLa_uRcjyIjkcdML8QEskJU";
+
+onMounted(() => {
+  const script = document.createElement("script");
+  script.src = "https://www.google.com/recaptcha/api.js";
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+});
 
 const handleLogin = async () => {
+  const recaptchaResponse = grecaptcha.getResponse();
+
+  // Kiểm tra nếu người dùng chưa hoàn tất reCAPTCHA
+  if (!recaptchaResponse) {
+    showToast("Vui lòng xác minh rằng bạn không phải là robot.", 'error')
+    return
+  }
   try {
-    await authStore.login(username.value, password.value);
+    await authStore.login(username.value, password.value, recaptchaResponse);
     router.push("/");
   } catch (error) {
     errorMessage.value = "Email hoặc mật khẩu không đúng!";
   }
+  grecaptcha.reset();
 };
 </script>
 

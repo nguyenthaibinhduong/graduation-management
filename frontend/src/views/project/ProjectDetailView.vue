@@ -35,7 +35,7 @@
         </div>
         <h2 class="w-full text-center font-bold text-2xl py-5">Nội dung</h2>
         <div class="w-full border border-gray-400 p-5 rounded-lg">
-          <span class="mt-10" v-html="project.content || 'Chưa cập nhật'"></span>
+          <span class="mt-10" v-html="safeHtml(project?.content) || 'Chưa cập nhật'"></span>
         </div>
       </template>
       <template #footer>
@@ -73,6 +73,11 @@ import { useAuthStore } from "@/stores/auth";
 import { Card } from "primevue";
 import MyInput from "@/components/form/MyInput.vue";
 import { showToast } from "@/utils/toast";
+import DOMPurify from 'dompurify';
+
+
+const safeHtml = (rawHtml) => { return DOMPurify.sanitize(rawHtml) };
+
 
 const authStore = useAuthStore();
 const projectStore = useProjectStore();

@@ -8,13 +8,15 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 
+
 @Injectable()
 export class AuthService {
   constructor(
+   
     private readonly userService: UsersService,
     private readonly JwtService: JwtService,
   ) {}
-  async login(user: any, res: Response) {
+  async login(user: any, res: Response ) {
     const payload = { id: user.id, username: user.username, role: user.role };
     // 🔐 Tạo Access Token (Hết hạn trong 15 phút)
     const accessToken = this.JwtService.sign(payload, {
@@ -83,4 +85,8 @@ export class AuthService {
       throw new UnauthorizedException('Token verification failed');
     }
   }
+
+ 
+
+
 }
