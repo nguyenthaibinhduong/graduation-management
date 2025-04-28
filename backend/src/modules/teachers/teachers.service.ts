@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
 import { Teacher } from 'src/entities/teacher.entity';
@@ -27,71 +27,40 @@ export class TeachersService extends BaseService<Teacher> {
     super(teacherRepository);
   }
 
-  async createTeacher(teacher: CreateTeacherDto): Promise<Teacher> {
-    const { user, positionIds, departmentId, ...teacherData } = teacher;
+  async createTeacher(teacherDto: CreateTeacherDto): Promise<Teacher> {
+    const { user, positionIds, departmentId, ...teacherData } = teacherDto;
+    await this.check_exist_no_data(Teacher, { code: teacherData.code }, 'Giáo viên đã tồn tại');
+    const department = await this.check_exist_with_data(Department,{ id: departmentId },'Khoa không tồn tại');
+    let positions = [];
+    if (positionIds?.length > 0) positions = await this.positionRepository.find({ where: { id: In(positionIds) }});
 
-    //Kiem tra neu giao vien da ton tai
-    const existingTeacher = await this.teacherRepository.findOne({
-      where: { code: teacherData.code },
+    // 4. Tạo User
+    const { password, ...userData }: any = user;
+    const hashedPassword = await bcrypt.hash(password ?? 'password', 10);
+    const newUser:any = this.userRepository.create({
+      ...userData,
+      password: hashedPassword,
+      role: 'teacher',
+      username: teacherData.code,
     });
-    if (existingTeacher) {
-      throw new ConflictException(
-        `Giáo viên với mã ${teacherData.code} đã tồn tại`,
-      );
-    }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    const savedUser = await this.userRepository.save(newUser);
 
-    //Xu ly transaction
+    // 5. Tạo Teacher
     try {
-      // Tao user
-      const { password, ...userData }: any = user;
-      const hashedPassword = await bcrypt.hash(password ?? 'password', 10);
-
-      const newUser = queryRunner.manager.create(User, {
-        ...userData,
-        password: hashedPassword,
-        role: 'teacher',
-        username: teacherData.code,
-      });
-      const savedUser = await queryRunner.manager.save(newUser);
-
-      // Tao giao vien
-      const newTeacher = queryRunner.manager.create(Teacher, {
+      const newTeacher = this.teacherRepository.create({
         ...teacherData,
         user: savedUser,
+        department,
+        position: positions,
       });
-
-      //Teacher position
-      if (positionIds && positionIds.length > 0) {
-        const positions = await this.positionRepository.find({
-          where: { id: In(positionIds) },
-        });
-        newTeacher.position = positions;
-      }
-      //Teacher department
-      const department = await this.departmentRepository.findOneBy({
-        id: departmentId,
-      });
-      newTeacher.department = department;
-
-      //Save teacher
-      const savedTeacher = await queryRunner.manager.save(newTeacher);
-
-      //Commit transaction
-      await queryRunner.commitTransaction();
-      return savedTeacher;
+      return await this.teacherRepository.save(newTeacher);
     } catch (error) {
-      //Rollback transaction
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      //Ket thuc transaction
-      await queryRunner.release();
+      throw new BadRequestException(`Lỗi khi thêm giáo viên: ${error.message}`);
     }
   }
+
+
 
   async getAllTeachers(
     search?: string,
@@ -143,25 +112,15 @@ export class TeachersService extends BaseService<Teacher> {
     await queryRunner.startTransaction();
 
     try {
-      const existingTeacher = await this.teacherRepository.findOne({
+      const existingTeacher = await this.check_exist_with_data(Teacher,{
         where: { id },
         relations: ['user'],
-      });
-
-      if (!existingTeacher) {
-        return null;
-      }
+      },'Giáo viên không tại');
 
       // Update user
-      const updatedUser = await this.userRepository.save({
-        ...existingTeacher.user,
-        ...teacherData.user,
-      });
+      const updatedUser = await this.userRepository.save({...existingTeacher.user,...teacherData.user});
       // Update department
-      const updatedDepartment = await this.departmentRepository.findOneBy({
-        id: departmentId,
-      });
-
+      const updatedDepartment = await this.departmentRepository.findOneBy({id: departmentId,});
       // Update teacher
       const updatedTeacher = await this.teacherRepository.save({
         ...existingTeacher,
