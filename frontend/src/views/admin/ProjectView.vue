@@ -1,13 +1,13 @@
 <template>
     <div class="w-full flex gap-x-4 p-2 rounded-lg">
+        <Button size="small" label="Tất cả" :outlined="statusData !== null"
+            :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
         <Button size="small" label="Đề tài chưa duyệt" :outlined="statusData !== 'pending'"
             :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'pending'" />
         <Button size="small" label="Đề tài đã duyệt" :outlined="statusData !== 'approve'"
             :severity="statusData === 'approve' ? 'primary' : undefined" @click="statusData = 'approve'" />
         <Button size="small" label="Đề tài công bố" :outlined="statusData !== 'public'"
             :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
-        <Button size="small" label="Tất cả" :outlined="statusData !== null"
-            :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
     </div>
 
     <DataTableCustom title="Danh sách đề tài - Admin" :data="projects" :columns="[
@@ -61,7 +61,7 @@ const projects = ref([]);
 const loading = ref(false);
 const isImport = ref(false);
 const isEditing = ref(false);
-const statusData = ref('pending')
+const statusData = ref(null)
 
 const editedProjectId = ref(null);
 const newData = ref({

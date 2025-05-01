@@ -112,7 +112,12 @@ export abstract class BaseService<T> {
   }
 
 
-
-
+  // ============= Loại bỏ pasword ra khỏi thông tin user ==============================//
+ remove_password_field(items: any) {
+  if (items?.password) {
+      delete items.password;
+  }
+  return items;
+}
 
 }

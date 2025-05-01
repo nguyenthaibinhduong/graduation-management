@@ -69,11 +69,11 @@ const password = ref("");
 const errorMessage = ref("");
 const authStore = useAuthStore();
 const router = useRouter();
-const siteKey = "6LfrVyYrAAAAANAgXCLa_uRcjyIjkcdML8QEskJU";
+const siteKey = import.meta.env.VITE_GG_CAPTCHA_SECRECT;
 
 onMounted(() => {
   const script = document.createElement("script");
-  script.src = "https://www.google.com/recaptcha/api.js";
+  script.src = import.meta.env.VITE_GG_CAPTCHA_SRC;
   script.async = true;
   script.defer = true;
   document.head.appendChild(script);

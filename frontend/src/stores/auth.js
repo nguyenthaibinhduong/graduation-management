@@ -42,7 +42,12 @@ export const useAuthStore = defineStore('auth', {
       const response = await axios.post(
         'http://localhost:3034/api/v1/auth/refresh-token',
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        }
       )
 
       if (response.data.access_token) {

@@ -64,10 +64,8 @@ export class Project {
   max_total_group: number;
 
   //session_id
-  @OneToOne(
-    () => EnrollmentSession,
-    (enrollmentSession) => enrollmentSession.id,
-  )
+  @ManyToOne(() => EnrollmentSession, (session) => session.project)
   @JoinColumn({ name: 'enroll_session_id' })
   session: EnrollmentSession;
+ 
 }

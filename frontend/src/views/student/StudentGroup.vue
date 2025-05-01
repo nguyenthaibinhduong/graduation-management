@@ -2,7 +2,7 @@
     <div class="p-6 container mx-auto">
         <h1 class="text-2xl font-bold mb-4 text-center">Nhóm Khóa luận</h1>
         <div class="w-full grid grid-cols-1 text-sm gap-6">
-            <div class="flex flex-col gap-4 mb-6">
+            <div class="flex flex-col w-1/2 gap-4 mb-6">
                 <label for="student_name"> Tên nhóm</label>
                 <MyInput v-model="groupData.name" id="student_name" class="w-full" />
             </div>

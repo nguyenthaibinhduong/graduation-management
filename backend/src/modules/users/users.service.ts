@@ -91,6 +91,12 @@ export class UsersService extends BaseService<User> {
     return user;
   }
 
+   async findByID(id: any) {
+     const user = await this.check_exist_with_data(User, {id}, 'Không tìm thấy người dùng');
+     const data = await this.getUserDetails(user);
+     return this.remove_password_field(data);
+  }
+ 
 
   async validateUser(username: string, password: string, ipAddress: string, captchaResponse: string) {
     if(!captchaResponse)  throw new Error('Chưa xác minh không phải robot');
@@ -193,7 +199,7 @@ export class UsersService extends BaseService<User> {
     page?: number,
   ): Promise<{ items: User[]; total: number; limit?: number; page?: number }> {
     const where = search
-      ? [{ fullname: Like(`%${search}%`) }]
+      ? [{ fullname: Like(`%${search}%`) }, { username: Like(`%${search}%`) }]
       : role
         ? { role }
         : {};
@@ -212,13 +218,15 @@ export class UsersService extends BaseService<User> {
     const userData = await this.userRepository.findOne({
       where: { id: user.id },
       relations: {
-        teacher: user.role === 'teacher',
+        teacher: user.role === 'teacher'?{ department: true } : false,
         student:
           user.role === 'student' ? { department: true, major: true } : false,
       },
     });
     return userData;
   }
+
+
 
   async updatePassword(
     id: number,

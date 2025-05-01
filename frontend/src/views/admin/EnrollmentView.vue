@@ -1,5 +1,5 @@
 <template>
-  <DataTableCustom title="Danh sách đợt đăng ký" :data="students" :columns="[
+  <DataTableCustom title="Danh sách đợt đăng ký" :block="['selectAll', 'import', 'export']" :data="students" :columns="[
     { field: 'title', header: 'Tiêu đề' },
     { field: 'content', header: 'Nội dung' },
     { field: 'course.name', header: 'Học kỳ', sortable: true },

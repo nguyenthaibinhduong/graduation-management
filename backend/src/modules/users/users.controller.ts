@@ -9,6 +9,7 @@ import {
   Put,
   ValidationPipe,
   UseGuards,
+  HttpException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,7 +22,7 @@ import { Roles } from 'src/common/decorators/roles.decorators';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
   
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
@@ -34,7 +35,10 @@ export class UsersController {
       const newUser = await this.userService.create(user);
       return new Response(newUser, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+     throw new HttpException(
+             { statusCode: HttpStatus.ERROR, message: error.message },
+             HttpStatus.ERROR,
+           );
     }
   }
 
@@ -69,19 +73,25 @@ export class UsersController {
         Message.SUCCESS,
       );
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Response<User>> {
     try {
-      const user = await this.userService.getById({ where: { id } });
+      const user = await this.userService.findByID(id);
       return user
         ? new Response(user, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 
@@ -100,7 +110,10 @@ export class UsersController {
         ? new Response(updatedUser, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 
@@ -110,7 +123,10 @@ export class UsersController {
       await this.userService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
-      return new Response(null, HttpStatus.ERROR, Message.ERROR);
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 }

@@ -3,10 +3,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Department } from './department.entity';
 import { Course } from './course.entity';
+import { Project } from './project.entity';
 
 @Entity('enrollment_session')
 export class EnrollmentSession {
@@ -32,4 +34,8 @@ export class EnrollmentSession {
   @ManyToOne(() => Course, (course) => course.enrollmentSessions, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'course_id' })
   course: Course;
+
+   @OneToMany(() => Project, (project) => project.session)
+  project: Project[]
 }
+

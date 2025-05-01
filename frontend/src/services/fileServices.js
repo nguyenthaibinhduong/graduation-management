@@ -5,8 +5,10 @@ const fileService = (resource) => ({
     const payload = new FormData()
     payload.append('file', file)
     return api.post(`/file/upload/${resource}`, payload, {
+      
       headers: {
         'Content-Type': 'multipart/form-data',
+   
       },
     })
   },

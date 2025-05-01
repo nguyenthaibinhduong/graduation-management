@@ -18,6 +18,10 @@
           </div>
 
         </div>
+        <div class="w-full flex justify-center">
+          <h1 class="pt-5 text-5xl font-bold">{{ authStore.user?.fullname || 'Chưa cập nhật' }}</h1>
+
+        </div>
         <div class="w-full flex justify-center my-10 ">
           <div class="flex gap-2">
             <Button label="Chỉnh sửa" icon="pi pi-pencil" class="btn-submit" @click="openEditForm" />
@@ -28,16 +32,11 @@
         <div class="w-full grid grid-cols-2 gap-4">
           <!-- Personal Information -->
 
-
-          <div class="flex items-center gap-2">
-            <label class="font-semibold text-gray-700">Họ và tên:</label>
-            <span>{{ authStore.user?.fullname || 'Chưa cập nhật' }}</span>
-          </div>
           <!-- User info Teacher/Student-->
-          <template v-if="authStore.user?.role === 'student'">
+          <template v-if="user?.role === 'student'">
             <div class="flex items-center gap-2">
               <label class="font-semibold text-gray-700">Mã số sinh viên:</label>
-              <span>{{ authStore.user?.username }}</span>
+              <span>{{ authStore.user?.student?.code }}</span>
             </div>
             <div class="flex items-center gap-2">
               <label class="font-semibold text-gray-700">Khoa:</label>
@@ -50,8 +49,16 @@
           </template>
           <template v-if="authStore.user?.role === 'teacher'">
             <div class="flex items-center gap-2">
+              <label class="font-semibold text-gray-700">Mã nhân viên:</label>
+              <span>{{ authStore.user?.teacher?.code || 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="flex items-center gap-2">
               <label class="font-semibold text-gray-700">Học vị:</label>
               <span>{{ authStore.user?.teacher?.degree || 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="font-semibold text-gray-700">Khoa</label>
+              <span>{{ authStore.user?.teacher?.department?.name || 'Chưa cập nhật' }}</span>
             </div>
           </template>
           <!--  -->

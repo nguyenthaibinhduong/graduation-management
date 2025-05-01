@@ -19,6 +19,8 @@ import StudentProjectView from '@/views/student/StudentProjectView.vue'
 import StudentGroup from '@/views/student/StudentGroup.vue'
 import ScoreView from '@/views/teacher/ScoreView.vue'
 import EvaluationFormDetail from '@/views/admin/EvaluationFormDetail.vue'
+import StudentProjectPublic from '@/views/student/StudentProjectPublic.vue'
+import DetailProfileView from '@/views/admin/DetailProfileView.vue'
 
 // Tự động import các component khi cần thiết (lazy-load)
 
@@ -30,6 +32,7 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: '/', component: DashboardView },
+       { path: '/user-detail/:id', component:DetailProfileView},
       { path: '/student-manangerment', component: StudentView },
        { path: '/group-manangerment', component: StudentGroup },
       { path: '/teacher-manangerment', component: TeacherView },
@@ -42,7 +45,9 @@ const routes = [
       { path: '/account-manangerment', component: UserView },
       { path: '/department-major-manangerment', component: MajorDepartmentView },
       { path: '/teacher-project', component: TeacherProjectView },
+      
       { path: '/student-project', component: StudentProjectView },
+      { path: '/student-project-public', component: StudentProjectPublic },
       { path: '/project-detail/:id', component: ProjectDetailView },
       { path: '/score/:id', component: ScoreView },
     ],
@@ -62,7 +67,8 @@ router.beforeEach(async (to, from, next) => {
   }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     try {
-      const res = await axios.post('http://localhost:3034/api/v1/auth/verify-token', { token })
+      const res = await axios.post('http://localhost:3034/api/v1/auth/verify-token', { token },
+      )
       if (res.status === 201) {
         authStore.setAuth(true)
         console.log('Token hợp lệ')
@@ -75,7 +81,9 @@ router.beforeEach(async (to, from, next) => {
           const refreshRes = await axios.post(
             'http://localhost:3034/api/v1/auth/refresh-token',
             {},
-            { withCredentials: true }
+            {
+              withCredentials: true
+            }
           )
           if (refreshRes.status === 201 && refreshRes.data.access_token) {
             localStorage.setItem('token', refreshRes.data.access_token)

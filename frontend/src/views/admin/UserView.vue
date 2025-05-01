@@ -1,12 +1,29 @@
 <template>
-  <DataTableCustom title="Danh sách Tài Khoản" :data="users" :columns="[
-    { field: 'email', header: 'Email', sortable: true },
-    { field: 'username', header: 'Tài khoản', sortable: true },
+  <DataTableCustom :block="['selectAll', 'import']" title="Danh sách Tài Khoản" :data="users" :columns="[
+    { field: 'username', header: 'Tên tài khoản', sortable: true },
     { field: 'fullname', header: 'Tên người dùng', sortable: true },
     { field: 'phone', header: 'Số điện thoại', sortable: true },
-    { field: 'role', header: 'Vai trò', sortable: true },
+    {
+      field: 'role',
+      header: 'Vai trò',
+      type: 'status',
+      statuses: [
+        { value: 'student', label: 'Sinh viên', class: 'bg-blue-100 text-blue-700' },
+        {
+          value: 'teacher',
+          label: 'Giảng viên',
+          class: 'bg-yellow-100 text-yellow-700',
+        },
+        { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
+        {
+          value: 'admin',
+          label: 'Giáo vụ - Admin',
+          class: 'bg-violet-100 text-violet-700',
+        },
+      ],
+    },
   ]" :total="userStore?.total" :loading="loading" @fetch="fetchUser" @add="addUser" @edit="editUser"
-    @delete="deleteUser" />
+    @delete="deleteUser" @rowSelect="getDetail" />
   <Drawer class="w-2/5" v-model:visible="visibleLeft" :header="isEditing ? 'Sửa tài khoản' : 'Thêm tài khoản'"
     position="right">
     <div class="grid grid-cols-1 gap-5 w-full">
@@ -42,6 +59,7 @@ import { ref, onMounted, watchEffect, watch } from 'vue';
 import { Button, Drawer, InputText } from 'primevue';
 import { useUserStore } from '@/stores/store';
 import DataTableCustom from '@/components/list/DataTableCustom.vue';
+import { useRouter } from 'vue-router';
 
 
 const visibleLeft = ref(false);
@@ -99,5 +117,11 @@ watch(visibleLeft, (newVal) => {
     cancelForm();
   }
 });
+
+
+const router = useRouter();
+const getDetail = (data) => {
+  if (data?.id) router.push(`/user-detail/${data?.id}`);
+};
 
 </script>

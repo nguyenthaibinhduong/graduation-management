@@ -1,13 +1,12 @@
 <template>
   <DataTableCustom title="Danh sách Sinh Viên" :data="students" :columns="[
     { field: 'code', header: 'Mã sinh viên', sortable: true },
-    { field: 'user.avatar', header: 'Ảnh đại diện', type: 'image' },
     { field: 'user.fullname', header: 'Họ và tên', sortable: true },
     { field: 'user.email', header: 'Email', sortable: true },
     { field: 'major.name', header: 'Ngành học', sortable: true },
     { field: 'department.name', header: 'Khoa', sortable: true }
   ]" :total="studentStore?.total" :loading="loading" @fetch="fetchStudent" @add="addStudent" @edit="editStudent"
-    @delete="deleteStudent" @selectOne="handleSelectData" @selectAll="handleSelectData" />
+    @delete="deleteStudent" @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail" />
 
 
   <MyDrawer class="w-full" title="sinh viên" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveStudent"
@@ -74,6 +73,7 @@ import { useStudentStore, useMajorStore, useDepartmentStore, useFileStore } from
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import MyInput from "@/components/form/MyInput.vue";
 import MyDrawer from "@/components/drawer/MyDrawer.vue";
+import { useRouter } from "vue-router";
 
 
 const visibleLeft = ref(false);
@@ -213,6 +213,11 @@ const fieldMappings = {
   date_of_birth: (v) => formatDate(v),
   major: (v) => v || "",
   enrollment_year: (v) => parseInt(v) || "",
+};
+
+const router = useRouter();
+const getDetail = (data) => {
+  if (data?.user?.id) router.push(`/user-detail/${data?.user?.id}`);
 };
 
 const validators = {

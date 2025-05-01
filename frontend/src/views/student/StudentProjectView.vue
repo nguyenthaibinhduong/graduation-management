@@ -1,38 +1,37 @@
 <template>
     <div class="w-full flex gap-x-4 p-2 rounded-lg">
-        <Button size="small" label="Đề tài có thể đăng ký " :outlined="statusData !== 'public'"
-            :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
-        <Button size="small" label="Đề tài đề xuất" :outlined="statusData == 'public'"
-            :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
+
+        <Button size="small" class="btn-submit" icon="pi pi-list" label="Danh sách đề tài Khoa"
+            @click="router.push(`/student-project-public`)" />
+        <Button size="small" class="btn-submit" icon="pi pi-verified" label="Đề tài đã đăng ký" onclick="" />
+        <Button size="small" class="btn-submit" icon="pi pi-clipboard" label="Đề tài đề xuất" onclick="" />
+
     </div>
-    <DataTableCustom v-if() :block="statusData == 'public' ? ['toolbar', 'selectAll', 'search'] : []" :title="statusData == 'public'
-        ? 'Danh sách đề tài công bố - đăng ký'
-        : 'Danh sách đề tài đề xuất'
-        " :data="projects" :columns="[
-            { field: 'title', header: 'Tên đề tài' },
-            { field: 'description', header: 'Mô tả' },
-            { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
-            { field: 'course.name', header: 'Học kỳ' },
-            {
-                field: 'status',
-                header: 'Trạng thái',
-                type: 'status',
-                statuses: [
-                    { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
-                    {
-                        value: 'pending',
-                        label: 'Đang chờ duyệt',
-                        class: 'bg-yellow-100 text-yellow-700',
-                    },
-                    { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
-                    {
-                        value: 'public',
-                        label: 'Đã công bố',
-                        class: 'bg-violet-100 text-violet-700',
-                    },
-                ],
-            },
-        ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
+    <DataTableCustom :title="'Danh sách đề tài đề xuất'" :data="projects" :columns="[
+        { field: 'title', header: 'Tên đề tài' },
+        { field: 'description', header: 'Mô tả' },
+        { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
+        { field: 'course.name', header: 'Học kỳ' },
+        {
+            field: 'status',
+            header: 'Trạng thái',
+            type: 'status',
+            statuses: [
+                { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
+                {
+                    value: 'pending',
+                    label: 'Đang chờ duyệt',
+                    class: 'bg-yellow-100 text-yellow-700',
+                },
+                { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
+                {
+                    value: 'public',
+                    label: 'Đã công bố',
+                    class: 'bg-violet-100 text-violet-700',
+                },
+            ],
+        },
+    ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
         @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail" />
 
     <MyDrawer class="w-full" title="đề tài đề xuất" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveProject"
@@ -75,7 +74,7 @@ const teachers = ref([]);
 const loading = ref(false);
 const isImport = ref(false);
 const isEditing = ref(false);
-const statusData = ref("public");
+const statusData = ref("");
 
 const editedProjectId = ref(null);
 const newData = ref({

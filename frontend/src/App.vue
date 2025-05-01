@@ -3,7 +3,6 @@ import { onMounted } from 'vue';
 import { RouterView } from 'vue-router'
 import { Toast, useToast } from 'primevue';
 import { initToast } from './utils/toast';
-import Header from './components/Header.vue'
 import { useAuthStore } from './stores/auth';
 const toast = useToast();
 const authStore = useAuthStore()
@@ -23,5 +22,4 @@ onMounted(() => {
   font-family: 'PrimeIcons' !important;
   font-style: normal !important;
 }
-
 </style>

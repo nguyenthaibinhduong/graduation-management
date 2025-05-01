@@ -1,10 +1,11 @@
 <template>
-  <DataTableCustom title="Danh sách học kỳ" :data="students" :columns="[
-    { field: 'name', header: 'Tên học kỳ', sortable: true },
-    { field: 'start_time', type: 'datetime', header: 'Ngày bắt đầu', sortable: true },
-    { field: 'end_time', type: 'datetime', header: 'Ngày Kết thúc', sortable: true },
+  <DataTableCustom title="Danh sách học kỳ" :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="students"
+    :columns="[
+      { field: 'name', header: 'Tên học kỳ' },
+      { field: 'start_time', type: 'datetime', header: 'Ngày bắt đầu' },
+      { field: 'end_time', type: 'datetime', header: 'Ngày Kết thúc' },
 
-  ]" :total="courseStore?.total" :loading="loading" @fetch="fetchCourse" @add="addCourse" @edit="editCourse"
+    ]" :total="courseStore?.total" :loading="loading" @fetch="fetchCourse" @add="addCourse" @edit="editCourse"
     @delete="deleteCourse" @selectOne="handleSelectData" @selectAll="handleSelectData" />
 
 

@@ -2,31 +2,36 @@
     <div>
         <h1 class="text-2xl font-bold text-blue-800 mb-4">Quản lý chuyên ngành</h1>
         <p class="text-gray-600 mb-6">Danh sách các khoa và chuyên ngành trong hệ thống.</p>
-    </div>
-    <div class="grid grid-cols-1 gap-4">
-        <div v-for="department in departments" :key="department.id"
-            class="bg-white rounded-2xl shadow-md p-6 transition duration-300 hover:shadow-xl">
-            <div class="flex items-center justify-between cursor-pointer group"
-                @click="toggleVisibility(department.id)">
-                <h2 class="text-lg font-semibold text-blue-800 group-hover:underline">
-                    {{ department.name }}
-                </h2>
-                <svg :class="[
-                    'w-5 h-5 text-blue-600 transition-transform duration-300',
-                    department.isVisible ? 'rotate-180' : 'rotate-0'
-                ]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
-            <p class="text-sm text-gray-500 mt-1">Mã khoa: {{ department.code }}</p>
 
-            <!-- Danh sách chuyên ngành -->
-            <div v-if="department.isVisible" class="mt-4">
-                <DataTable :value="department.major" class="text-sm border rounded-md">
-                    <Column field="code" header="Mã chuyên ngành" style="min-width: 120px;" />
-                    <Column field="name" header="Tên chuyên ngành" style="min-width: 200px;" />
-                </DataTable>
-            </div>
+        <div class="overflow-x-auto bg-white shadow rounded-2xl">
+            <table class="min-w-full text-sm">
+                <thead class="bg-blue-50 text-blue-800 font-semibold">
+                    <tr>
+                        <th class="text-left px-4 py-2 w-1/3">Tên</th>
+                        <th class="text-left px-4 py-2 w-1/3">Mã</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template v-for="department in departments" :key="department.id">
+                        <!-- Row: Department -->
+                        <tr @click="toggleVisibility(department.id)"
+                            class="cursor-pointer hover:bg-blue-50 border-b group transition">
+                            <td class="px-4 py-2 font-medium text-blue-800 group-hover:underline">
+                                <span class="mr-2 pi pi-angle-right" />{{ department.name }}
+                            </td>
+                            <td class="px-4 py-2 text-gray-700">{{ department.code }}</td>
+                        </tr>
+
+                        <!-- Row: Majors (only shown if visible) -->
+                        <template v-if="department.isVisible">
+                            <tr v-for="major in department.major" :key="major.id" class="border-b ps-5">
+                                <td class="px-8 py-2 text-gray-700">{{ major.name }}</td>
+                                <td class="px-4 py-2 text-gray-500">{{ major.code }}</td>
+                            </tr>
+                        </template>
+                    </template>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>
@@ -34,40 +39,25 @@
 <script setup>
 import { ref, onMounted, watchEffect } from "vue";
 import { useDepartmentStore } from "@/stores/store";
-import { Column, DataTable } from "primevue";
-
 
 const departmentsStore = useDepartmentStore();
 const departments = ref([]);
 
 onMounted(() => {
-
     departmentsStore.fetchItems();
 });
 
 watchEffect(() => {
-
     departments.value = departmentsStore.items.map((department) => ({
         ...department,
-        isVisible: department.isVisible ?? false, // đảm bảo có isVisible
+        isVisible: department.isVisible ?? false,
     }));
 });
 
 const toggleVisibility = (departmentId) => {
-    const department = departments.value.find((dep) => dep.id === departmentId);
+    const department = departments.value.find(dep => dep.id === departmentId);
     if (department) {
         department.isVisible = !department.isVisible;
     }
 };
 </script>
-
-<style scoped>
-/* Custom PrimeVue DataTable spacing */
-::v-deep(.p-datatable-tbody > tr) {
-    transition: background-color 0.2s;
-}
-
-::v-deep(.p-datatable-tbody > tr:hover) {
-    background-color: #f3f4f6;
-}
-</style>

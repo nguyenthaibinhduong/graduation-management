@@ -2,11 +2,11 @@ import { useAuthStore } from '@/stores/auth'
 import { showToast } from '@/utils/toast'
 import axios from 'axios'
 
-const API_URL = 'http://localhost:3034/api/v1'
+const API_URL = import.meta.env.VITE_API_URL
 
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  withCredentials: true
 })
 
 // Lấy token từ localStorage khi request
