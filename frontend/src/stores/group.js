@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import baseService from '@/services/baseService'
 import { showToast } from '@/utils/toast'
 import api from '@/api/api'
@@ -10,6 +10,11 @@ export function createGroupStore(entity) {
     const total = ref()
       const item = ref([])
       const group= ref([]) 
+    const invite = ref([]) 
+    onMounted(async() => {
+      await getMyGroup();
+      await getMyInvite();
+    })
     const fetchItems = async (page = 1, limit = 10, search = '') => {
       const data = await baseService(entity).fetchAll(page, limit, search)
       items.value = data.items
@@ -27,6 +32,11 @@ export function createGroupStore(entity) {
     const getMyGroup = async () => {
         const { data } = await api.post(`/groups/get-my-group`)
         group.value = data.data
+    }
+
+    const getMyInvite = async () => {
+        const { data } = await api.post(`/groups/get-my-invite`)
+       invite.value = data.data
     }
 
     const addItem = async (itemData ) => {
@@ -51,6 +61,6 @@ export function createGroupStore(entity) {
 
     
 
-    return { items,item, total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup }
+    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite}
   })
 }

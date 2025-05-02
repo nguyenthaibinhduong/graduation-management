@@ -148,7 +148,23 @@ export class GroupsController {
   ): Promise<Response<any>> {
     try {
       const id = request.user?.id
-      const group = await this.groupsService.getGroupByUserId(id);
+      const group = await this.groupsService.getGroupByUser(id,'leader');
+      return new Response(group, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Post('get-my-invite')
+  async getMyInvite(
+     @Request() request: any,
+  ): Promise<Response<any>> {
+    try {
+      const id = request.user?.id
+      const group = await this.groupsService.getGroupByUser(id,'invite');
       return new Response(group, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

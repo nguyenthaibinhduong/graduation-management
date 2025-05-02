@@ -127,7 +127,7 @@
         </div>
         <div class="w-full mt-10 p-6 bg-white rounded-xl shadow-sm ">
             <h2 class="text-2xl font-semibold mb-4 text-green-700">Thông tin nhóm của bạn</h2>
-            <div v-if="!group" class="text-gray-500 text-sm">
+            <div v-if="group?.length < 1 || !group" class="text-gray-500 text-sm">
                 Bạn hiện chưa có nhóm đăng ký
             </div>
             <div v-else class="space-y-2 text-base">
@@ -137,7 +137,8 @@
                 <div>
                     <span class="font-medium">Thành viên:</span>
                     <ul class="list-disc list-inside ml-2">
-                        <li v-for="member in group?.students" :key="member.id">
+                        <li v-for="member in (group?.status == 'approve' ? group?.students : group?.student_attemp)"
+                            :key="member.id">
                             {{ member.user?.fullname }} ({{ member.code }})
                         </li>
                     </ul>
@@ -164,12 +165,14 @@ const student_code = ref('')
 const message = ref('')
 const authStore = useAuthStore();
 const student = ref()
-const group = ref()
+const group = ref(null)
 const groupStore = useGroupStore()
 const showMore = ref(false)
 onMounted(async () => {
     await authStore.fetchUser();
     await groupStore.getMyGroup()
+
+
 })
 watchEffect(() => {
     student.value = authStore.user?.student

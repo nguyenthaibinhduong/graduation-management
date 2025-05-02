@@ -31,14 +31,18 @@ export class Group {
   @Column()
   total_member: number;
 
-  @OneToMany(() => Student, (student) => student.group)
+  @ManyToMany(() => Student, (student) => student.group_attemp,)
+  student_attemp: Student[];
+
+  @OneToMany(() => Student, (student) => student.group,{ onDelete: 'CASCADE'})
   students: Student[];
 
-  @ManyToOne(() => Student, (student) => student.group, {
+  @ManyToOne(() => Student, (student) => student.leadGroups, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'leader_id' })
   leader: Student;
+
 
   @ManyToOne(() => Project, (project) => project.groups, {
     onDelete: 'CASCADE',
