@@ -9,6 +9,7 @@ import {
   JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Major } from './major.entity';
@@ -39,9 +40,18 @@ export class Student {
   @JoinColumn({ name: 'group_id' })
   group?: Group;
 
+  @ManyToMany(() => Group, (group) => group.student_attemp,{ onDelete: 'CASCADE'})
+  @JoinTable({ name: 'student_group_attempts' }) // đúng cú pháp
+  group_attemp?: Group[];
+
+
+  @OneToMany(() => Group, (group) => group.leader)
+  leadGroups: Group[];
+
+
   @CreateDateColumn()
-    created_at: Date; // Ngày tạo tài khoản
+  created_at: Date; // Ngày tạo tài khoản
   
-    @UpdateDateColumn()
-    updated_at: Date; // Ngày cập nhật thông tin người dùng
+  @UpdateDateColumn()
+  updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

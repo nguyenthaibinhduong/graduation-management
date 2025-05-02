@@ -29,4 +29,5 @@ export class Position {
 
   @ManyToMany(() => Teacher, (teacher) => teacher.position)
   teachers: Teacher[];
+  
 }

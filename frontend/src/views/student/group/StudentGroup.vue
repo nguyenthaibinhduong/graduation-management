@@ -6,14 +6,13 @@
     </div>
     <CreateGroup />
     <InvitationList />
-    <HistoryList />
 
 </template>
 <script setup>
 import CreateGroup from './CreateGroup.vue';
 import { Button } from 'primevue';
 import InvitationList from './InvitationList.vue';
-import HistoryList from './HistoryList.vue';
+
 
 
 </script>

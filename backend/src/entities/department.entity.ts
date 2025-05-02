@@ -3,6 +3,7 @@ import { Student } from './student.entity';
 import { Major } from './major.entity';
 import { EnrollmentSession } from './enrollment_session.entity';
 import { Teacher } from './teacher.entity';
+import { Group } from './group.entity';
 
 @Entity('departments')
 export class Department {
@@ -23,6 +24,9 @@ export class Department {
 
   @OneToMany(() => Major, (major) => major.department)
   major: Major[];
+
+  @OneToMany(() => Group, (group) => group.department)
+  group: Group[];
   
   @OneToMany(() => EnrollmentSession, (enrollment) => enrollment.department)
 enrollmentSessions: EnrollmentSession[];

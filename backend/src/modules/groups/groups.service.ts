@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
@@ -5,7 +6,7 @@ import { Roles } from 'src/common/decorators/roles.decorators';
 import { Group } from 'src/entities/group.entity';
 import { Student } from 'src/entities/student.entity';
 import { User } from 'src/entities/user.entity';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class GroupsService extends BaseService<Group> {
@@ -16,66 +17,131 @@ export class GroupsService extends BaseService<Group> {
     super(groupRepository);
   }
 
-  async createGroup(data: any, user_id: any): Promise<Group> {
-    if (!data?.student_codes || data.student_codes.length === 0) {
-      throw new Error('Không thể thêm nhóm mà không có sinh viên');
-    }
-    const user: any = await this.repository.manager.findOne(User, {
-      where: { id: user_id },
-      relations: { student: true }
-    })
-     
-    if (!data.student_codes.includes(user?.student?.code)) {
-      throw new Error('Bạn chỉ được thêm nhóm có thông tin của bạn');
-    }
-    // Find students by their codes
-    const students = await this.repository.manager.find(Student, {
-      where: { code: In(data.student_codes) },
-      relations: { department: true, group: true }, // Ensure department and group relations are loaded
-    });
-    if (data.student_codes.length > 1) {
-      if (students.length !== data.student_codes.length) {
-        const foundCodes = students.map((s) => s.code);
-        const missingCodes = data.student_codes.filter(
-          (code: string) => !foundCodes.includes(code),
-        );
-        throw new Error(
-          `Sinh viên  mã  ${missingCodes.join(', ')}` + ' không tồn tại',
-        );
-      }
-
-      const departmentIds = students.map((s) => s.department?.id);
-      const uniqueDepartmentIds = [...new Set(departmentIds)];
-
-      if (uniqueDepartmentIds.length > 1) {
-        const departmentNames = students.map(
-          (s) => s.department?.name || 'Không xác định',
-        );
-        const uniqueDepartmentNames = [...new Set(departmentNames)];
-        throw new Error(
-          `Tất cả sinh viên phải thuộc cùng một khoa. Đã phát hiện các khoa: ${uniqueDepartmentNames.join(', ')}`,
-        );
-      }
-
-      // Create a new group
-      const newGroup = new Group();
-      newGroup.name = data.name;
-      newGroup.students = students;
-      newGroup.leader = user?.student;
-      newGroup.total_member = students.length;
-      return this.groupRepository.save(newGroup);
-    } else if (data.student_codes.length == 1) {
-      const newGroup = new Group();
-      newGroup.name = data.name;
-      newGroup.students = students;
-      newGroup.status = 'pending'
-      newGroup.leader = user?.student;
-      newGroup.total_member = 1;
-      return this.groupRepository.save(newGroup);
-    }
-    // Check if all provided student codes exist
-    
+async createGroup(data: any, user_id: any): Promise<Group> {
+  if (!data?.student_codes || data.student_codes.length === 0) {
+    throw new Error('Không thể tạo nhóm mà không có sinh viên');
   }
+
+  // Lấy thông tin user hiện tại
+  const user: any = await this.repository.manager.findOne(User, {
+    where: { id: user_id },
+    relations: ['student', 'student.department'],
+  });
+
+  if (!user?.student) {
+    throw new Error('Không tìm thấy thông tin sinh viên');
+  }
+
+  const currentStudentCode = user.student.code;
+
+  // Kiểm tra mã sinh viên hiện tại có nằm trong danh sách không
+  if (!data.student_codes.includes(currentStudentCode)) {
+    throw new Error('Bạn chỉ được tạo nhóm có chứa thông tin của bạn');
+  }
+  if (data.student_codes[1] == user.student?.code) {
+       throw new Error("Mã số thành viên phải khác với mã số của bạn")
+  }
+
+  // Lấy danh sách sinh viên
+  const students = await this.repository.manager.find(Student, {
+    where: { code: In(data.student_codes) },
+    relations: ['department', 'group'],
+  });
+
+  if (students.length !== data.student_codes.length) {
+    throw new Error('Mã số thành viên không hợp lệ');
+  }
+
+  const radomcode1 = Math.floor(Math.random() * 999 + 1).toString().padStart(3, '0');
+  const radomcode2 = Math.floor(Math.random() * 999 + 1).toString().padStart(3, '0');
+
+  // Kiểm tra nhóm hiện tại của user
+  const existGroup = await this.repository.manager.findOne(Group, {
+    where: { leader: { id: user.student.id } },
+    relations: ['leader'],
+  });
+
+  // Nếu tạo nhóm chỉ có 1 người (bản thân)
+  if (data.student_codes.length === 1) {
+    if (existGroup) {
+      throw new Error('Bạn đã có nhóm. Vui lòng hủy nhóm cũ để tạo nhóm mới hoặc mời thêm thành viên');
+    }
+
+    const newGroup = new Group();
+    newGroup.name = data.name;
+    newGroup.students = [user.student];
+    newGroup.department = user.student.department;
+    newGroup.code = `${radomcode1}${radomcode2}`;
+    newGroup.status = 'pending';
+    newGroup.leader = user.student;
+    newGroup.total_member = 1;
+
+    return this.groupRepository.save(newGroup);
+  }
+
+  // Nếu tạo nhóm có 2 thành viên
+  if (data.student_codes.length === 2) {
+    
+
+    const secondStudent = students.find(s => s.code !== currentStudentCode);
+
+    if (!secondStudent) {
+      throw new Error('Không tìm thấy sinh viên thứ hai');
+    }
+
+    if (secondStudent.group) {
+      throw new Error(`Sinh viên có mã ${secondStudent.code} đã có nhóm`);
+    }
+
+    // Kiểm tra 2 người đã cùng nhóm khác chưa (double check)
+    // const existed = await this.repository.manager
+    //   .createQueryBuilder(Group, 'group')
+    //   .innerJoin('group.student_attemp', 'student')
+    //   .where('student.code IN (:...codes)', { codes: data.student_codes })
+    //   .getOne();
+
+    // if (existed) {
+    //   throw new Error('Hai bạn đã có nhóm từ trước.');
+    // }
+
+    // Kiểm tra cùng khoa
+    const departmentIds = students.map(s => s.department?.id);
+    const uniqueDepartments = [...new Set(departmentIds)];
+    if (uniqueDepartments.length > 1) {
+      const departmentNames = [...new Set(students.map(s => s.department?.name || 'Không xác định'))];
+      throw new Error(`Tất cả sinh viên phải cùng khoa. Đã phát hiện các khoa: ${departmentNames.join(', ')}`);
+    }
+
+    // Nếu user đã có nhóm nhưng chỉ 1 thành viên => update nhóm
+    if (existGroup) {
+      if (existGroup.total_member === 1) {
+        existGroup.name = data.name || existGroup.name;
+        existGroup.status = 'create';
+        existGroup.total_member = 2;
+        existGroup.student_attemp = students;
+        return this.groupRepository.save(existGroup);
+      } else {
+        throw new Error('Nhóm đã đầy. Bạn không được mời thêm thành viên mới');
+      }
+    }
+
+    // Tạo nhóm mới với 2 người
+    const newGroup = new Group();
+    newGroup.name = data.name;
+    newGroup.student_attemp = students;
+    newGroup.department = user.student.department;
+    newGroup.leader = user.student;
+     newGroup.students = [user.student]
+    newGroup.code = `${radomcode1}${radomcode2}`;
+    newGroup.total_member = 2;
+
+    return this.groupRepository.save(newGroup);
+  }
+
+  // Nếu số lượng thành viên khác 1 hoặc 2 => không hỗ trợ
+  throw new Error('Chỉ hỗ trợ tạo nhóm 1 hoặc 2 thành viên');
+}
+
 
   async registerProject(groupId: number, projectId: number): Promise<any> {
     const group = await this.repository.findOne({
@@ -99,7 +165,10 @@ export class GroupsService extends BaseService<Group> {
 
     return this.repository.save(group);
   }
-  async getGroupByUserId(userId: number): Promise<any> {
+
+
+  // 
+  async getGroupByUser(userId: number, type:string): Promise<any> {
     const user = await this.check_exist_with_data(User, {
       where: { id: userId },
       relations: ['student'],
@@ -109,47 +178,57 @@ export class GroupsService extends BaseService<Group> {
         where: { id: user?.student?.id },
         relations: { group: true },
       }, 'Sinh viên không tồn tại');
+      let data:any = {}
       const group: any = await this.repository.manager.findOne(Group, {
         where: { id: student?.group?.id },
-        relations: ['students', 'students.user'],
+        relations: ['students', 'students.user','leader','leader.user','student_attemp','student_attemp.user'],
       });
-      if (group?.students) {
-        group.students = group.students.map((student: any) => {
-          return {
-            ...student,
-            user: {
-              id: student.user?.id,
-              fullname: student.user?.fullname,
-            },
-          };
-        });
+      if (type === 'leader') {
+        if (group && group?.status == 'create') {
+          const groupDta = await this.repository.manager.findOne(Group, {
+            where: { id: group.id , leader:{id: user?.student?.id}},
+            relations: ['students', 'students.user','leader','leader.user','student_attemp','student_attemp.user'],
+          });
+          data =this.freshData(groupDta) ;
+        } else {
+          data = this.freshData(group);
+        }
+      } else if (type === 'invite') {
+        // Lấy tất cả nhóm có user là 1 trong các student_attemp
+            const groupHas = await this.repository.manager.find(Group, {
+              where: {
+                student_attemp: {
+                  id: user?.student?.id
+                }
+              },
+              relations: [
+                'students', 'students.user',
+                'leader', 'leader.user',
+                'student_attemp', 'student_attemp.user'
+              ]
+            });
+
+            // Lọc ra những nhóm mà leader không phải là chính user
+        const groupInvite = groupHas.filter(group => group.leader.id !== user?.student?.id);
+        const freshGroupInvite = await Promise.all(groupInvite.map(group => this.freshData(group)));
+          data= freshGroupInvite
+        
       }
-      return group ?? null; // Null = chưa có nhóm
+      
+      
+      return data ?? null; // Null = chưa có nhóm
     } else {
       throw new Error("Bạn không phải là sinh viên")
     }
     
    
   }
-  async getListHistory(userId: number): Promise<any> {
-    const user = await this.check_exist_with_data(User, {
-        where: { id: userId},
-        relations: ['student'],
-      }, 'Tài khoản không hợp lệ');
-    if (user?.student) {
-        const student = await this.check_exist_with_data(Student, {
-          where: { leader_id: user?.student?.id },
-          relations: { group: true },
-        }, 'Sinh viên không tồn tại');
-      const group:any = await this.repository.manager.find(Group, {
-          where: { id: student?.group?.id  },
-        relations: ['students', 'students.user'],
-          order: {
-            created_at: 'DESC',
-          },
-      });
-      if (group?.students) {
-        group.students = group.students.map((student: any) => {
+
+  freshData(data: any) {
+    if (data?.students) {
+      data.students = data.students.map((student: any) => {
+          delete student.created_at;
+          delete student.updated_at;
           return {
             ...student,
             user: {
@@ -159,10 +238,32 @@ export class GroupsService extends BaseService<Group> {
           };
         });
       }
-       return group ?? null; // Null = chưa có nhóm
-    } else {
-      throw new Error("Bạn không phải là sinh viên")
+
+      if (data?.student_attemp) {
+        data.student_attemp = data.student_attemp.map((student: any) => {
+          delete student.created_at;
+          delete student.updated_at;
+          return {
+            ...student,
+            user: {
+              id: student.user?.id,
+              fullname: student.user?.fullname,
+            },
+          };
+        });
+      }
+    if (data?.leader) {
+        delete data.leader.created_at;
+        delete data.leader.updated_at;
+        data.leader = {
+          ...data.leader,
+          user: {
+            id: data.leader.user?.id,
+            fullname: data.leader.user?.fullname,
+          },
+        };
     }
-}
+    return data
+  }
 
 }
