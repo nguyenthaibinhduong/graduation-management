@@ -54,22 +54,27 @@
         </div>
 
         <!-- Thông tin nhóm -->
-        <div class="bg-white rounded-lg shadow-md p-5" v-if="group">
-            <h2 class="text-xl font-semibold mb-4 text-green-700">👥 Thông tin nhóm</h2>
-            <div class="text-sm space-y-2 text-gray-800">
-                <p><span class="font-medium">Tên nhóm:</span> {{ group.name }}</p>
-                <p><span class="font-medium">Trưởng nhóm:</span> {{ group.students?.[0]?.user?.fullname }} ({{
-                    group.students?.[0]?.code }})</p>
+        <div class="w-full p-6 bg-white rounded-xl shadow-sm ">
+            <h2 class="text-2xl font-semibold mb-4 text-green-700">Thông tin nhóm của bạn</h2>
+            <div v-if="!group" class="text-gray-500 text-sm w-full flex flex-col items-start">
+                <span class="w-full text-center">Bạn hiện chưa có nhóm đăng ký </span>
+                <Button class="mt-3 mx-auto bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300"
+                    icon="pi pi-plus" size="small" label="Đăng ký nhóm" @click="router.push(`/group-manangerment`)" />
+            </div>
+            <div v-else class="space-y-2 text-base">
+                <div><span class="font-medium">Tên nhóm:</span> {{ group?.name }}</div>
+                <div><span class="font-medium">Mã nhóm:</span> {{ group?.code }}</div>
+                <div><span class="font-medium">Trưởng nhóm:</span> {{ group?.leader?.user?.fullname }} </div>
                 <div>
                     <span class="font-medium">Thành viên:</span>
-                    <ul class="list-disc list-inside ml-4">
-                        <li v-for="member in group.students" :key="member.id">
+                    <ul class="list-disc list-inside ml-2">
+                        <li v-for="member in group?.students" :key="member.id">
                             {{ member.user?.fullname }} ({{ member.code }})
                         </li>
                     </ul>
                 </div>
-                <p><span class="font-medium">Trạng thái:</span> <span class="text-blue-600">{{ group.status }}</span>
-                </p>
+                <div><span class="font-medium">Trạng thái:</span> <span class="text-blue-600">{{ group?.status }}</span>
+                </div>
             </div>
         </div>
     </div>

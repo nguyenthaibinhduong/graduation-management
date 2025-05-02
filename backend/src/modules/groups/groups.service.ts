@@ -22,8 +22,10 @@ export class GroupsService extends BaseService<Group> {
     }
     const user: any = await this.repository.manager.findOne(User, {
       where: { id: user_id },
-      relations: { student: true }
+      relations: ['student','student.department'] 
     })
+
+    
      
     if (!data.student_codes.includes(user?.student?.code)) {
       throw new Error('Bạn chỉ được thêm nhóm có thông tin của bạn');
@@ -33,14 +35,44 @@ export class GroupsService extends BaseService<Group> {
       where: { code: In(data.student_codes) },
       relations: { department: true, group: true }, // Ensure department and group relations are loaded
     });
+    const radomcode1 = Math.floor(Math.random() * 999 + 1).toString().padStart(3, '0');
+    const radomcode2 = Math.floor(Math.random() * 999 + 1).toString().padStart(3, '0');
+    // await this.check_exist_no_data(Group, {
+    //   where:{ students: { code : In(data.student_codes)}}
+    // },'Hai bạn đã có nhóm từ trước . Hãy kiểm tra lời mời trong danh sách')
+    
+
+    const existGroup = await this.repository.manager.findOne(Group, {
+       where: { leader: { id: user?.student?.id } },
+      relations: ['leader'],
+    })
+    console.log(existGroup);
+    
     if (data.student_codes.length > 1) {
-      if (students.length !== data.student_codes.length) {
-        const foundCodes = students.map((s) => s.code);
-        const missingCodes = data.student_codes.filter(
-          (code: string) => !foundCodes.includes(code),
-        );
+      if (data.student_codes?.[1] == user?.student?.code) {
+          throw new Error(`Mã sinh viên ${data.student_codes?.[1]} không hợp lệ vì là mã sinh viên của bạn`  )
+      }
+      const existed = await this.repository.manager
+        .createQueryBuilder(Group, 'group')
+        .innerJoin('group.students', 'student')
+        .where('student.code IN (:...codes)', { codes: data.student_codes })
+        .getOne();
+
+      if (existed) {
+        throw new Error('Hai bạn đã có nhóm từ trước.');
+      }
+      const studentB = await this.repository.manager.find(Student, {
+        where:{code : data.student_codes?.[1]}
+      })
+      if (!studentB) {
+        throw new Error(`Mã sinh viên ${data.student_codes?.[1]} không hợp lệ`  )
+      }
+
+      const studentsWithGroup = studentB.filter((student) => student.group);
+      if (studentsWithGroup.length > 0) {
+        const studentCodes = studentsWithGroup.map((s) => s.code);
         throw new Error(
-          `Sinh viên  mã  ${missingCodes.join(', ')}` + ' không tồn tại',
+          `Sinh viên có mã ${data.student_codes?.[1]} sau đã có nhóm: `,
         );
       }
 
@@ -57,21 +89,47 @@ export class GroupsService extends BaseService<Group> {
         );
       }
 
-      // Create a new group
-      const newGroup = new Group();
-      newGroup.name = data.name;
-      newGroup.students = students;
-      newGroup.leader = user?.student;
-      newGroup.total_member = students.length;
-      return this.groupRepository.save(newGroup);
+ 
+      if (existGroup) {
+        if (existGroup.total_member == 1) {
+          if (data.name) {
+            existGroup.name = data.name;
+          }
+          existGroup.status = 'create';
+          existGroup.total_member = students.length;
+          existGroup.students = students
+          return this.groupRepository.save(existGroup);
+        } else {
+           throw Error('Nhóm đã đầy. Bạn không được mời thêm thành viên mới. Vui lòng hủy nhóm cũ để tạo nhóm mới')
+        }
+        
+      } else {
+          const newGroup = new Group();
+          newGroup.name = data.name;
+          newGroup.students = students;
+          newGroup.department =user?.student?.department
+          newGroup.leader = user?.student;
+          newGroup.code = `${radomcode1}${radomcode2}`;
+          newGroup.total_member = students.length;
+          return this.groupRepository.save(newGroup);
+      }
+      
+     
     } else if (data.student_codes.length == 1) {
-      const newGroup = new Group();
-      newGroup.name = data.name;
-      newGroup.students = students;
-      newGroup.status = 'pending'
-      newGroup.leader = user?.student;
-      newGroup.total_member = 1;
-      return this.groupRepository.save(newGroup);
+      if (existGroup) {
+        throw Error('Bạn không được tạo nhóm mới. Vui lòng hủy nhóm cũ để tạo nhóm mới hoặc mời thêm thành viên')
+      } else {
+        const newGroup = new Group();
+        newGroup.name = data.name;
+        newGroup.students = students;
+        newGroup.department = user?.student?.department
+        newGroup.code = `${radomcode1}${radomcode2}`;
+        newGroup.status = 'pending'
+        newGroup.leader = user?.student;
+        newGroup.total_member = 1;
+        return this.groupRepository.save(newGroup);
+      }
+      
     }
     // Check if all provided student codes exist
     
@@ -109,12 +167,23 @@ export class GroupsService extends BaseService<Group> {
         where: { id: user?.student?.id },
         relations: { group: true },
       }, 'Sinh viên không tồn tại');
+      let data:any = {}
       const group: any = await this.repository.manager.findOne(Group, {
         where: { id: student?.group?.id },
-        relations: ['students', 'students.user'],
+        relations: ['students', 'students.user','leader','leader.user'],
       });
-      if (group?.students) {
-        group.students = group.students.map((student: any) => {
+      if (group.status == 'create') {
+        const groupDta = await this.repository.manager.findOne(Group, {
+          where: { id: group.id , leader:{id: user?.student?.id}},
+          relations: ['students', 'students.user','leader','leader.user'],
+        });
+        data = groupDta;
+      } else {
+        data = group;
+      }
+
+      if (data?.students) {
+        data.students = data.students.map((student: any) => {
           return {
             ...student,
             user: {
@@ -124,7 +193,27 @@ export class GroupsService extends BaseService<Group> {
           };
         });
       }
-      return group ?? null; // Null = chưa có nhóm
+      if (data?.students) {
+        data.students = data.students.map((student: any) => {
+          return {
+            ...student,
+            user: {
+              id: student.user?.id,
+              fullname: student.user?.fullname,
+            },
+          };
+        });
+      }
+      if (data?.leader) {
+        data.leader = {
+          ...data.leader,
+          user: {
+            id: data.leader.user?.id,
+            fullname: data.leader.user?.fullname,
+          },
+        };
+      }
+      return data ?? null; // Null = chưa có nhóm
     } else {
       throw new Error("Bạn không phải là sinh viên")
     }
@@ -148,17 +237,7 @@ export class GroupsService extends BaseService<Group> {
             created_at: 'DESC',
           },
       });
-      if (group?.students) {
-        group.students = group.students.map((student: any) => {
-          return {
-            ...student,
-            user: {
-              id: student.user?.id,
-              fullname: student.user?.fullname,
-            },
-          };
-        });
-      }
+      
        return group ?? null; // Null = chưa có nhóm
     } else {
       throw new Error("Bạn không phải là sinh viên")

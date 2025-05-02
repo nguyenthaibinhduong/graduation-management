@@ -13,6 +13,7 @@ import {
 import { Student } from './student.entity';
 import { Project } from './project.entity';
 import { Score } from './score.entity';
+import { Department } from './department.entity';
 
 @Entity('groups')
 export class Group {
@@ -45,6 +46,12 @@ export class Group {
   @JoinColumn({ name: 'project_id' })
   project: Project;
 
+  @ManyToOne(() => Department, (department) => department.group, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'department_id' })
+  department: Department;
+
   @OneToOne(() => Score, (score) => score.id)
   score: Score;
 
@@ -58,8 +65,8 @@ export class Group {
   
 
   @CreateDateColumn()
-    created_at: Date; // Ngày tạo tài khoản
+  created_at: Date; // Ngày tạo tài khoản
   
-    @UpdateDateColumn()
-    updated_at: Date; // Ngày cập nhật thông tin người dùng
+  @UpdateDateColumn()
+  updated_at: Date; // Ngày cập nhật thông tin người dùng
 }
