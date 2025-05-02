@@ -1,63 +1,73 @@
 <template>
-  <div class="flex min-h-screen bg-transparent py-8 justify-center">
-    <Card class="w-full">
+  <div class="flex min-h-screen py-10 px-4 bg-gray-50 justify-center items-start">
+    <Card class="w-full max-w-5xl bg-white shadow-md rounded-xl">
+      <!-- Tiêu đề và trạng thái -->
       <template #title>
-        <div class="w-full flex justify-between items-center pb-6">
-          <h2 class="text-xl font-bold text-blue-800">
-            Đề tài {{ project.title || "" }}
+        <div class="flex justify-between items-center border-b pb-4">
+          <h2 class="text-2xl font-bold text-blue-800">
+            Đề tài: {{ project.title || "Chưa có tiêu đề" }}
           </h2>
           <span :class="statusClass(project.status)">
-            {{ statusLabel(projectStore?.item?.status) }}
+            {{ statusLabel(project.status) }}
           </span>
         </div>
       </template>
+
+      <!-- Nội dung chính -->
       <template #content>
-        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-100 rounded-lg p-5 text-blue-600">
-          <div class="flex items-center gap-2">
-            <label class="font-semibold text-blue-700">Mô tả:</label>
-            <span>{{ project.description || "Chưa cập nhật" }}</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-blue-50 rounded-md text-blue-800">
+          <div class="space-y-1">
+            <label class="font-semibold">📄 Mô tả:</label>
+            <p>{{ project.description || "Chưa cập nhật" }}</p>
           </div>
 
-          <div class="flex items-center gap-2">
-            <label class="font-semibold text-blue-700">Giáo viên hướng dẫn:</label>
-            <span>{{ project.teacher?.user?.fullname || "Chưa xác định" }}</span>
+          <div class="space-y-1">
+            <label class="font-semibold">👨‍🏫 GV Hướng dẫn:</label>
+            <p>{{ project.teacher?.user?.fullname || "Chưa xác định" }}</p>
           </div>
 
-          <div v-if="project.student?.user?.fullname" class="flex items-center gap-2">
-            <label class="font-semibold text-blue-700">Sinh viên đề xuất:</label>
-            <span>{{ project.student?.user?.fullname || "Chưa xác định" }}</span>
+          <div v-if="project.student?.user?.fullname" class="space-y-1">
+            <label class="font-semibold">👩‍🎓 SV Đề xuất:</label>
+            <p>{{ project.student?.user?.fullname }}</p>
           </div>
 
-          <div class="flex items-center gap-2">
-            <label class="font-semibold text-blue-700">Học kỳ:</label>
-            <span>{{ project.course?.name || "Chưa xác định" }}</span>
+          <div class="space-y-1">
+            <label class="font-semibold">📅 Học kỳ:</label>
+            <p>{{ project.course?.name || "Chưa xác định" }}</p>
           </div>
         </div>
-        <h2 class="w-full text-center font-bold text-2xl py-5">Nội dung</h2>
-        <div class="w-full border border-gray-400 p-5 rounded-lg">
-          <span class="mt-10" v-html="safeHtml(project?.content) || 'Chưa cập nhật'"></span>
+
+        <!-- Nội dung chi tiết -->
+        <div class="mt-8">
+          <h3 class="text-center text-xl font-bold text-blue-900 mb-4">📝 Nội dung đề tài</h3>
+          <div class="border border-gray-300 rounded-lg p-5 text-gray-800 leading-relaxed">
+            <span v-html="safeHtml(project?.content) || 'Chưa cập nhật'"></span>
+          </div>
         </div>
       </template>
-      <template #footer>
-        <div class="flex justify-between">
-          <div class="w-3/5">
-            <MyInput v-if="project?.status == 'approve' && authStore.user?.role == 'admin'" v-model="sessonSelected"
-              id="session_id" type="select" :options="session" optionLabel="title" optionValue="id"
-              placeholder="Chọn đợt đăng ký" />
 
+      <!-- Footer với các hành động -->
+      <template #footer>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mt-6">
+          <!-- Select đợt nếu là admin -->
+          <div v-if="project.status === 'approve' && authStore.user?.role === 'admin'" class="w-full md:w-1/2">
+            <MyInput v-model="sessonSelected" id="session_id" type="select" :options="session" optionLabel="title"
+              optionValue="id" placeholder="Chọn đợt đăng ký" />
           </div>
 
-          <div class="w-1/2 flex justify-end">
-            <Button @click="sendStatus" class="btn-submit p-2 rounded-md gap-x-5"
-              v-if="project?.status == 'propose' && authStore.user?.role == 'teacher'">Gửi duyệt</Button>
-            <Button @click="Approve" class="btn-submit p-2 rounded-md"
-              v-if="project?.status == 'pending' && authStore.user?.role == 'admin'">Duyệt đề tài</Button>
+          <!-- Các nút hành động -->
+          <div class="flex  gap-3 justify-end w-full">
+            <Button v-if="project.status === 'propose' && authStore.user?.role === 'teacher'" label="Gửi duyệt"
+              class="btn-submit p-2 px-4 rounded-md bg-yellow-500 hover:bg-yellow-600 text-white" @click="sendStatus" />
 
-            <Button @click="Public" class="btn-submit p-2 rounded-md"
-              v-if="project?.status == 'approve' && authStore.user?.role == 'admin'">Công bố đề tài</Button>
+            <Button v-if="project.status === 'pending' && authStore.user?.role === 'admin'" label="Duyệt đề tài"
+              class="btn-submit p-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white" @click="Approve" />
 
-            <Button @click="Public" class="btn-submit p-2 rounded-md"
-              v-if="project?.status == 'public' && authStore.user?.role == 'student'">Đăng ký thực hiện đề tài</Button>
+            <Button v-if="project.status === 'approve' && authStore.user?.role === 'admin'" label="Công bố đề tài"
+              class="btn-submit p-2 px-4 rounded-md bg-blue-600 hover:bg-blue-700 text-white" @click="Public" />
+
+            <Button v-if="project.status === 'public' && authStore.user?.role === 'student'" label="Đăng ký thực hiện"
+              class="btn-submit p-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white" @click="Public" />
           </div>
         </div>
       </template>
@@ -65,12 +75,13 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { useEnrollmentStore, useProjectStore } from "@/stores/store";
 import { useAuthStore } from "@/stores/auth";
-import { Card } from "primevue";
+import { Button, Card } from "primevue";
 import MyInput from "@/components/form/MyInput.vue";
 import { showToast } from "@/utils/toast";
 import DOMPurify from 'dompurify';
@@ -124,10 +135,10 @@ const statusLabel = (status) => {
 
 const statusClass = (status) => {
   const classes = {
-    propose: "bg-blue-100 text-blue-700 p-2 rounded",
-    pending: "bg-yellow-100 text-yellow-700 p-2 rounded",
-    approve: "bg-green-100 text-green-700 p-2 rounded",
-    public: "bg-purple-100 text-purple-700 p-2 rounded",
+    propose: "bg-blue-100 px-4 text-blue-700 py-2 text-md rounded",
+    pending: "bg-yellow-100 px-4 text-yellow-700 py-2 text-md rounded",
+    approve: "bg-green-100 px-4 text-green-700 py-2 text-md rounded",
+    public: "bg-purple-100 px-4 text-purple-700 py-2 text-md rounded",
   };
   return classes[status] || "";
 };
