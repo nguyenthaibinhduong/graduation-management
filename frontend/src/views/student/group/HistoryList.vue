@@ -1,6 +1,6 @@
 <template>
     <div class="w-full mx-auto p-6 bg-white rounded-xl shadow-sm mt-6 mb-2">
-        <h2 class="text-xl font-semibold mb-4">Lời mời tham gia nhóm</h2>
+        <h2 class="text-xl font-semibold mb-4">Lịch sử tạo nhóm</h2>
 
         <div v-if="invitations.length === 0" class="text-gray-500 text-sm">
             Bạn hiện không có lời mời nào.
@@ -14,9 +14,8 @@
                     <p class="text-sm text-gray-600">Mời từ: {{ invite.inviterEmail }}</p>
                 </div>
                 <div class="flex gap-2">
-                    <Button label="Chấp nhận" icon="pi pi-check" class="p-button-sm p-button-success"
-                        @click="acceptInvite(invite.id)" />
-                    <Button label="Từ chối" icon="pi pi-times" class="p-button-sm p-button-danger"
+
+                    <Button label="Hủy Nhóm" icon="pi pi-times" class="p-button-sm p-button-danger"
                         @click="declineInvite(invite.id)" />
 
 

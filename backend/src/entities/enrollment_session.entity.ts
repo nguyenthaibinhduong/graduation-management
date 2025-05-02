@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Department } from './department.entity';
 import { Course } from './course.entity';
@@ -37,5 +39,11 @@ export class EnrollmentSession {
 
    @OneToMany(() => Project, (project) => project.session)
   project: Project[]
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }
 

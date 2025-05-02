@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { EnrollmentSession } from './enrollment_session.entity';
 
 @Entity('courses')
@@ -21,4 +21,10 @@ export class Course {
   
   @OneToMany(() => EnrollmentSession, (enrollment) => enrollment.department)
   enrollmentSessions: EnrollmentSession[];
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

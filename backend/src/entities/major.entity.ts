@@ -1,5 +1,5 @@
 
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Student } from './student.entity';
 import { Department } from './department.entity';
 
@@ -21,4 +21,10 @@ export class Major {
   @ManyToOne(() => Department, (department) => department.id)
   @JoinColumn({ name: 'department_id' })
   department: Department;
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

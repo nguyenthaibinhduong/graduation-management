@@ -7,6 +7,8 @@ import {
   ManyToMany,
   JoinTable,
   ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Committee } from './committee.entity';
@@ -40,4 +42,10 @@ export class Teacher {
 
   @Column()
   degree: string;
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+  @UpdateDateColumn()
+  updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

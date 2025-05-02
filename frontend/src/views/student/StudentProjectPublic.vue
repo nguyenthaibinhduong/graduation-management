@@ -132,7 +132,7 @@ watch(statusData, async (newSelection) => {
 });
 
 const registerProject = () => {
-    if (group?.status !== "pending") {
+    if (group?.status !== "approve") {
         showToast("Nhóm không được phép đăng ký đề tài", 'info')
     }
 }

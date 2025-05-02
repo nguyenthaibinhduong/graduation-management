@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Criteria } from './criteria.entity';
 
@@ -28,4 +30,11 @@ export class EvaluationForm {
   @ManyToMany(() => Criteria, (criteria) => criteria.evaluationForms)
   @JoinTable({ name: 'evaluation_criterias' })
   criteria: Criteria[];
+
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

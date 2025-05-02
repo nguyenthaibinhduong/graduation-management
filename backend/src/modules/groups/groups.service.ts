@@ -16,13 +16,13 @@ export class GroupsService extends BaseService<Group> {
     super(groupRepository);
   }
 
-  async createGroup(data: any,user_id:any): Promise<Group> {
+  async createGroup(data: any, user_id: any): Promise<Group> {
     if (!data?.student_codes || data.student_codes.length === 0) {
       throw new Error('Không thể thêm nhóm mà không có sinh viên');
     }
-    const user:any = await this.repository.manager.findOne(User, {
-      where: { id: user_id }, 
-      relations : {student:true}
+    const user: any = await this.repository.manager.findOne(User, {
+      where: { id: user_id },
+      relations: { student: true }
     })
      
     if (!data.student_codes.includes(user?.student?.code)) {
@@ -33,48 +33,48 @@ export class GroupsService extends BaseService<Group> {
       where: { code: In(data.student_codes) },
       relations: { department: true, group: true }, // Ensure department and group relations are loaded
     });
+    if (data.student_codes.length > 1) {
+      if (students.length !== data.student_codes.length) {
+        const foundCodes = students.map((s) => s.code);
+        const missingCodes = data.student_codes.filter(
+          (code: string) => !foundCodes.includes(code),
+        );
+        throw new Error(
+          `Sinh viên  mã  ${missingCodes.join(', ')}` + ' không tồn tại',
+        );
+      }
 
+      const departmentIds = students.map((s) => s.department?.id);
+      const uniqueDepartmentIds = [...new Set(departmentIds)];
+
+      if (uniqueDepartmentIds.length > 1) {
+        const departmentNames = students.map(
+          (s) => s.department?.name || 'Không xác định',
+        );
+        const uniqueDepartmentNames = [...new Set(departmentNames)];
+        throw new Error(
+          `Tất cả sinh viên phải thuộc cùng một khoa. Đã phát hiện các khoa: ${uniqueDepartmentNames.join(', ')}`,
+        );
+      }
+
+      // Create a new group
+      const newGroup = new Group();
+      newGroup.name = data.name;
+      newGroup.students = students;
+      newGroup.leader = user?.student;
+      newGroup.total_member = students.length;
+      return this.groupRepository.save(newGroup);
+    } else if (data.student_codes.length == 1) {
+      const newGroup = new Group();
+      newGroup.name = data.name;
+      newGroup.students = students;
+      newGroup.status = 'pending'
+      newGroup.leader = user?.student;
+      newGroup.total_member = 1;
+      return this.groupRepository.save(newGroup);
+    }
     // Check if all provided student codes exist
-    if (students.length !== data.student_codes.length) {
-      const foundCodes = students.map((s) => s.code);
-      const missingCodes = data.student_codes.filter(
-        (code: string) => !foundCodes.includes(code),
-      );
-      throw new Error(
-        `Sinh viên  mã  ${missingCodes.join(', ')}` + ' không tồn tại',
-      );
-    }
-
-    // Check if any students are already in a group
-    const studentsWithGroup = students.filter((student) => student.group);
-    if (studentsWithGroup.length > 0) {
-      const studentCodes = studentsWithGroup.map((s) => s.code);
-      throw new Error(
-        `Sinh viên mã ${studentCodes.join(', ')} đã có nhóm: `,
-      );
-    }
-
-    // Ensure all students belong to the same department
-    const departmentIds = students.map((s) => s.department?.id);
-    const uniqueDepartmentIds = [...new Set(departmentIds)];
-
-    if (uniqueDepartmentIds.length > 1) {
-      const departmentNames = students.map(
-        (s) => s.department?.name || 'Không xác định',
-      );
-      const uniqueDepartmentNames = [...new Set(departmentNames)];
-      throw new Error(
-        `Tất cả sinh viên phải thuộc cùng một khoa. Đã phát hiện các khoa: ${uniqueDepartmentNames.join(', ')}`,
-      );
-    }
-
-    // Create a new group
-    const newGroup = new Group();
-    newGroup.name = data.name;
-    newGroup.students = students;
-    newGroup.total_member = students.length;
-
-    return this.groupRepository.save(newGroup);
+    
   }
 
   async registerProject(groupId: number, projectId: number): Promise<any> {
@@ -101,18 +101,18 @@ export class GroupsService extends BaseService<Group> {
   }
   async getGroupByUserId(userId: number): Promise<any> {
     const user = await this.check_exist_with_data(User, {
-        where: { id: userId},
-        relations: ['student'],
-      }, 'Tài khoản không hợp lệ');
+      where: { id: userId },
+      relations: ['student'],
+    }, 'Tài khoản không hợp lệ');
     if (user?.student) {
-        const student = await this.check_exist_with_data(Student, {
-          where: { id: user?.student?.id },
-          relations: { group: true },
-        }, 'Sinh viên không tồn tại');
-      const group:any = await this.check_exist_with_data(Group, {
-          where: { id: student?.group?.id },
-          relations: ['students', 'students.user'],
-      }, 'Không có nhóm');
+      const student = await this.check_exist_with_data(Student, {
+        where: { id: user?.student?.id },
+        relations: { group: true },
+      }, 'Sinh viên không tồn tại');
+      const group: any = await this.repository.manager.findOne(Group, {
+        where: { id: student?.group?.id },
+        relations: ['students', 'students.user'],
+      });
       if (group?.students) {
         group.students = group.students.map((student: any) => {
           return {
@@ -124,11 +124,45 @@ export class GroupsService extends BaseService<Group> {
           };
         });
       }
-       return group; // Null = chưa có nhóm
+      return group ?? null; // Null = chưa có nhóm
     } else {
       throw new Error("Bạn không phải là sinh viên")
     }
     
    
   }
+  async getListHistory(userId: number): Promise<any> {
+    const user = await this.check_exist_with_data(User, {
+        where: { id: userId},
+        relations: ['student'],
+      }, 'Tài khoản không hợp lệ');
+    if (user?.student) {
+        const student = await this.check_exist_with_data(Student, {
+          where: { leader_id: user?.student?.id },
+          relations: { group: true },
+        }, 'Sinh viên không tồn tại');
+      const group:any = await this.repository.manager.find(Group, {
+          where: { id: student?.group?.id  },
+        relations: ['students', 'students.user'],
+          order: {
+            created_at: 'DESC',
+          },
+      });
+      if (group?.students) {
+        group.students = group.students.map((student: any) => {
+          return {
+            ...student,
+            user: {
+              id: student.user?.id,
+              fullname: student.user?.fullname,
+            },
+          };
+        });
+      }
+       return group ?? null; // Null = chưa có nhóm
+    } else {
+      throw new Error("Bạn không phải là sinh viên")
+    }
+}
+
 }

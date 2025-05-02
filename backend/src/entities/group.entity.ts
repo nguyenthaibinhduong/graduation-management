@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToMany,
@@ -7,6 +8,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Student } from './student.entity';
 import { Project } from './project.entity';
@@ -21,10 +23,21 @@ export class Group {
   name: string;
 
   @Column()
+  code: string;
+
+
+
+  @Column()
   total_member: number;
 
   @OneToMany(() => Student, (student) => student.group)
   students: Student[];
+
+  @ManyToOne(() => Student, (student) => student.group, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'leader_id' })
+  leader: Student;
 
   @ManyToOne(() => Project, (project) => project.groups, {
     onDelete: 'CASCADE',
@@ -41,5 +54,12 @@ export class Group {
     enum: ['create','pending', 'approved', 'rejected'],
     default: 'create',
   })
-  status: 'create'|'pending' | 'approved' | 'rejected';
+  status: 'create' | 'pending' | 'approved' | 'rejected';
+  
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

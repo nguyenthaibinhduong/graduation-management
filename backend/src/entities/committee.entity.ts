@@ -1,11 +1,13 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Course } from './course.entity';
 import { Department } from './department.entity';
@@ -62,4 +64,10 @@ export class Committee {
   @ManyToOne(() => EvaluationForm, (evaluationForm) => evaluationForm.id)
   @JoinColumn({ name: 'evaluation_id' })
   evaluationForm?: EvaluationForm;
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

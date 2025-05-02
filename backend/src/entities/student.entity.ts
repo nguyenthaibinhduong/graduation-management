@@ -7,6 +7,8 @@ import {
   ManyToOne,
   ManyToMany,
   JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Major } from './major.entity';
@@ -36,4 +38,10 @@ export class Student {
   @ManyToOne(() => Group, (group) => group.students, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'group_id' })
   group?: Group;
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

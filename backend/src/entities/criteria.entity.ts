@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { EvaluationForm } from './evaluation_form.entity';
 
 @Entity('criteria')
@@ -20,4 +20,10 @@ export class Criteria {
 
   @ManyToMany(() => EvaluationForm, (evaluationForm) => evaluationForm.criteria)
   evaluationForms: EvaluationForm[];
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

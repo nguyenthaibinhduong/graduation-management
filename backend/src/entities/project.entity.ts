@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
@@ -8,6 +9,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Teacher } from './teacher.entity';
 import { EnrollmentSession } from './enrollment_session.entity';
@@ -67,5 +69,10 @@ export class Project {
   @ManyToOne(() => EnrollmentSession, (session) => session.project)
   @JoinColumn({ name: 'enroll_session_id' })
   session: EnrollmentSession;
- 
+  
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
+    @UpdateDateColumn()
+    updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

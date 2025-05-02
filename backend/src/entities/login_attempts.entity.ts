@@ -1,5 +1,5 @@
     // src/auth/entities/login-attempt.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('login_attempts')
 export class LoginAttempt {
@@ -20,4 +20,8 @@ export class LoginAttempt {
 
   @Column({ nullable: true })
   ip_address: string;
+
+  @CreateDateColumn()
+    created_at: Date; // Ngày tạo tài khoản
+  
 }

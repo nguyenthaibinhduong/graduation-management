@@ -11,7 +11,7 @@
 
             <!-- Mời thành viên -->
             <div class="mb-4 ">
-                <label for="student_code" class="block mb-1 font-medium">Mã sinh viên</label>
+                <label for="student_code" class="block mb-1 font-medium">Mã sinh viên (thành viên)</label>
                 <MyInput type="text" id="student_code" v-model="student_code" class="w-full"
                     placeholder="Mã sinh viên muốn mời (tối đa 1 sinh viên)" />
             </div>
@@ -19,7 +19,7 @@
             <!-- Gửi lời mời -->
             <div class="flex justify-end space-x-2">
                 <Button label="Tạo nhóm" icon="pi pi-users" @click="createGroup" />
-                <Button label="Gửi lời mời" icon="pi pi-send" class="p-button-success" @click="sendInvite" />
+                <Button label="Gửi lời mời" icon="pi pi-send" class="p-button-success" @click="inviteMember" />
             </div>
 
             <!-- Thông báo -->
@@ -27,8 +27,10 @@
         </div>
         <div v-if="group" class="w-full mt-10 p-6 bg-white rounded-xl shadow-sm ">
             <h2 class="text-2xl font-semibold mb-4 text-green-700">Thông tin nhóm của bạn</h2>
-
-            <div class="space-y-2 text-base">
+            <div v-if="group.length === 0" class="text-gray-500 text-sm">
+                Bạn hiện chưa có nhóm
+            </div>
+            <div v-else class="space-y-2 text-base">
                 <div><span class="font-medium">Tên nhóm:</span> {{ group.name }}</div>
                 <div><span class="font-medium">Trưởng nhóm:</span> {{ group.students?.[0]?.user?.fullname }} ({{
                     group.students?.[0]?.code
@@ -56,6 +58,7 @@ import Button from 'primevue/button'
 import MyInput from '@/components/form/MyInput.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useGroupStore } from '@/stores/store'
+import { showToast } from '@/utils/toast'
 
 const group_name = ref('')
 const student_code = ref('')
@@ -74,18 +77,42 @@ watchEffect(() => {
 })
 // Hàm tạo nhóm (logic bạn tự thêm)
 const createGroup = async () => {
+    if (!group_name?.value) {
+        showToast('Chưa điền tên nhóm', 'info')
+    }
     const param = {
         name: group_name.value,
-        student_codes: [student.value?.code, student_code.value],
+        student_codes: [student.value?.code],
     }
 
-    ///await groupStore.addItem(param)
+    await groupStore.addItem(param)
     await groupStore.getMyGroup()
     console.log(group.value);
 
     group_name.value = ''
     student_code.value = ''
 }
+
+const inviteMember = async () => {
+    if (!group_name?.value) {
+        showToast('Chưa điền tên nhóm', 'info')
+    }
+    if (!student_code?.value) {
+        showToast('Chưa điền mã sinh viên thành viên', 'info')
+    }
+    const param = {
+        name: group_name.value,
+        student_codes: [student.value?.code, student_code?.value],
+    }
+
+    await groupStore.addItem(param)
+    await groupStore.getMyGroup()
+    console.log(group.value);
+
+    group_name.value = ''
+    student_code.value = ''
+}
+
 
 
 // Hàm gửi lời mời (logic bạn tự thêm)

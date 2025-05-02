@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Score } from './score.entity';
 import { Student } from './student.entity';
@@ -27,4 +29,10 @@ export class ScoreDetail {
 
   @Column({ type: 'varchar', length: 255 })
   comment: string;
+
+  @CreateDateColumn()
+  created_at: Date; // Ngày tạo tài khoản
+  
+  @UpdateDateColumn()
+  updated_at: Date; // Ngày cập nhật thông tin người dùng
 }
