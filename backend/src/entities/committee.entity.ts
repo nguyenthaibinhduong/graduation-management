@@ -28,8 +28,8 @@ export class Committee {
   @JoinColumn({ name: 'department_id' })
   department?: Department;
 
-  @ManyToMany(() => Project, (project) => project.id)
-  project?: Project[];
+  @ManyToMany(() => Project, (project) => project.committees)
+  projects?: Project[];
 
   @ManyToMany(() => Teacher, (teacher) => teacher.committees)
   @JoinTable({
@@ -66,8 +66,8 @@ export class Committee {
   evaluationForm?: EvaluationForm;
 
   @CreateDateColumn()
-    created_at: Date; // Ngày tạo tài khoản
-  
-    @UpdateDateColumn()
-    updated_at: Date; // Ngày cập nhật thông tin người dùng
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

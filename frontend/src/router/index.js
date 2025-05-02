@@ -21,7 +21,7 @@ import ScoreView from '@/views/teacher/ScoreView.vue'
 import EvaluationFormDetail from '@/views/admin/EvaluationFormDetail.vue'
 import StudentProjectPublic from '@/views/student/StudentProjectPublic.vue'
 import DetailProfileView from '@/views/admin/DetailProfileView.vue'
-
+import CommitteeView from '@/views/admin/CommitteeView.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 
 const routes = [
@@ -32,20 +32,21 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: '/', component: DashboardView },
-       { path: '/user-detail/:id', component:DetailProfileView},
+      { path: '/user-detail/:id', component: DetailProfileView },
       { path: '/student-manangerment', component: StudentView },
-       { path: '/group-manangerment', component: StudentGroup },
+      { path: '/group-manangerment', component: StudentGroup },
       { path: '/teacher-manangerment', component: TeacherView },
       { path: '/course-manangerment', component: CourseView },
       { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
       { path: '/evaluation-form-manangerment', component: EvaluationFormView },
-       { path: '/evaluation-form-detail/:id', component: EvaluationFormDetail },
+      { path: '/evaluation-form-detail/:id', component: EvaluationFormDetail },
       { path: '/project-manangerment', component: ProjectView },
       { path: '/profile', component: ProfileView },
       { path: '/account-manangerment', component: UserView },
       { path: '/department-major-manangerment', component: MajorDepartmentView },
       { path: '/teacher-project', component: TeacherProjectView },
-      
+      { path: '/committee-management', component: CommitteeView },
+
       { path: '/student-project', component: StudentProjectView },
       { path: '/student-project-public', component: StudentProjectPublic },
       { path: '/project-detail/:id', component: ProjectDetailView },
@@ -67,8 +68,7 @@ router.beforeEach(async (to, from, next) => {
   }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     try {
-      const res = await axios.post('http://localhost:3034/api/v1/auth/verify-token', { token },
-      )
+      const res = await axios.post('http://localhost:3034/api/v1/auth/verify-token', { token })
       if (res.status === 201) {
         authStore.setAuth(true)
         console.log('Token hợp lệ')
@@ -82,7 +82,7 @@ router.beforeEach(async (to, from, next) => {
             'http://localhost:3034/api/v1/auth/refresh-token',
             {},
             {
-              withCredentials: true
+              withCredentials: true,
             }
           )
           if (refreshRes.status === 201 && refreshRes.data.access_token) {

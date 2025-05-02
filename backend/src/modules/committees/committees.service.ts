@@ -6,7 +6,7 @@ import {
 import { CreateCommitteeDto } from './dto/create-committee.dto';
 import { Committee } from 'src/entities/committee.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, Like } from 'typeorm';
 import { Course } from 'src/entities/course.entity';
 import { Department } from 'src/entities/department.entity';
 import { EvaluationForm } from 'src/entities/evaluation_form.entity';
@@ -130,5 +130,31 @@ export class CommitteesService {
       // Release the query runner
       await queryRunner.release();
     }
+  }
+
+  async getAllCommittees(
+    search?: string,
+    limit?: number,
+    page?: number,
+  ): Promise<{
+    items: Committee[];
+    total: number;
+    limit?: number;
+    page?: number;
+  }> {
+    const where = search ? { name: Like(`%${search}%`) } : {};
+    const [items, total] = await this.committeeRepository.findAndCount({
+      where,
+      relations: [
+        'course',
+        'department',
+        'evaluationForm',
+        'teachers',
+        'projects',
+      ],
+      skip: limit && page ? (page - 1) * limit : undefined,
+      take: limit,
+    });
+    return { items, total, ...(limit && { limit }), ...(page && { page }) };
   }
 }
