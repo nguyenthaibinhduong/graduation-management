@@ -23,6 +23,8 @@ export const useEvaluationStore = createBaseStore('evaluation-forms')
 
 export const useGroupStore = createGroupStore('groups')
 
-export const useProjectStore = createProjectStore();
+export const useProjectStore = createProjectStore()
 
 export const useFileStore = createFileStore()
+
+export const useCommitteeStore = createBaseStore('committees')
