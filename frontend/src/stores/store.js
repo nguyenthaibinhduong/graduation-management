@@ -1,5 +1,6 @@
 import { createBaseStore } from './base'
 import { createFileStore } from './files'
+import { createGroupStore } from './group'
 import { createProjectStore } from './project'
 
 export const useDepartmentStore = createBaseStore('departments')
@@ -20,7 +21,7 @@ export const useEnrollmentStore = createBaseStore('enrollment_sessions')
 
 export const useEvaluationStore = createBaseStore('evaluation-forms')
 
-export const useGroupStore = createBaseStore('groups')
+export const useGroupStore = createGroupStore('groups')
 
 export const useProjectStore = createProjectStore();
 

@@ -89,7 +89,7 @@ export abstract class BaseService<T> {
     where: any,
     errorMessage: string,
   ): Promise<void> {
-    const existingRecord = await this.repository.manager.findOne(entity, { where });
+    const existingRecord = await this.repository.manager.findOne(entity, {...where });
     
     if (!existingRecord) {
       throw new Error(errorMessage); 
@@ -102,7 +102,7 @@ export abstract class BaseService<T> {
     where: any,
     errorMessage: string,
   ): Promise<T> {
-    const existingRecord = await this.repository.manager.findOne(entity, { where });
+    const existingRecord = await this.repository.manager.findOne(entity, { ...where });
 
     if (!existingRecord && errorMessage) {
       throw new Error(errorMessage);

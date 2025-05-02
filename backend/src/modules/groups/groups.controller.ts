@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ValidationPipe,
@@ -14,7 +13,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { GroupsService } from './groups.service';
-import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { Response } from 'src/common/globalClass';
@@ -36,7 +34,7 @@ export class GroupsController {
         createGroupDto,
         request.user?.id,
       );
-      return new Response(newGroup, HttpStatus.SUCCESS, Message.SUCCESS);
+      return new Response( newGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -144,12 +142,13 @@ export class GroupsController {
     }
   }
 
-  @Get('get-group-by-user-id/:userId')
-  async getGroupByUserId(
-    @Param('userId', new ValidationPipe({ transform: true })) userId: number,
-  ): Promise<Response<Group>> {
+  @Post('get-my-group')
+  async getMyGroup(
+     @Request() request: any,
+  ): Promise<Response<any>> {
     try {
-      const group = await this.groupsService.getGroupByUserId(userId);
+      const id = request.user?.id
+      const group = await this.groupsService.getGroupByUserId(id);
       return new Response(group, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

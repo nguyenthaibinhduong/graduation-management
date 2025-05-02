@@ -38,8 +38,8 @@ export class Group {
   //Group status: pending, approved, rejected
   @Column({
     type: 'enum',
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending',
+    enum: ['create','pending', 'approved', 'rejected'],
+    default: 'create',
   })
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'create'|'pending' | 'approved' | 'rejected';
 }

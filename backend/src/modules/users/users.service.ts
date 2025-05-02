@@ -134,8 +134,8 @@ export class UsersService extends BaseService<User> {
   }
 
   async verifyCaptcha(captchaResponse: string): Promise<boolean> {
-  const secretKey = '6LfrVyYrAAAAAN6leFm5NXusLn3N8IyuVqWtI3mS'; // Thay thế bằng key của bạn
-  const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
+  const secretKey = process.env.GG_CAPTCHA_SECRECT; // Thay thế bằng key của bạn
+  const response = await axios.post(process.env.GG_CAPTCHA_API, null, {
     params: {
       secret: secretKey,
       response: captchaResponse,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
+import { Roles } from 'src/common/decorators/roles.decorators';
 import { Group } from 'src/entities/group.entity';
 import { Student } from 'src/entities/student.entity';
 import { User } from 'src/entities/user.entity';
@@ -20,7 +21,7 @@ export class GroupsService extends BaseService<Group> {
       throw new Error('Không thể thêm nhóm mà không có sinh viên');
     }
     const user:any = await this.repository.manager.findOne(User, {
-      where: { id: user_id },
+      where: { id: user_id }, 
       relations : {student:true}
     })
      
@@ -49,7 +50,7 @@ export class GroupsService extends BaseService<Group> {
     if (studentsWithGroup.length > 0) {
       const studentCodes = studentsWithGroup.map((s) => s.code);
       throw new Error(
-        `Các sinh viên sau đã có nhóm: ${studentCodes.join(', ')}`,
+        `Sinh viên mã ${studentCodes.join(', ')} đã có nhóm: `,
       );
     }
 
@@ -98,14 +99,36 @@ export class GroupsService extends BaseService<Group> {
 
     return this.repository.save(group);
   }
-  async getGroupByUserId(userId: number): Promise<Group> {
-    const student = await this.repository.manager.findOne(Student, {
-      where: { id: userId },
-      relations: { group: true },
-    });
-    if (!student) {
-      throw new Error('Sinh viên không tồn tại');
+  async getGroupByUserId(userId: number): Promise<any> {
+    const user = await this.check_exist_with_data(User, {
+        where: { id: userId},
+        relations: ['student'],
+      }, 'Tài khoản không hợp lệ');
+    if (user?.student) {
+        const student = await this.check_exist_with_data(Student, {
+          where: { id: user?.student?.id },
+          relations: { group: true },
+        }, 'Sinh viên không tồn tại');
+      const group:any = await this.check_exist_with_data(Group, {
+          where: { id: student?.group?.id },
+          relations: ['students', 'students.user'],
+      }, 'Không có nhóm');
+      if (group?.students) {
+        group.students = group.students.map((student: any) => {
+          return {
+            ...student,
+            user: {
+              id: student.user?.id,
+              fullname: student.user?.fullname,
+            },
+          };
+        });
+      }
+       return group; // Null = chưa có nhóm
+    } else {
+      throw new Error("Bạn không phải là sinh viên")
     }
-    return student.group ?? null; // Null = chưa có nhóm
+    
+   
   }
 }
