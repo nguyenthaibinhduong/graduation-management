@@ -12,6 +12,7 @@ import { Department } from 'src/entities/department.entity';
 import { EvaluationForm } from 'src/entities/evaluation_form.entity';
 import { Project } from 'src/entities/project.entity';
 import { Teacher } from 'src/entities/teacher.entity';
+import { UpdateCommitteeDto } from './dto/update-committee.dto';
 
 @Injectable()
 export class CommitteesService {
@@ -132,6 +133,32 @@ export class CommitteesService {
     }
   }
 
+  // async updateCommittee(
+  //   id: number,
+  //   committeeData: UpdateCommitteeDto,
+  // ): Promise<Committee> {
+  //   const {
+  //     course_id,
+  //     department_id,
+  //     evaluation_id,
+  //     project_ids,
+  //     teacher_ids,
+  //     ...data
+  //   } = committeeData;
+  //   const committee = await this.committeeRepository.findOne({
+  //     where: { id },
+  //     relations: [
+  //       'course',
+  //       'department',
+  //       'evaluationForm',
+  //       'projects',
+  //       'teachers',
+  //     ],
+  //   });
+  //   if (!committee) {
+  //     throw new NotFoundException(`Committee with ID ${id} not found`);
+  //   }
+  // }
   async getAllCommittees(
     search?: string,
     limit?: number,

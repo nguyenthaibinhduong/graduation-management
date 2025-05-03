@@ -58,8 +58,8 @@ export class Committee {
   @Column({ type: 'datetime' })
   time_end: Date;
 
-  @Column({ type: 'enum', enum: ['blocked', 'active'], default: 'active' })
-  status: 'blocked' | 'active';
+  @Column({ type: 'enum', enum: ['inactive', 'active'], default: 'active' })
+  status: 'inactive' | 'active';
 
   @ManyToOne(() => EvaluationForm, (evaluationForm) => evaluationForm.id)
   @JoinColumn({ name: 'evaluation_id' })

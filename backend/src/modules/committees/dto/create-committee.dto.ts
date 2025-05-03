@@ -41,9 +41,9 @@ export class CreateCommitteeDto {
   @IsNotEmpty({ message: 'Thời gian kết thúc không được để trống' })
   time_end: Date;
 
-  @IsEnum(['blocked', 'active'], { message: 'Trạng thái không hợp lệ' })
+  @IsEnum(['inactive', 'active'], { message: 'Trạng thái không hợp lệ' })
   @IsOptional()
-  status?: 'blocked' | 'active';
+  status?: 'inactive' | 'active';
 
   @IsInt()
   @IsOptional()
