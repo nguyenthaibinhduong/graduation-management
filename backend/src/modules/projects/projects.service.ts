@@ -102,7 +102,7 @@ export class ProjectsService extends BaseService<Project> {
         'student.department',
         'course',
       ];
-      where.status = status ? status : In(['pending', 'approve', 'public']);
+      where.status = status ? status : In(['pending', 'approve', 'public','propose']);
     }
     const [items, total] = await this.projectRepository.findAndCount(options);
     items.forEach((item) => {
