@@ -1,6 +1,9 @@
 <template>
     <div class="w-full mx-auto p-6 bg-white rounded-xl shadow-sm mt-6 mb-2">
-        <h2 class="text-xl font-semibold mb-4">Lời mời tham gia nhóm</h2>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">Lời mời tham gia nhóm</h2>
+            <Button label="Làm mới" icon="pi pi-refresh" class="p-button-sm p-button-outlined" @click="reset" />
+        </div>
 
         <div v-if="invites && invites.length === 0" class="text-gray-500 text-sm">
             Bạn hiện không có lời mời nào.
@@ -44,16 +47,26 @@ watchEffect(() => {
 })
 
 // Hàm xử lý chấp nhận
-const acceptInvite = (inviteId) => {
-    console.log('Đã chấp nhận lời mời:', inviteId)
-    // TODO: Gọi API xác nhận lời mời
-    invitations.value = invitations.value.filter(i => i.id !== inviteId)
+const acceptInvite = async (groupId) => {
+    const param = {
+        group_id: groupId
+    }
+    await groupStore.respondToInvite(param, 'accept')
+    await reset()
 }
 
 // Hàm từ chối
-const declineInvite = (inviteId) => {
-    console.log('Đã từ chối lời mời:', inviteId)
-    // TODO: Gọi API từ chối lời mời
-    invitations.value = invitations.value.filter(i => i.id !== inviteId)
+const declineInvite = async (groupId) => {
+    const param = {
+        group_id: groupId
+    }
+    await groupStore.respondToInvite(param, 'reject')
+    await reset()
+
+}
+
+const reset = async () => {
+    await groupStore.getMyGroup()
+    await groupStore.getMyInvite()
 }
 </script>

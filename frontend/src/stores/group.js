@@ -39,6 +39,14 @@ export function createGroupStore(entity) {
        invite.value = data.data
     }
 
+    const respondToInvite = async (param, type = 'accept') => {
+      const { data } = await api.post(`/groups/invite-response/${type}`, param)
+      if (data) {
+        const msg = type === "accept" ? "Tham gia nhóm thành công" : "Từ chối nhóm thàng công";
+        showToast(msg, "success");
+      }
+      
+    }
     const addItem = async (itemData ) => {
 
       await baseService(entity).create(itemData)
@@ -61,6 +69,6 @@ export function createGroupStore(entity) {
 
     
 
-    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite}
+    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite}
   })
 }

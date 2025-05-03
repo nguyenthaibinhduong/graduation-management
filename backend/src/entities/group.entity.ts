@@ -25,6 +25,7 @@ export class Group {
 
   @Column()
   code: string;
+  
 
 
 
@@ -42,6 +43,7 @@ export class Group {
   })
   @JoinColumn({ name: 'leader_id' })
   leader: Student;
+  
 
 
   @ManyToOne(() => Project, (project) => project.groups, {
@@ -58,6 +60,7 @@ export class Group {
 
   @OneToOne(() => Score, (score) => score.id)
   score: Score;
+
 
   //Group status: pending, approved, rejected
   @Column({

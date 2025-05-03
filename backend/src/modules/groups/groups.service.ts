@@ -1,8 +1,7 @@
-import { Type } from "class-transformer";
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
-import { Roles } from 'src/common/decorators/roles.decorators';
 import { Group } from 'src/entities/group.entity';
 import { Student } from 'src/entities/student.entity';
 import { User } from 'src/entities/user.entity';
@@ -31,6 +30,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
   if (!user?.student) {
     throw new Error('Không tìm thấy thông tin sinh viên');
   }
+
 
   const currentStudentCode = user.student.code;
 
@@ -63,7 +63,12 @@ async createGroup(data: any, user_id: any): Promise<Group> {
 
   // Nếu tạo nhóm chỉ có 1 người (bản thân)
   if (data.student_codes.length === 1) {
-    if (existGroup) {
+    const existGroupAttempt = await this.repository.manager.findOne(Group, {
+      where: { students: { id: user.student.id }, status:'pending' },
+      relations: ['leader'],
+    });
+
+    if (existGroupAttempt) {
       throw new Error('Bạn đã có nhóm. Vui lòng hủy nhóm cũ để tạo nhóm mới hoặc mời thêm thành viên');
     }
 
@@ -108,6 +113,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
     const departmentIds = students.map(s => s.department?.id);
     const uniqueDepartments = [...new Set(departmentIds)];
     if (uniqueDepartments.length > 1) {
+
       const departmentNames = [...new Set(students.map(s => s.department?.name || 'Không xác định'))];
       throw new Error(`Tất cả sinh viên phải cùng khoa. Đã phát hiện các khoa: ${departmentNames.join(', ')}`);
     }
@@ -124,7 +130,14 @@ async createGroup(data: any, user_id: any): Promise<Group> {
         throw new Error('Nhóm đã đầy. Bạn không được mời thêm thành viên mới');
       }
     }
+    const existGroupAttempt = await this.repository.manager.findOne(Group, {
+      where: { students: { id: user.student.id }, status:'pending' },
+      relations: ['leader'],
+    });
 
+    if (existGroupAttempt) {
+      throw new Error('Bạn đã có nhóm. Vui lòng hủy nhóm cũ để tạo nhóm mới hoặc mời thêm thành viên');
+    }
     // Tạo nhóm mới với 2 người
     const newGroup = new Group();
     newGroup.name = data.name;
@@ -167,7 +180,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
   }
 
 
-  // 
+
   async getGroupByUser(userId: number, type:string): Promise<any> {
     const user = await this.check_exist_with_data(User, {
       where: { id: userId },
@@ -197,6 +210,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
         // Lấy tất cả nhóm có user là 1 trong các student_attemp
             const groupHas = await this.repository.manager.find(Group, {
               where: {
+                status: "create",
                 student_attemp: {
                   id: user?.student?.id
                 }
@@ -264,6 +278,64 @@ async createGroup(data: any, user_id: any): Promise<Group> {
         };
     }
     return data
+  }
+
+  async handleInviteResponse(userId: any, groupId: any, type: any) {
+    const user = await this.check_exist_with_data(User, {
+      where: { id: userId },
+      relations: ['student'],
+    }, 'Tài khoản không hợp lệ');
+    if (user?.student) {
+      var student = await this.check_exist_with_data(Student, {
+        where: { id: user?.student?.id },
+        relations: { group: true },
+      }, 'Sinh viên không tồn tại');
+    }
+    const group = await this.check_exist_with_data(Group, {
+      where: { id: groupId },
+      relations: {leader: true},
+    }, 'Nhóm không tồn tại')
+    if (group?.leader && group?.leader?.code != user?.student.code && group?.status =='create') {
+      const groupHas = await this.repository.manager.findOne(Group, {
+            where: {
+                id: group?.id,
+                student_attemp: {
+                  id: user?.student?.id
+                }
+              },
+              relations: [
+                'students', 'students.user',
+                'leader', 'leader.user',
+                'student_attemp', 'student_attemp.user'
+              ]
+      });
+      if (groupHas) {
+        if (type == 'accept') {
+          if (student?.group) {
+            throw new Error("Bạn đã có nhóm. Bạn cần hủy tham gia nhóm hiện tại để tham gia nhóm khác");
+          }
+          groupHas.status = 'pending';
+          groupHas.total_member = 2;
+          groupHas.students = [groupHas.leader,user?.student];
+          return this.groupRepository.save(groupHas);
+        } else {
+          if (type == "reject") {
+            groupHas.status = 'pending';
+            groupHas.total_member = 1;
+            groupHas.students = [groupHas.leader];
+            groupHas.student_attemp = [groupHas.leader]
+            return this.groupRepository.save(groupHas);
+          }
+        }
+      
+        
+      }
+      
+    }
+    else {
+      throw new Error("Yêu cầu không hợp lệ");
+    }
+
   }
 
 }

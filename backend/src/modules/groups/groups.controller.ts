@@ -173,4 +173,30 @@ export class GroupsController {
       );
     }
   }
+
+  @Post('invite-response/:type')
+  async respondToInvite(
+  @Param('type') type: 'accept' | 'reject',
+  @Body('group_id') groupId: number,
+  @Request() request: any,
+): Promise<Response<any>> {
+  try {
+    const userId = request.user?.id;
+
+    if (!userId || !groupId) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin userId hoặc groupId' },
+        HttpStatus.ERROR,
+      );
+    }
+
+    const result = await this.groupsService.handleInviteResponse(userId, groupId, type);
+      return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
 }

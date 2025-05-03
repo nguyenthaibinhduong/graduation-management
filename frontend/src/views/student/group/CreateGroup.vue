@@ -137,7 +137,7 @@
                 <div>
                     <span class="font-medium">Thành viên:</span>
                     <ul class="list-disc list-inside ml-2">
-                        <li v-for="member in (group?.status == 'approve' ? group?.students : group?.student_attemp)"
+                        <li v-for="member in (group?.status == 'create' ? group?.student_attemp : group?.students)"
                             :key="member.id">
                             {{ member.user?.fullname }} ({{ member.code }})
                         </li>
