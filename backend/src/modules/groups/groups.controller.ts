@@ -45,14 +45,17 @@ export class GroupsController {
 
   @Get()
   async findAll(
-    @Query('search') search?: string,
-    @Query('limit') limit?: number,
-    @Query('page') page?: number,
+    @Query('status') status?: string,
+    @Query('department_id') department_id?: number | string,
+   @Query('search') search?: string,
+  @Query('limit') limit?: number,
+  @Query('page') page?: number,
+  @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc',
   ): Promise<
     Response<{ items: Group[]; total: number; limit?: number; page?: number }>
   > {
     try {
-      const groups = await this.groupsService.getAll(search, limit, page);
+     const groups = await this.groupsService.getAllGroup(status,department_id,search,limit,page,orderBy);
       return new Response(groups, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

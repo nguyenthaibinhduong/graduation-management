@@ -2,10 +2,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
+import { Department } from 'src/entities/department.entity';
 import { Group } from 'src/entities/group.entity';
 import { Student } from 'src/entities/student.entity';
 import { User } from 'src/entities/user.entity';
-import { In, Not, Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class GroupsService extends BaseService<Group> {
@@ -15,6 +16,53 @@ export class GroupsService extends BaseService<Group> {
   ) {
     super(groupRepository);
   }
+
+async getAllGroup(
+  status: string,
+  department_id: number | string | null,
+  search?: string,
+  limit?: number,
+  page?: number,
+  orderBy: 'asc' | 'desc' = 'asc',
+): Promise<{ items: any[]; total: number; limit?: number; page?: number }> {
+  // Xây dựng điều kiện lọc
+  const where: any = {};
+ if (search) {
+  where.push(
+    { code: Like(`%${search}%`) },
+    { name: Like(`%${search}%`) }
+  );
+}
+  if (status) where.status = status;
+  
+  if (department_id) {
+    where.department = { id: department_id };
+  }
+
+
+  const options: any = {
+    where,
+    order: {
+      updated_at: orderBy,
+    },
+    relations:{department:true}
+  };
+
+  if (limit && page) {
+    options.take = limit;
+    options.skip = (page - 1) * limit;
+  }
+
+  const [items, total] = await this.groupRepository.findAndCount(options);
+
+  return {
+    items,
+    total,
+    ...(limit && { limit }),
+    ...(page && { page }),
+  };
+}
+
 
 async createGroup(data: any, user_id: any): Promise<Group> {
   if (!data?.student_codes || data.student_codes.length === 0) {

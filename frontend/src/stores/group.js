@@ -11,16 +11,24 @@ export function createGroupStore(entity) {
       const item = ref([])
       const group= ref([]) 
     const invite = ref([]) 
-    onMounted(async() => {
-      await getMyGroup();
-      await getMyInvite();
-    })
-    const fetchItems = async (page = 1, limit = 10, search = '') => {
-      const data = await baseService(entity).fetchAll(page, limit, search)
-      items.value = data.items
-      total.value = data.total
-      
-    }
+    const fetchItems = async (status, department_id, page = 1, limit = 10, search = '', orderBy = 'asc') => {
+      const params = {
+        status,
+        department_id,
+        page,
+        limit,
+        search,
+        orderBy,
+      };
+
+      const { data } = await api.get(`/groups`, { params });
+        if (data) {
+          items.value = data.data.items;
+          total.value = data.data.total;
+        }
+        
+    };
+
 
     const findItem = async (id) => {
       if (id) {

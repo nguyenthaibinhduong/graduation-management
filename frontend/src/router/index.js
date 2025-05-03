@@ -22,6 +22,7 @@ import EvaluationFormDetail from '@/views/admin/EvaluationFormDetail.vue'
 import StudentProjectPublic from '@/views/student/StudentProjectPublic.vue'
 import DetailProfileView from '@/views/admin/DetailProfileView.vue'
 import CommitteeView from '@/views/admin/CommitteeView.vue'
+import GroupView from '@/views/admin/GroupView.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 
 const routes = [
@@ -34,7 +35,7 @@ const routes = [
       { path: '/', component: DashboardView },
       { path: '/user-detail/:id', component: DetailProfileView },
       { path: '/student-manangerment', component: StudentView },
-      { path: '/group-manangerment', component: StudentGroup },
+      { path: '/group-manangerment-admin', component: GroupView },
       { path: '/teacher-manangerment', component: TeacherView },
       { path: '/course-manangerment', component: CourseView },
       { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
@@ -46,7 +47,7 @@ const routes = [
       { path: '/department-major-manangerment', component: MajorDepartmentView },
       { path: '/teacher-project', component: TeacherProjectView },
       { path: '/committee-management', component: CommitteeView },
-
+      { path: '/group-manangerment', component: StudentGroup },
       { path: '/student-project', component: StudentProjectView },
       { path: '/student-project-public', component: StudentProjectPublic },
       { path: '/project-detail/:id', component: ProjectDetailView },
