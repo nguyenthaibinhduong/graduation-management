@@ -11,7 +11,7 @@ export function createGroupStore(entity) {
       const item = ref([])
       const group= ref([]) 
     const invite = ref([]) 
-    const fetchItems = async (status, department_id, page = 1, limit = 10, search = '', orderBy = 'asc') => {
+    const fetchItems = async  (page = 1, limit = 10,status, department_id, search = '', orderBy = 'asc') => {
       const params = {
         status,
         department_id,
@@ -50,11 +50,22 @@ export function createGroupStore(entity) {
     const respondToInvite = async (param, type = 'accept') => {
       const { data } = await api.post(`/groups/invite-response/${type}`, param)
       if (data) {
-        const msg = type === "accept" ? "Tham gia nhóm thành công" : "Từ chối nhóm thàng công";
+        const msg = type === "accept" ? "Tham gia nhóm thành công" : "Từ chối nhóm thành công";
         showToast(msg, "success");
       }
       
     }
+
+    const updateStatus = async (id_project,status = '') => {
+      const param = { status }
+      const { data } = await api.post(`/groups/update-status/${id_project}`, param)
+      if (data) {
+        const msg ="Đã cập nhật trạng thái nhóm";
+        showToast(msg, "success");
+      }
+      
+    }
+
     const addItem = async (itemData ) => {
 
       await baseService(entity).create(itemData)
@@ -77,6 +88,6 @@ export function createGroupStore(entity) {
 
     
 
-    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite}
+    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus}
   })
 }

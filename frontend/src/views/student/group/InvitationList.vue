@@ -42,7 +42,6 @@ onMounted(async () => {
 })
 watchEffect(() => {
     invites.value = groupStore.invite
-    console.log(invites.value);
 
 })
 

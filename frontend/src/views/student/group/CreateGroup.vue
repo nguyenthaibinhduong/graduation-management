@@ -8,10 +8,12 @@
                 <li><strong>1.Tạo nhóm mới</strong></li>
                 <ul class="list-inside space-y-1">
                     <li><strong>Đăng ký 1 mình:</strong> Bạn có thể tạo nhóm cho riêng mình. Nhóm sẽ có trạng thái <span
-                            class="font-bold">Pending</span> (chờ duyệt). Hệ thống sẽ tạo mã nhóm duy nhất cho bạn.</li>
+                            class="font-bold">Pending</span> (đang chờ duyệt). Hệ thống sẽ tạo mã nhóm duy nhất cho bạn.
+                    </li>
                     <li><strong>Mời thêm thành viên vào nhóm:</strong> Bạn có thể mời các sinh viên khác tham gia nhóm.
                         Nhóm
-                        sẽ có trạng thái <span class="font-bold">Create</span> (đang tạo), và các thành viên bạn mời sẽ
+                        sẽ có trạng thái <span class="font-bold">Create</span> (đang lập nhóm), và các thành viên bạn
+                        mời sẽ
                         nhận
                         lời mời tham gia nhóm.</li>
                 </ul>
@@ -20,7 +22,8 @@
                 <ul class="list-inside space-y-1">
                     <li><strong>Chấp nhận lời mời:</strong> Khi sinh viên được mời chấp nhận lời mời, nhóm sẽ chuyển
                         sang
-                        trạng thái <span class="font-bold">Pending</span> (chờ duyệt). Các thành viên sẽ chờ giáo vụ
+                        trạng thái <span class="font-bold">Pending</span> (đang chờ duyệt). Các thành viên sẽ chờ giáo
+                        vụ
                         duyệt
                         nhóm.</li>
                     <li><strong>Từ chối lời mời:</strong> Nếu một thành viên từ chối lời mời, nhóm sẽ cập nhật sang
@@ -32,10 +35,12 @@
                 <li><strong>1.Tạo nhóm mới</strong></li>
                 <ul class="list-inside space-y-1">
                     <li><strong>Đăng ký 1 mình:</strong> Bạn có thể tạo nhóm cho riêng mình. Nhóm sẽ có trạng thái <span
-                            class="font-bold">Pending</span> (chờ duyệt). Hệ thống sẽ tạo mã nhóm duy nhất cho bạn.</li>
+                            class="font-bold">Pending</span> (đang chờ duyệt). Hệ thống sẽ tạo mã nhóm duy nhất cho bạn.
+                    </li>
                     <li><strong>Mời thêm thành viên vào nhóm:</strong> Bạn có thể mời các sinh viên khác tham gia nhóm.
                         Nhóm
-                        sẽ có trạng thái <span class="font-bold">Create</span> (đang tạo), và các thành viên bạn mời sẽ
+                        sẽ có trạng thái <span class="font-bold">Create</span> (đang lập nhóm), và các thành viên bạn
+                        mời sẽ
                         nhận
                         lời mời tham gia nhóm.</li>
                 </ul>
@@ -44,7 +49,8 @@
                 <ul class="list-inside space-y-1">
                     <li><strong>Chấp nhận lời mời:</strong> Khi sinh viên được mời chấp nhận lời mời, nhóm sẽ chuyển
                         sang
-                        trạng thái <span class="font-bold">Pending</span> (chờ duyệt). Các thành viên sẽ chờ giáo vụ
+                        trạng thái <span class="font-bold">Pending</span> (đang chờ duyệt). Các thành viên sẽ chờ giáo
+                        vụ
                         duyệt
                         nhóm.</li>
                     <li><strong>Từ chối lời mời:</strong> Nếu một thành viên từ chối lời mời, nhóm sẽ cập nhật sang
@@ -69,7 +75,7 @@
 
                 <li><strong>5.Tạo nhóm mới sau khi hủy nhóm cũ</strong></li>
                 <ul class="list-inside space-y-1">
-                    <li>Nếu nhóm hiện tại của bạn có trạng thái khác <span class="font-bold">Approved</span> (chưa
+                    <li>Nếu nhóm hiện tại của bạn có trạng thái khác với <span class="font-bold">Approved</span> (chưa
                         duyệt),
                         bạn cần hủy nhóm cũ để tạo nhóm mới.</li>
                     <li>Hệ thống không cho phép tạo nhóm mới nếu nhóm cũ chưa được duyệt (status != <span
@@ -143,9 +149,19 @@
                         </li>
                     </ul>
                 </div>
-                <div><span class="font-medium">Trạng thái:</span> <span class="text-blue-600">{{ group?.status }}</span>
+                <div>
+                    <span class="font-medium">Trạng thái:</span>
+                    <span :class="statusClass(group?.status)">{{ statusLabel(group?.status) }}</span>
                 </div>
+                <div class="flex justify-end space-x-2">
+                    <Button v-if="group.status !== 'approved' && student?.id != group?.leader?.id" label="Rời nhóm"
+                        icon="pi pi-sign-out" variant="outlined" severity="danger" @click="cancelGroup(group.id)" />
+                    <Button v-if="group.status !== 'approved' && student?.id == group?.leader?.id" label="Hủy nhóm"
+                        icon="pi pi-user-minus" variant="outlined" severity="danger" @click="cancelGroup(group.id)" />
+                </div>
+
             </div>
+
         </div>
     </div>
 
@@ -162,7 +178,6 @@ import { showToast } from '@/utils/toast'
 
 const group_name = ref('')
 const student_code = ref('')
-const message = ref('')
 const authStore = useAuthStore();
 const student = ref()
 const group = ref(null)
@@ -177,7 +192,28 @@ onMounted(async () => {
 watchEffect(() => {
     student.value = authStore.user?.student
     group.value = groupStore.group
+    console.log(group.value, student.value)
 })
+
+const statusLabel = (status) => {
+    const statuses = {
+        create: "Đang lập nhóm",
+        pending: "Đang chờ duyệt",
+        approved: "Đã duyệt",
+        reject: "Đã huỷ",
+    };
+    return statuses[status] || "Không xác định";
+};
+
+const statusClass = (status) => {
+    const classes = {
+        create: "bg-blue-100 text-blue-700 px-2  py-1 ms-2 text-sm rounded-full",
+        pending: "bg-yellow-100 text-yellow-700 px-2  py-1 ms-2 text-sm rounded-full",
+        approved: "bg-green-100 text-green-700 px-2  py-1 ms-2 text-sm rounded-full",
+        reject: "bg-red-100 text-red-700 px-2  py-1 ms-2 text-sm rounded-full",
+    };
+    return classes[status] || "";
+};
 // Hàm tạo nhóm (logic bạn tự thêm)
 const createGroup = async () => {
     if (!group_name?.value) {
@@ -221,13 +257,12 @@ const inviteMember = async () => {
 
 }
 
+const cancelGroup = async (id) => {
+    if (id) {
+        await groupStore.updateStatus(id);
+        await groupStore.getMyGroup()
+    }
 
-
-// Hàm gửi lời mời (logic bạn tự thêm)
-const sendInvite = () => {
-    console.log('Gửi lời mời đến:', memberEmail.value)
-    message.value = 'Đã gửi lời mời đến sinh viên (giả lập).'
-    // TODO: Gửi lời mời đến email thông qua API
 }
 </script>
 

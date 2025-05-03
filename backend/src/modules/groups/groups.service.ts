@@ -1,12 +1,11 @@
 
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
-import { Department } from 'src/entities/department.entity';
 import { Group } from 'src/entities/group.entity';
 import { Student } from 'src/entities/student.entity';
-import { User } from 'src/entities/user.entity';
-import { In, Like, Not, Repository } from 'typeorm';
+import { User, UserRole } from 'src/entities/user.entity';
+import { In, Like,  Repository } from 'typeorm';
 
 @Injectable()
 export class GroupsService extends BaseService<Group> {
@@ -26,13 +25,11 @@ async getAllGroup(
   orderBy: 'asc' | 'desc' = 'asc',
 ): Promise<{ items: any[]; total: number; limit?: number; page?: number }> {
   // Xây dựng điều kiện lọc
-  const where: any = {};
- if (search) {
-  where.push(
-    { code: Like(`%${search}%`) },
-    { name: Like(`%${search}%`) }
-  );
-}
+  const where: any = search
+    ? [
+      { code: Like(`%${search}%`) },
+      { name: Like(`%${search}%`) },
+    ] : {};
   if (status) where.status = status;
   
   if (department_id) {
@@ -45,7 +42,7 @@ async getAllGroup(
     order: {
       updated_at: orderBy,
     },
-    relations:{department:true}
+     relations: ['students', 'students.user','leader','leader.user','student_attemp','student_attemp.user','department'],
   };
 
   if (limit && page) {
@@ -53,8 +50,9 @@ async getAllGroup(
     options.skip = (page - 1) * limit;
   }
 
-  const [items, total] = await this.groupRepository.findAndCount(options);
-
+  const [data, total] = await this.groupRepository.findAndCount(options);
+  const freshGroupInvite = await Promise.all(data.map(group => this.freshData(group)));
+  const items= freshGroupInvite
   return {
     items,
     total,
@@ -105,7 +103,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
 
   // Kiểm tra nhóm hiện tại của user
   const existGroup = await this.repository.manager.findOne(Group, {
-    where: { leader: { id: user.student.id } },
+    where: { status: In(["create", "approved", "pending"]),leader: { id: user.student.id } },
     relations: ['leader'],
   });
 
@@ -171,7 +169,6 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       if (existGroup.total_member === 1) {
         existGroup.name = data.name || existGroup.name;
         existGroup.status = 'create';
-        existGroup.total_member = 2;
         existGroup.student_attemp = students;
         return this.groupRepository.save(existGroup);
       } else {
@@ -192,9 +189,9 @@ async createGroup(data: any, user_id: any): Promise<Group> {
     newGroup.student_attemp = students;
     newGroup.department = user.student.department;
     newGroup.leader = user.student;
-     newGroup.students = [user.student]
+    newGroup.students = [user.student]
     newGroup.code = `${radomcode1}${radomcode2}`;
-    newGroup.total_member = 2;
+    newGroup.total_member = 1;
 
     return this.groupRepository.save(newGroup);
   }
@@ -241,24 +238,30 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       }, 'Sinh viên không tồn tại');
       let data:any = {}
       const group: any = await this.repository.manager.findOne(Group, {
-        where: { id: student?.group?.id },
+        where: { status: In(["create", "approved", "pending"]), id: student?.group?.id },
         relations: ['students', 'students.user','leader','leader.user','student_attemp','student_attemp.user'],
       });
       if (type === 'leader') {
         if (group && group?.status == 'create') {
           const groupDta = await this.repository.manager.findOne(Group, {
-            where: { id: group.id , leader:{id: user?.student?.id}},
+            where: { status: In(["create", "approved", "pending"]), id: group.id , leader:{id: user?.student?.id}},
             relations: ['students', 'students.user','leader','leader.user','student_attemp','student_attemp.user'],
           });
           data =this.freshData(groupDta) ;
+        } else if(group && group?.status == 'pending') {
+          const groupDta = await this.repository.manager.findOne(Group, {
+            where: { status: In(["create", "approved", "pending"]), id: group.id , students:{id: user?.student?.id}},
+            relations: ['students', 'students.user','leader','leader.user','student_attemp','student_attemp.user'],
+          });
+          data = this.freshData(groupDta);
         } else {
-          data = this.freshData(group);
+          data = this.freshData(group)
         }
       } else if (type === 'invite') {
         // Lấy tất cả nhóm có user là 1 trong các student_attemp
             const groupHas = await this.repository.manager.find(Group, {
               where: {
-                status: "create",
+                status: In(["create"]),
                 student_attemp: {
                   id: user?.student?.id
                 }
@@ -343,7 +346,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       where: { id: groupId },
       relations: {leader: true},
     }, 'Nhóm không tồn tại')
-    if (group?.leader && group?.leader?.code != user?.student.code && group?.status =='create') {
+    if (group?.leader && group?.leader?.id != user?.student.id && group?.status =='create') {
       const groupHas = await this.repository.manager.findOne(Group, {
             where: {
                 id: group?.id,
@@ -384,6 +387,64 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       throw new Error("Yêu cầu không hợp lệ");
     }
 
+  }
+
+  async updateStatusGroup( userId: any ,groupId: any , status?: any) {
+    const userDta = await this.check_exist_with_data(User, {
+      where: { id: userId },
+    }, 'Tài khoản không hợp lệ');
+    const group = await this.check_exist_with_data(Group, {
+      where: { id: groupId },
+        relations: [
+                'students', 'students.user',
+                'leader', 'leader.user',
+                'student_attemp', 'student_attemp.user'
+        ],
+    }, 'Nhóm không tồn tại')
+    if (userDta.role == UserRole.STUDENT) {
+      const user = await this.check_exist_with_data(User, {
+          where: { id: userDta?.id },
+          relations:{student:true}
+        }, 'Tài khoản không hợp lệ');
+      if (group?.leader && group?.leader?.id == user?.student?.id && group?.status != 'approved' && group?.total_member == 1){
+        group.status = "rejected";
+        group.students = [];
+        return this.groupRepository.save(group);
+      } else if (group?.leader && group?.leader?.id != user?.student?.id && group?.status != 'approved' ) {
+        const groupHas = await this.repository.manager.findOne(Group, {
+            where: {
+                id: group?.id,
+                student_attemp: {
+                  id: user?.student?.id
+                }
+              },
+              relations: [
+                'students', 'students.user',
+                'leader', 'leader.user',
+                'student_attemp', 'student_attemp.user'
+              ]
+        });
+        if (groupHas && groupHas.leader) {
+          groupHas.student_attemp = [group?.leader]
+          groupHas.status = "pending";
+          groupHas.total_member = 1;
+          groupHas.students = [group?.leader]
+          return this.groupRepository.save(groupHas);
+        }
+      } else if(group?.leader && group?.leader?.id == user?.student?.id && group?.status != 'approved' && group.total_member == 2){
+        throw new Error("Thành viên khác cần rời nhóm để hủy nhóm, Hoặc liên hệ giáo vụ để giải quyết");
+      } else {
+        throw new Error("Lỗi ! liên hệ giáo vụ để giải quyết");
+      }
+    } else if (userDta.role == UserRole.ADMIN) {
+      if (status == "rejected" || status == "create" || status == "pending" || status == "approved") {
+        group.status = status;
+        return this.groupRepository.save(group);
+      }
+      
+    } else {
+      throw new ForbiddenException("Bạn đủ có quyền hạn!");
+    }
   }
 
 }
