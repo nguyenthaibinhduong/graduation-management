@@ -39,6 +39,8 @@
         </div>
 
 
+
+
         <!-- Bảng dữ liệu -->
         <DataTableCustom title="Danh sách nhóm" :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="groups"
             :columns="[
@@ -61,6 +63,19 @@
 
             ]" :total="groupStore.total" @fetch="onPaginate" @add="onAdd" @edit="onEdit" @delete="onDelete"
             @selectOne="onSelect" @selectAll="onSelect" @rowSelect="onSelect" />
+        <div class="w-full grid grid-cols-5 gap-4 bg-white p-3 rounded-md shadow-sm text-sm">
+            <!-- Trạng thái -->
+
+            <!-- Khoa -->
+            <div class="flex flex-col gap-y-1 col-span-1 col-start-4">
+                <label for="department" class="font-medium">Khoa</label>
+                <MyInput class="w-full" id="department" type="select" v-model="lockData.department_id"
+                    :options="departments" optionLabel="name" optionValue="id" placeholder="Chọn khoa" />
+            </div>
+            <div class="flex  flex-col justify-end gap-y-1 col-span-1 col-start-5">
+                <Button label="Khóa nhóm" @click="handleLockData" />
+            </div>
+        </div>
     </div>
     <Dialog v-model:visible="open" modal header="Chi tiết nhóm" :style="{ width: '500px' }" @after-hide="reset">
         <div class="w-full">
@@ -73,7 +88,7 @@
                 <div>
                     <span class="font-medium">Thành viên:</span>
                     <ul class="list-disc list-inside ml-2">
-                        <li v-for="member in (detail?.status == 'create' ? detail?.student_attemp : (detail?.students))"
+                        <li v-for="member in (detail?.status == 'create' ? detail?.student_attemp : detail.students)"
                             :key="member.id">
                             {{ member.user?.fullname }} ({{ member.code }})
                         </li>
@@ -115,6 +130,7 @@ import DataTableCustom from '@/components/list/DataTableCustom.vue';
 import { useDepartmentStore, useGroupStore } from '@/stores/store';
 import { Dialog, Button } from 'primevue';
 import MyInput from '@/components/form/MyInput.vue';
+import { showToast } from '@/utils/toast';
 
 const groupStore = useGroupStore();
 const departmentsStore = useDepartmentStore();
@@ -138,6 +154,7 @@ const handleUpdatStatus = async () => {
     if (update.value.group_id && update.value.status) {
         await groupStore.updateStatus(update.value.group_id, update.value.status);
         await fetchGroup();
+        detail.value.status = update.value.status
         reset();
     }
 };
@@ -147,26 +164,26 @@ const detail = ref({});
 
 // 1) onSelect gán thẳng data
 const onSelect = (data) => {
-    if (data) {
+    if (data != null) {
         detail.value = data;
-        open.value = true;
     }
+    open.value = true;
 };
 
 // 2) reset chỉ clear modal, không chạm detail
 const reset = () => {
     open.value = false;
     showUpdate.value = false;
-    update.value.group_id = '';
-    update.value.status = '';
 };
 
 // 3) watch detail để set update
 watch(detail, (data) => {
-    if (data && data.id != null && data.status != null) {
+    if (data != null) {
         update.value.group_id = data.id;
         update.value.status = data.status;
     }
+
+
 });
 
 // 4) watch update để bật nút
@@ -183,4 +200,21 @@ onMounted(async () => {
 watch(filters, () => fetchGroup(), { deep: true });
 watchEffect(() => { groups.value = groupStore.items; });
 
+
+const lockData = ref({
+    department_id: '',
+    group_ids: []
+})
+
+const handleLockData = async () => {
+    if (lockData.value?.department_id) {
+        const param = {
+            department_id: lockData.value?.department_id
+        }
+        await groupStore.lockGroup(param)
+        await fetchGroup();
+    } else {
+        showToast('Vui lòng chọn khoa cần khóa nhóm hoặc khóa từng nhóm', 'info')
+    }
+}
 </script>

@@ -131,6 +131,7 @@
             <!-- Thông báo -->
 
         </div>
+        <!-- Thông tin nhóm  -->
         <div class="w-full mt-10 p-6 bg-white rounded-xl shadow-sm ">
             <h2 class="text-2xl font-semibold mb-4 text-green-700">Thông tin nhóm của bạn</h2>
             <div v-if="group?.length < 1 || !group" class="text-gray-500 text-sm">

@@ -66,6 +66,15 @@ export function createGroupStore(entity) {
       
     }
 
+    const lockGroup = async (param) => {
+      const { data } = await api.post(`/groups/lock-group`, param)
+      if (data) {
+        const msg ="Đã khóa nhóm";
+        showToast(msg, "success");
+      }
+      
+    }
+
     const addItem = async (itemData ) => {
 
       await baseService(entity).create(itemData)
@@ -88,6 +97,6 @@ export function createGroupStore(entity) {
 
     
 
-    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus}
+    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus,lockGroup}
   })
 }
