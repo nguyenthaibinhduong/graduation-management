@@ -35,7 +35,7 @@
       <div class="grid grid-cols-2 gap-4">
         <h3 class="col-span-2 text-lg font-semibold">Thông tin chung</h3>
         <MyInput
-          v-model="newCommittee.department"
+          v-model="newCommittee.department_id"
           title="Khoa"
           id="department"
           type="select"
@@ -44,7 +44,7 @@
           optionValue="id"
         />
         <MyInput
-          v-model="newCommittee.course"
+          v-model="newCommittee.course_id"
           title="Học kỳ"
           id="course"
           type="select"
@@ -74,22 +74,22 @@
       <div class="grid grid-cols-2 gap-4">
         <h3 class="col-span-2 text-lg font-semibold mt-5">Giáo viên và Đề tài</h3>
         <MyInput
-          v-model="newCommittee.teachers"
+          v-model="newCommittee.teacher_ids"
           title="Giáo viên"
           id="teachers"
           type="multiselect"
           :options="teachers"
           optionLabel="displayName"
-          optionValue="code"
+          optionValue="id"
           filter
         />
         <MyInput
-          v-model="newCommittee.project"
+          v-model="newCommittee.project_ids"
           title="Đề tài"
           id="project"
           type="multiselect"
           :options="projects"
-          optionLabel="name"
+          optionLabel="title"
           optionValue="id"
           filter
         />
@@ -165,11 +165,11 @@ const newCommittee = ref({
   time_start: null,
   time_end: null,
   status: 'active',
-  course: null,
-  department: null,
-  teachers: [],
-  project: [],
-  evaluationForm: null,
+  course_id: null,
+  department_id: null,
+  teacher_ids: [],
+  project_ids: [],
+  evaluation_id: null,
 })
 
 const statusOptions = ref([
@@ -195,6 +195,7 @@ watchEffect(() => {
   }))
   projects.value = projectStore.items
 })
+
 const addCommittee = () => {
   visibleLeft.value = true
 }
@@ -206,31 +207,52 @@ const cancelForm = () => {
   isImport.value = false
   src.value = null
   file.value = null
-  const newCommittee = ref({
-    name: '',
-    description: '',
-    content: '',
-    total_teacher: null,
-    total_project: null,
-    time_start: null,
-    time_end: null,
-    status: 'active',
-    course: null,
-    department: null,
-    teachers: [],
-    project: [],
-    evaluationForm: null,
-  })
+  newCommittee.value = {
+  name: '',
+  description: '',
+  content: '',
+  total_teacher: null,
+  total_project: null,
+  time_start: null,
+  time_end: null,
+  status: 'active',
+  course_id: null,
+  department_id: null,
+  teacher_ids: [],
+  project_ids: [],
+  evaluation_id: null,
+  }
 }
 
 const saveCommittee = async () => {
-  const newData = {
-    ...newCommittee.value,
-    department_id: newCommittee.value.department.id,
-    course_id: newCommittee.value.course.id,
-    teachers: newCommittee.value.teachers.map((teacher) => teacher.code),
-    project: newCommittee.value.project.map((project) => project.id),
+  try {
+    loading.value = true;
+
+    newCommittee.value.total_teacher = newCommittee.value.teacher_ids.length;
+    newCommittee.value.total_project = newCommittee.value.project_ids.length;
+
+    if (isEditing.value) {
+      await committeeStore.updateItem(editedCommitteeId.value, newCommittee.value);
+    } else {
+      await committeeStore.addItem(newCommittee.value);
+    }
+
+    cancelForm();
+  } catch (error) {
+    Message.error('Failed to save committee. Please try again.');
+  } finally {
+    loading.value = false;
   }
-  cancelForm()
-}
+};
+
+const editCommittee = (committee) => {
+  editedCommitteeId.value = committee.id;
+  newCommittee.value = committeeStore.getById(committee.id);
+  isEditing.value = true;
+  visibleLeft.value = true;
+};
+
+const deleteCommittee = async (ids) => {
+  await committeeStore.deleteItem(ids);
+};
 </script>
