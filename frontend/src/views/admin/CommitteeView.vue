@@ -196,10 +196,37 @@ watchEffect(() => {
   projects.value = projectStore.items
 })
 
+const fetchCommittee = async (newPage, newLimit, newSearch) => {
+  await committeeStore.fetchItems(
+    newSearch ? 1 : newPage,
+    newSearch ? studentStore.total : newLimit,
+    newSearch
+  );
+};
+
 const addCommittee = () => {
+  clearValues()
   visibleLeft.value = true
+  isEditing.value = false
+  
 }
 
+const clearValues = () => {
+  newCommittee.value = {
+    name: '',
+    description: '',
+    content: '',
+    total_teacher: null,
+    total_project: null,
+    time_start: null,
+    time_end: null,
+    status: 'active',
+    course_id: null,
+    department_id: null,
+    teacher_ids: [],
+    project_ids: [],
+  }
+}
 const cancelForm = () => {
   visibleLeft.value = false
   isEditing.value = false
@@ -207,21 +234,7 @@ const cancelForm = () => {
   isImport.value = false
   src.value = null
   file.value = null
-  newCommittee.value = {
-  name: '',
-  description: '',
-  content: '',
-  total_teacher: null,
-  total_project: null,
-  time_start: null,
-  time_end: null,
-  status: 'active',
-  course_id: null,
-  department_id: null,
-  teacher_ids: [],
-  project_ids: [],
-  evaluation_id: null,
-  }
+  clearValues()
 }
 
 const saveCommittee = async () => {
@@ -236,7 +249,7 @@ const saveCommittee = async () => {
     } else {
       await committeeStore.addItem(newCommittee.value);
     }
-
+    
     cancelForm();
   } catch (error) {
     Message.error('Failed to save committee. Please try again.');
@@ -247,7 +260,12 @@ const saveCommittee = async () => {
 
 const editCommittee = (committee) => {
   editedCommitteeId.value = committee.id;
-  newCommittee.value = committeeStore.getById(committee.id);
+  newCommittee.value = {...committee, 
+    teacher_ids: committee.teachers.map((teacher) => teacher.id),
+    project_ids: committee.projects.map((project) => project.id),
+    course_id: committee.course.id,
+    department_id: committee.department.id,
+  };
   isEditing.value = true;
   visibleLeft.value = true;
 };
