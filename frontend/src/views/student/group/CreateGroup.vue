@@ -105,8 +105,8 @@
         </button>
     </div>
 
-    <div class="w-full grid grid-cols-2 gap-x-4">
-        <div class="w-full mt-10 mx-auto o p-6 bg-white  rounded-xl shadow-sm">
+    <div class="w-full grid gap-x-4" :class="group?.status != 'approved' ? 'grid-cols-2' : 'grid-cols-1'">
+        <div v-if="group?.status != 'approved'" class="w-full mt-10 mx-auto o p-6 bg-white  rounded-xl shadow-sm">
             <h2 class="text-2xl font-semibold mb-4">Đăng ký nhóm khóa luận</h2>
 
             <!-- Tên nhóm -->

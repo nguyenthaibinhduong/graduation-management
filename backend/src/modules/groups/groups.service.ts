@@ -147,6 +147,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       throw new Error(`Sinh viên có mã ${secondStudent.code} đã có nhóm`);
     }
 
+
     // Kiểm tra 2 người đã cùng nhóm khác chưa (double check)
     // const existed = await this.repository.manager
     //   .createQueryBuilder(Group, 'group')
@@ -265,14 +266,18 @@ async getGroupByUser(userId: number, type: string): Promise<any> {
     } else {
       // Không phải leader nhưng nằm trong group (students hoặc student_attemp) với status pending
       if (
-        group.status === 'pending' &&
+        (group.status === 'pending' || group.status === "approved") &&
         (
           group.students.some(s => s.id === studentId) ||
           group.student_attemp.some(s => s.id === studentId)
         )
       ) {
-        return this.freshData(group);
-      } else {
+        const fullGroup = await this.repository.manager.findOne(Group, {
+          where: { id: group.id },
+          relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user'],
+        });
+        return this.freshData(fullGroup);
+      }  else {
         return null;
       }
     }
