@@ -40,7 +40,7 @@ export class Student {
   @JoinColumn({ name: 'group_id' })
   group?: Group;
 
-  @ManyToMany(() => Group, (group) => group.student_attemp,{ onDelete: 'CASCADE'})
+  @ManyToMany(() => Group, (group) => group.student_attemp)
   @JoinTable({ name: 'student_group_attempts' }) // đúng cú pháp
   group_attemp?: Group[];
 

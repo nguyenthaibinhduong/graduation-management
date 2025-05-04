@@ -32,7 +32,10 @@ export class Group {
   @Column()
   total_member: number;
 
-  @ManyToMany(() => Student, (student) => student.group_attemp,)
+  @ManyToMany(() => Student, (student) => student.group_attemp, {
+  cascade: true,
+    onDelete: 'CASCADE',
+  })
   student_attemp: Student[];
 
   @OneToMany(() => Student, (student) => student.group,{ onDelete: 'CASCADE'})

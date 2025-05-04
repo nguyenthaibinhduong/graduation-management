@@ -33,7 +33,7 @@
           <!-- Personal Information -->
 
           <!-- User info Teacher/Student-->
-          <template v-if="user?.role === 'student'">
+          <template v-if="authStore.user?.role == 'student'">
             <div class="flex items-center gap-2">
               <label class="font-semibold text-gray-700">Mã số sinh viên:</label>
               <span>{{ authStore.user?.student?.code }}</span>
@@ -66,7 +66,7 @@
             <label class="font-semibold text-gray-700">Ngày sinh:</label>
             <span>{{
               dayjs(authStore.user?.birth_date).format('MM/DD/YYYY') || 'Chưa cập nhật'
-            }}</span>
+              }}</span>
           </div>
           <div class="flex items-center gap-2">
             <label class="font-semibold text-gray-700">Địa chỉ:</label>
@@ -178,8 +178,8 @@ const password = ref({
   confirmPassword: '',
 })
 
-onMounted(() => {
-  authStore.fetchUser()
+onMounted(async () => {
+  await authStore.fetchUser()
 })
 
 const cancelForm = () => {

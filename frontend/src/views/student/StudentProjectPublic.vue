@@ -55,7 +55,7 @@
 
         <!-- Thông tin nhóm -->
         <div class="w-full p-6 bg-white rounded-xl shadow-sm ">
-            <h2 class="text-2xl font-semibold mb-4 text-green-700">Thông tin nhóm của bạn</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-green-700">Nhóm của bạn</h2>
             <div v-if="!group" class="text-gray-500 text-sm w-full flex flex-col items-start">
                 <span class="w-full text-center">Bạn hiện chưa có nhóm đăng ký </span>
                 <Button class="mt-3 mx-auto bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300"
@@ -73,7 +73,9 @@
                         </li>
                     </ul>
                 </div>
-                <div><span class="font-medium">Trạng thái:</span> <span class="text-blue-600">{{ group?.status }}</span>
+                <div>
+                    <span class="font-medium">Trạng thái:</span>
+                    <span :class="statusClass(group?.status)">{{ statusLabel(group?.status) }}</span>
                 </div>
             </div>
         </div>
@@ -141,6 +143,26 @@ const registerProject = () => {
         showToast("Nhóm không được phép đăng ký đề tài", 'info')
     }
 }
+
+const statusLabel = (status) => {
+    const statuses = {
+        create: "Đang lập nhóm",
+        pending: "Đang chờ duyệt",
+        approved: "Đã duyệt",
+        reject: "Đã huỷ",
+    };
+    return statuses[status] || "Không xác định";
+};
+
+const statusClass = (status) => {
+    const classes = {
+        create: "bg-blue-100 text-blue-700 px-2  py-1 ms-2 text-sm rounded-full",
+        pending: "bg-yellow-100 text-yellow-700 px-2  py-1 ms-2 text-sm rounded-full",
+        approved: "bg-green-100 text-green-700 px-2  py-1 ms-2 text-sm rounded-full",
+        reject: "bg-red-100 text-red-700 px-2  py-1 ms-2 text-sm rounded-full",
+    };
+    return classes[status] || "";
+};
 
 
 
