@@ -6,7 +6,13 @@
       { field: 'name', header: 'Tên hội đồng', sortable: true },
       { field: 'description', header: 'Mô tả', sortable: true },
       { field: 'course.name', header: 'Học kỳ', sortable: true },
-      { field: 'status', header: 'Trạng thái', sortable: true },
+      { field: 'department.name', header: 'Khoa', sortable: true },
+      { field: 'status', header: 'Trạng thái', sortable: true, type: 'status', 
+        statuses: [
+          { value: 'active', label: 'Đang hoạt động', class: 'bg-blue-100 text-blue-700' }, 
+          { value: 'inactive', label: 'Ngừng hoạt động', class: 'bg-red-100 text-red-700' }
+        ] 
+      },
     ]"
     :total="committeeStore?.total"
     :loading="loading"
@@ -184,9 +190,11 @@ onMounted(async () => {
   await teacherStore.fetchItems()
   await projectStore.fetchItems()
 })
-
 watchEffect(() => {
-  committees.value = committeeStore.items
+  committees.value = committeeStore.items.map((committee) => ({
+    ...committee,
+    encodedId: committee.encodedId,
+  }));
   departments.value = departmentStore.items
   courses.value = courseStore.items
   teachers.value = teacherStore.items.map((teacher) => ({
@@ -272,5 +280,10 @@ const editCommittee = (committee) => {
 
 const deleteCommittee = async (ids) => {
   await committeeStore.deleteItem(ids);
+};
+
+const router = useRouter();
+const getDetail = (data) => {
+  if (data?.encodedId) router.push(`/committee-management/${data?.encodedId}`);
 };
 </script>

@@ -9,6 +9,7 @@ import { Teacher } from 'src/entities/teacher.entity';
 import { Course } from 'src/entities/course.entity';
 import { Department } from 'src/entities/department.entity';
 import { EvaluationForm } from 'src/entities/evaluation_form.entity';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Module({
   imports: [
@@ -22,6 +23,6 @@ import { EvaluationForm } from 'src/entities/evaluation_form.entity';
     ]),
   ],
   controllers: [CommitteesController],
-  providers: [CommitteesService],
+  providers: [CommitteesService, JwtUtilityService],
 })
 export class CommitteesModule {}

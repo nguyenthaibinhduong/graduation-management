@@ -17,10 +17,14 @@ import { UpdateCommitteeDto } from './dto/update-committee.dto';
 import { Committee } from 'src/entities/committee.entity';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { Response } from 'src/common/globalClass';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Controller('committees')
 export class CommitteesController {
-  constructor(private readonly committeesService: CommitteesService) {}
+  constructor(private readonly committeesService: CommitteesService,
+    private readonly jwtUtilityService: JwtUtilityService,
+
+  ) {}
 
   @Get()
   async findAll(
@@ -42,6 +46,20 @@ export class CommitteesController {
         page,
       );
       return new Response(students, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<Response<any>> {
+    try {
+      const decodeId = this.jwtUtilityService.decodeId(id);
+      const committee = await this.committeesService.getCommitteeById(decodeId);
+      return new Response(committee, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },

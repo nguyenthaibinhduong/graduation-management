@@ -23,6 +23,7 @@ import StudentProjectPublic from '@/views/student/StudentProjectPublic.vue'
 import DetailProfileView from '@/views/admin/DetailProfileView.vue'
 import CommitteeView from '@/views/admin/CommitteeView.vue'
 import GroupView from '@/views/admin/GroupView.vue'
+import CommitteeDetail from '@/views/admin/CommitteeDetail.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 
 const routes = [
@@ -46,7 +47,8 @@ const routes = [
       { path: '/account-manangerment', component: UserView },
       { path: '/department-major-manangerment', component: MajorDepartmentView },
       { path: '/teacher-project', component: TeacherProjectView },
-      { path: '/committee-management', component: CommitteeView },
+      { path: '/committee-management/', component: CommitteeView },
+      { path: '/committee-management/:id', component: CommitteeDetail },
       { path: '/group-manangerment', component: StudentGroup },
       { path: '/student-project', component: StudentProjectView },
       { path: '/student-project-public', component: StudentProjectPublic },

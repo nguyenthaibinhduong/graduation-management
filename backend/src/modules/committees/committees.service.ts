@@ -14,6 +14,8 @@ import { Project } from 'src/entities/project.entity';
 import { Teacher } from 'src/entities/teacher.entity';
 import { UpdateCommitteeDto } from './dto/update-committee.dto';
 import { BaseService } from 'src/common/base.service';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
+
 
 @Injectable()
 export class CommitteesService extends BaseService<Committee>{
@@ -31,6 +33,7 @@ export class CommitteesService extends BaseService<Committee>{
     @InjectRepository(Teacher)
     private readonly teacherRepository: Repository<Teacher>,
     private readonly dataSource: DataSource,
+    private readonly jwtUtilityService: JwtUtilityService,
   ) {super(committeeRepository);}
 
   async createCommittee(commiteeData: CreateCommitteeDto): Promise<Committee> {
@@ -301,6 +304,40 @@ export class CommitteesService extends BaseService<Committee>{
       skip: limit && page ? (page - 1) * limit : undefined,
       take: limit,
     });
-    return { items, total, ...(limit && { limit }), ...(page && { page }) };
+
+    const committees = items.map((committee) => ({
+      ...committee,
+      encodedId: this.jwtUtilityService.encodeId(committee.id),
+    }));
+    committees.forEach((committee) => delete committee.id);
+    return { items: committees, total, ...(limit && { limit }), ...(page && { page }) };
+  }
+
+  async getCommitteeById(id: number): Promise<any> {
+    const committee = await this.committeeRepository
+    .createQueryBuilder('committee')
+    .leftJoin('committee.course', 'course')
+    .addSelect(['course.name'])
+    .leftJoin('committee.department', 'department')
+    .addSelect(['department.name'])
+    .leftJoinAndSelect('committee.evaluationForm', 'evaluationForm')
+    .leftJoin('committee.projects', 'projects')
+    .addSelect(['projects.title'])
+    .leftJoin('committee.teachers', 'teachers')
+    .addSelect(['teachers.code'])
+    .innerJoin('teachers.user', 'user')
+    .addSelect(['user.fullname', 'user.username'])
+    .where('committee.id = :id', { id })
+    .getOne();
+
+    if (!committee) {
+      throw new NotFoundException(`Committee not found`);
+    }
+    delete committee.id;
+    const encodedId = this.jwtUtilityService.encodeId(committee.id);
+    return { 
+      ...committee,
+      encodedId,
+    };
   }
 }
