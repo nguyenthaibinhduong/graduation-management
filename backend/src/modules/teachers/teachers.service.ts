@@ -30,7 +30,8 @@ export class TeachersService extends BaseService<Teacher> {
   async createTeacher(teacherDto: CreateTeacherDto): Promise<Teacher> {
     const { user, positionIds, departmentId, ...teacherData } = teacherDto;
     await this.check_exist_no_data(Teacher, { code: teacherData.code }, 'Giáo viên đã tồn tại');
-    const department = await this.check_exist_with_data(Department,{ id: departmentId },'Khoa không tồn tại');
+    //const department = await this.check_exist_with_data(Department,{ id: departmentId },'Khoa không tồn tại');
+    const department = await this.departmentRepository.findOneBy({ id: departmentId });
     let positions = [];
     if (positionIds?.length > 0) positions = await this.positionRepository.find({ where: { id: In(positionIds) }});
 

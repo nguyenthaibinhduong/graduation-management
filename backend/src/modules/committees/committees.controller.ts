@@ -9,6 +9,7 @@ import {
   HttpException,
   ValidationPipe,
   Query,
+  Put,
 } from '@nestjs/common';
 import { CommitteesService } from './committees.service';
 import { CreateCommitteeDto } from './dto/create-committee.dto';
@@ -49,6 +50,25 @@ export class CommitteesController {
     }
   }
 
+  @Put(':id')
+  async update(
+    @Param('id') id: number,
+    @Body(new ValidationPipe()) updateCommitteeDto: UpdateCommitteeDto,
+  ): Promise<Response<Committee>> {
+    try {
+      const updatedGroup = await this.committeesService.updateCommittee(
+        id,
+        updateCommitteeDto,
+      );
+      return new Response(updatedGroup, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
   @Post()
   async create(
     @Body(new ValidationPipe()) createCommitteeDto: CreateCommitteeDto,
@@ -58,6 +78,33 @@ export class CommitteesController {
       const newCommittee =
         await this.committeesService.createCommittee(createCommitteeDto);
       return new Response(newCommittee, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: number): Promise<Response<void>> {
+    try {
+      const deletedCommittee = await this.committeesService.deleteCommittee(id);
+      return new Response(deletedCommittee, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+  @Post('remove-multi')
+  async removeMulti(
+    @Body() ids: number[],
+  ): Promise<Response<void> | HttpException> {
+    try {
+      await this.committeesService.deleteCommittee(ids);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
