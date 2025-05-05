@@ -25,6 +25,7 @@ import CommitteeView from '@/views/admin/CommitteeView.vue'
 import GroupView from '@/views/admin/GroupView.vue'
 import StudentProjectDoing from '@/views/student/StudentProjectDoing.vue'
 import NotFound from '@/views/error/NotFound.vue'
+import CommitteeDetail from '@/views/admin/CommitteeDetail.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 
 const routes = [
@@ -51,7 +52,8 @@ const routes = [
       { path: '/account-manangerment', component: UserView , meta: { roles: ['admin'] }},
       { path: '/department-major-manangerment', component: MajorDepartmentView , meta: { roles: ['admin'] }},
       { path: '/committee-management', component: CommitteeView , meta: { roles: ['admin'] }},
-      { path: '/score/:id', component: ScoreView ,meta: { roles: ['admin'] }},
+      { path: '/score/:id', component: ScoreView, meta: { roles: ['admin'] } },
+      { path: '/committee-management/:id', component: CommitteeDetail , meta: { roles: ['admin'] }},
       //Trang cho teacher
       { path: '/teacher-project', component: TeacherProjectView ,meta: { roles: ['teacher'] } },
       //Trang cho student
