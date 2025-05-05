@@ -90,6 +90,7 @@ onMounted(async () => {
     items.value.push({
       label: 'Sinh viên',
       items: [
+        { label: 'Đề tài thực hiện', to: '/student-project-doing' },
         { label: 'Đề xuất đề tài', to: '/student-project' },
         { label: 'Đề tài đăng ký', to: '/student-project-public' },
         { label: 'Nhóm khóa luận', to: '/group-manangerment' },

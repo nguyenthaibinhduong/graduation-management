@@ -23,6 +23,8 @@ import StudentProjectPublic from '@/views/student/StudentProjectPublic.vue'
 import DetailProfileView from '@/views/admin/DetailProfileView.vue'
 import CommitteeView from '@/views/admin/CommitteeView.vue'
 import GroupView from '@/views/admin/GroupView.vue'
+import StudentProjectDoing from '@/views/student/StudentProjectDoing.vue'
+import NotFound from '@/views/error/NotFound.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 
 const routes = [
@@ -32,27 +34,40 @@ const routes = [
     component: DefaultLayout,
     meta: { requiresAuth: true },
     children: [
+    //Trang cho tất cả 
       { path: '/', component: DashboardView },
       { path: '/user-detail/:id', component: DetailProfileView },
-      { path: '/student-manangerment', component: StudentView },
-      { path: '/group-manangerment-admin', component: GroupView },
-      { path: '/teacher-manangerment', component: TeacherView },
-      { path: '/course-manangerment', component: CourseView },
-      { path: '/enrollment-sessions-manangerment', component: EnrollmentView },
-      { path: '/evaluation-form-manangerment', component: EvaluationFormView },
-      { path: '/evaluation-form-detail/:id', component: EvaluationFormDetail },
-      { path: '/project-manangerment', component: ProjectView },
-      { path: '/profile', component: ProfileView },
-      { path: '/account-manangerment', component: UserView },
-      { path: '/department-major-manangerment', component: MajorDepartmentView },
-      { path: '/teacher-project', component: TeacherProjectView },
-      { path: '/committee-management', component: CommitteeView },
-      { path: '/group-manangerment', component: StudentGroup },
-      { path: '/student-project', component: StudentProjectView },
-      { path: '/student-project-public', component: StudentProjectPublic },
       { path: '/project-detail/:id', component: ProjectDetailView },
-      { path: '/score/:id', component: ScoreView },
+      { path: '/profile', component: ProfileView },
+      // Trang cho admin
+      { path: '/student-manangerment', component: StudentView , meta: { roles: ['admin'] }},
+      { path: '/group-manangerment-admin', component: GroupView , meta: { roles: ['admin'] }},
+      { path: '/teacher-manangerment', component: TeacherView , meta: { roles: ['admin'] }},
+      { path: '/course-manangerment', component: CourseView , meta: { roles: ['admin'] }},
+      { path: '/enrollment-sessions-manangerment', component: EnrollmentView , meta: { roles: ['admin'] }},
+      { path: '/evaluation-form-manangerment', component: EvaluationFormView , meta: { roles: ['admin'] }},
+      { path: '/evaluation-form-detail/:id', component: EvaluationFormDetail , meta: { roles: ['admin'] }},
+      { path: '/project-manangerment', component: ProjectView , meta: { roles: ['admin'] }},
+      { path: '/account-manangerment', component: UserView , meta: { roles: ['admin'] }},
+      { path: '/department-major-manangerment', component: MajorDepartmentView , meta: { roles: ['admin'] }},
+      { path: '/committee-management', component: CommitteeView , meta: { roles: ['admin'] }},
+      { path: '/score/:id', component: ScoreView ,meta: { roles: ['admin'] }},
+      //Trang cho teacher
+      { path: '/teacher-project', component: TeacherProjectView ,meta: { roles: ['teacher'] } },
+      //Trang cho student
+      { path: '/group-manangerment', component: StudentGroup ,meta: { roles: ['student'] } },
+      { path: '/student-project', component: StudentProjectView , meta: { roles: ['student'] }},
+      { path: '/student-project-public', component: StudentProjectPublic ,meta: { roles: ['student'] }},
+      { path: '/student-project-doing', component: StudentProjectDoing ,meta: { roles: ['student'] }},
+      
+      //Nếu sai đuòng dẫn hoặc không đúng role
+      { path: '/not-found', component: NotFound },
+      
     ],
+  },
+  {
+    path: '/:catchAll(.*)',
+    redirect: '/not-found',
   },
 ]
 
@@ -64,8 +79,12 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token')
   const authStore = useAuthStore()
+  const userRole = authStore.user?.role
   if (to.meta.requiresAuth && !token) {
     return next('/login')
+  }
+   if (to.meta.roles && !to.meta.roles.includes(userRole)) {
+    return next('/not-found')
   }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     try {
