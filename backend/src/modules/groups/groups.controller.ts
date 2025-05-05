@@ -127,8 +127,8 @@ export class GroupsController {
 
   @Post('register-project')
   async registerProject(
-    @Body('groupId', new ValidationPipe({ transform: true })) groupId: number,
-    @Body('projectId', new ValidationPipe({ transform: true }))
+    @Body('group_id', new ValidationPipe({ transform: true })) groupId: number,
+    @Body('project_id', new ValidationPipe({ transform: true }))
     projectId: number,
   ): Promise<Response<void>> {
     try {

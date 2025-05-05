@@ -12,7 +12,6 @@
 
     <DataTableCustom title="Danh sách đề tài - Admin" :data="projects" :columns="[
         { field: 'title', header: 'Tên đề tài', },
-        { field: 'description', header: 'Mô tả' },
         { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
         { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
         { field: 'course.name', header: 'Học kỳ' },

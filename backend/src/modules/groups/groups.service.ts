@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
 import { Group } from 'src/entities/group.entity';
 import { Student } from 'src/entities/student.entity';
+import { Teacher } from 'src/entities/teacher.entity';
 import { User, UserRole } from 'src/entities/user.entity';
 import { In, Like,  Not,  Repository } from 'typeorm';
 
@@ -210,8 +211,9 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       where: { id: groupId },
       relations: { project: true },
     });
-    const project = await this.repository.manager.findOne('Project', {
+    const project:any = await this.repository.manager.findOne('Project', {
       where: { id: projectId },
+      relations: ['groups','teacher','teacher.user'],
     });
     if (!project) {
       throw new Error('Dự án không tồn tại');
@@ -219,11 +221,20 @@ async createGroup(data: any, user_id: any): Promise<Group> {
     if (!group) {
       throw new Error('Nhóm không tồn tại');
     }
-    if (group.project) {
+    if (group?.status != "approved") {
+      throw new Error('Nhóm khoong trong đợt đăng ký');
+    }
+    if (group?.project) {
       throw new Error('Nhóm đã đăng ký dự án trước đó');
     }
+    if (project?.status != "public") {
+      throw new Error(`Đề tài không được đăng ký`);
+    }
+    if (project?.groups?.length == project.total_member) {
+      throw new Error(`Đề tài đã quá số lượng đăng ký ! Vui lòng đăng ký đề tài hoặc liên hệ với giảng viên ${project?.teacher?.user?.fullname} đễ được hỗ trợ`);
+    }
 
-    group.project = { id: projectId } as any;
+    group.project = project;
 
     return this.repository.save(group);
   }
@@ -249,7 +260,7 @@ async getGroupByUser(userId: number, type: string): Promise<any> {
         { students: { id: studentId }, status: In(["create", "pending", "approved"]) },
         { student_attemp: { id: studentId }, status: 'pending' }
       ],
-      relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user'],
+      relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user','project'],
     });
 
     if (!group) return null;
@@ -260,7 +271,7 @@ async getGroupByUser(userId: number, type: string): Promise<any> {
       // Nếu là leader thì được xem nhóm ở mọi trạng thái
       const fullGroup = await this.repository.manager.findOne(Group, {
         where: { id: group.id },
-        relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user'],
+        relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user','project'],
       });
       return this.freshData(fullGroup);
     } else {
@@ -274,7 +285,7 @@ async getGroupByUser(userId: number, type: string): Promise<any> {
       ) {
         const fullGroup = await this.repository.manager.findOne(Group, {
           where: { id: group.id },
-          relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user'],
+          relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user','project'],
         });
         return this.freshData(fullGroup);
       }  else {

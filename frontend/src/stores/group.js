@@ -56,11 +56,21 @@ export function createGroupStore(entity) {
       
     }
 
-    const updateStatus = async (id_project,status = '') => {
+    const updateStatus = async (id_group,status = '') => {
       const param = { status }
-      const { data } = await api.post(`/groups/update-status/${id_project}`, param)
+      const { data } = await api.post(`/groups/update-status/${id_group}`, param)
       if (data) {
         const msg ="Đã cập nhật trạng thái nhóm";
+        showToast(msg, "success");
+      }
+      
+    }
+
+    const registerProject = async (group_id,project_id) => {
+      const param = { group_id, project_id }
+      const { data } = await api.post(`/groups/register-project`, param)
+      if (data) {
+        const msg ="Đăng ký đề tài thành công !";
         showToast(msg, "success");
       }
       
@@ -97,6 +107,6 @@ export function createGroupStore(entity) {
 
     
 
-    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus,lockGroup}
+    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus,lockGroup,registerProject}
   })
 }

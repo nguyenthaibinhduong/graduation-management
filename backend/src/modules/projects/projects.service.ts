@@ -252,7 +252,7 @@ export class ProjectsService extends BaseService<Project> {
     });
     if (!project) throw new NotFoundException('Đề tài không tồn tại');
 
-    if (type === 'student' && project.student?.id != obj_id)
+    if (type === 'student' && project.student?.id != obj_id && project?.status != 'public')
       throw new NotFoundException('Không có quyền truy cập đề tài này');
 
     if (type === 'teacher' && project.teacher?.id != obj_id)
