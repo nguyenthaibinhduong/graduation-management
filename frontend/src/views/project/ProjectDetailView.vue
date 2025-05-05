@@ -57,17 +57,22 @@
 
           <!-- Các nút hành động -->
           <div class="flex  gap-3 justify-end w-full">
-            <Button v-if="project.status === 'propose' && authStore.user?.role === 'teacher'" label="Gửi duyệt"
-              class="btn-submit p-2 px-4 rounded-md bg-yellow-500 hover:bg-yellow-600 text-white" @click="sendStatus" />
+            <Button size="small" v-if="project.status === 'propose' && authStore.user?.role === 'teacher'"
+              label="Gửi duyệt" class="btn-submit p-2 px-4 rounded-md bg-yellow-500 hover:bg-yellow-600 text-white"
+              @click="sendStatus" />
 
-            <Button v-if="project.status === 'pending' && authStore.user?.role === 'admin'" label="Duyệt đề tài"
-              class="btn-submit p-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white" @click="Approve" />
+            <Button size="small" v-if="project.status === 'pending' && authStore.user?.role === 'admin'"
+              label="Duyệt đề tài" class="btn-submit p-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white"
+              @click="Approve" />
 
-            <Button v-if="project.status === 'approve' && authStore.user?.role === 'admin'" label="Công bố đề tài"
-              class="btn-submit p-2 px-4 rounded-md bg-blue-600 hover:bg-blue-700 text-white" @click="Public" />
+            <Button size="small" v-if="project.status === 'approve' && authStore.user?.role === 'admin'"
+              label="Công bố đề tài" class="btn-submit p-2 px-4 rounded-md bg-blue-600 hover:bg-blue-700 text-white"
+              @click="Public" />
 
-            <Button v-if="project.status === 'public' && authStore.user?.role === 'student'" label="Đăng ký thực hiện"
-              class="btn-submit p-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white" @click="Public" />
+            <Button size="small"
+              v-if="project.status === 'public' && authStore.user?.role === 'student' && !group?.project"
+              label="Đăng ký thực hiện"
+              class="btn-submit p-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white" @click="Register" />
           </div>
         </div>
       </template>
@@ -79,7 +84,7 @@
 <script setup>
 import { ref, onMounted, watchEffect } from "vue";
 import { useRoute } from "vue-router";
-import { useEnrollmentStore, useProjectStore } from "@/stores/store";
+import { useEnrollmentStore, useGroupStore, useProjectStore } from "@/stores/store";
 import { useAuthStore } from "@/stores/auth";
 import { Button, Card } from "primevue";
 import MyInput from "@/components/form/MyInput.vue";
@@ -96,11 +101,13 @@ const project = ref(null);
 const sessonSelected = ref(null);
 const session = ref([]);
 const sessionStore = useEnrollmentStore();
+const groupStore = useGroupStore();
 const updateData = ref({
   id: null,
   obj_id: null,
   status: "",
 });
+const group = ref()
 const route = useRoute();
 onMounted(async () => {
   try {
@@ -113,6 +120,9 @@ onMounted(async () => {
     const projectId = route.params.id;
     const obj_id = user?.student?.id || user?.teacher?.id;
     await projectStore.findItem(projectId, obj_id, user.role);
+    if (authStore.user?.role == 'student') {
+      await groupStore.getMyGroup()
+    }
   } catch (error) {
     console.error("Có lỗi xảy ra:", error);
   }
@@ -121,6 +131,9 @@ onMounted(async () => {
 watchEffect(() => {
   session.value = sessionStore.items;
   project.value = projectStore.item;
+  if (authStore.user?.role == 'student') {
+    group.value = groupStore.group
+  }
 });
 
 const statusLabel = (status) => {
@@ -195,4 +208,10 @@ const Public = async () => {
 
 
 };
+
+const Register = async () => {
+  const projectId = route.params.id;
+  await groupStore.registerProject(group.value?.id, projectId);
+  await groupStore.getMyGroup()
+}
 </script>
