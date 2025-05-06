@@ -8,8 +8,8 @@ export function createBaseStore(entity) {
     const items = ref([])
     const total = ref()
     const item = ref([])
-    const fetchItems = async (page = 1, limit = 10, search = '') => {
-      const data = await baseService(entity).fetchAll(page, limit, search)
+    const fetchItems = async (page = 1, limit = 10, search = '',filters) => {
+      const data = await baseService(entity).fetchAll(page, limit, search,filters)
       items.value = data.items
       total.value = data.total
       

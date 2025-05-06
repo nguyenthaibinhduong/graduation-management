@@ -25,32 +25,52 @@ export class StudentsService extends BaseService<Student> {
   ) {
     super(studentRepository);
   }
-  async getAllStudent(
+async getAllStudent(
+  department_id: any,
+  major_id: any,
+  orderBy: string,
   search?: string,
   limit?: number,
   page?: number,
 ): Promise<{ items: Student[]; total: number; limit?: number; page?: number }> {
-  const where = search
-    ? {
-        user: {
-          fullname: Like(`%${search}%`),
-        },
+  // Xây dựng object where động
+  const where: any = {
+    ...(search && {
+      user: {
+        fullname: Like(`%${search}%`)
       }
-    : {};
+    }),
+    ...(department_id && { department: { id: department_id } }),
+    ...(major_id && { major: { id: major_id } }),
+  };
 
   const [items, total] = await this.repository.findAndCount({
     where,
-    relations: { user:true, major:true, department:true},
+    relations: {
+      user: true,
+      major: true,
+      department: true
+    },
+    order: {
+      created_at: orderBy === 'DESC' ? 'DESC' : 'ASC' // ví dụ cho sort
+    },
     skip: limit && page ? (page - 1) * limit : undefined,
     take: limit,
   });
+
+  // Xóa mật khẩu khỏi kết quả trả về
   items.forEach((student) => {
     if (student.user) {
       delete student.user.password;
     }
   });
 
-  return { items, total, ...(limit && { limit }), ...(page && { page }) };
+  return {
+    items,
+    total,
+    ...(limit && { limit }),
+    ...(page && { page })
+  };
 }
 
 

@@ -92,7 +92,7 @@ export class UsersService extends BaseService<User> {
   }
 
    async findByID(id: any) {
-     const user = await this.check_exist_with_data(User, {id}, 'Không tìm thấy người dùng');
+     const user = await this.check_exist_with_data(User, {where:{id}}, 'Không tìm thấy người dùng');
      const data = await this.getUserDetails(user);
      return this.remove_password_field(data);
   }

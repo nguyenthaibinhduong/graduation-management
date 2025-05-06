@@ -1,12 +1,36 @@
 <template>
-  <DataTableCustom title="Danh sách Sinh Viên" :data="students" :columns="[
-    { field: 'code', header: 'Mã sinh viên', sortable: true },
-    { field: 'user.fullname', header: 'Họ và tên', sortable: true },
-    { field: 'user.email', header: 'Email', sortable: true },
-    { field: 'major.name', header: 'Ngành học', sortable: true },
-    { field: 'department.name', header: 'Khoa', sortable: true }
-  ]" :total="studentStore?.total" :loading="loading" @fetch="fetchStudent" @add="addStudent" @edit="editStudent"
-    @delete="deleteStudent" @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail" />
+  <div class="w-full grid grid-cols-5 gap-4 bg-white p-3 rounded-md shadow-sm text-sm">
+
+    <!-- Khoa -->
+    <div class="flex flex-col gap-y-1">
+      <label for="department" class="font-medium">Khoa</label>
+      <MyInput class="w-full" id="department" type="select" v-model="filterData.department_id" :options="departments"
+        optionLabel="name" optionValue="id" placeholder="Chọn khoa" />
+    </div>
+
+    <div class="flex flex-col gap-y-1">
+      <label for="major" class="font-medium">Chuyên ngành</label>
+      <MyInput class="w-full" id="major" type="select" v-model="filterData.major_id" :options="majors"
+        optionLabel="name" optionValue="id" placeholder="Chọn chuyên ngành" />
+    </div>
+
+    <!-- Sắp xếp -->
+    <div class="flex flex-col gap-y-1">
+      <label for="order" class="font-medium">Sắp xếp</label>
+      <MyInput class="w-full" id="order" type="select" v-model="filterData.orderBy" :options="[
+        { label: 'Mới nhất', value: 'DESC' },
+        { label: 'Cũ nhất', value: 'ASC' }
+      ]" optionLabel="label" optionValue="value" placeholder="Chọn thứ tự" />
+    </div>
+    <div class="flex flex-col gap-y-1 justify-end">
+      <Button label="Reset" @click="resetFilter" />
+    </div>
+
+  </div>
+  <DataTableCustom title="Danh sách Sinh Viên" :data="students" :columns="optionColumn" :total="studentStore?.total"
+    :loading="loading" @fetch="fetchStudent" @add="visibleLeft.value = true" @edit="editStudent" @delete="deleteStudent"
+    @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail"
+    @export="handleOpenDialog('export')" @import="handleOpenDialog('import')" />
 
 
   <MyDrawer class="w-full" title="sinh viên" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveStudent"
@@ -64,79 +88,137 @@
     </div>
   </MyDrawer>
 
+  <ImportExportDialog v-model:visible="openDialog" :type="typeDialog" @hide="resetDialog" @export="exportData">
+    <template #export>
+      <!-- UI export tuỳ chỉnh -->
+      <div class="w-full pb-2">
+        <div class="w-full grid grid-cols-5 gap-4 bg-white p-3 rounded-md shadow-sm text-sm">
+
+          <!-- Khoa -->
+          <div class="flex flex-col gap-y-1">
+            <label for="department" class="font-medium">Khoa</label>
+            <MyInput class="w-full" id="department" type="select" v-model="filterData.department_id"
+              :options="departments" optionLabel="name" optionValue="id" placeholder="Chọn khoa" />
+          </div>
+
+          <div class="flex flex-col gap-y-1">
+            <label for="major" class="font-medium">Chuyên ngành</label>
+            <MyInput class="w-full" id="major" type="select" v-model="filterData.major_id" :options="majors"
+              optionLabel="name" optionValue="id" placeholder="Chọn chuyên ngành" />
+          </div>
+
+          <!-- Sắp xếp -->
+          <div class="flex flex-col gap-y-1">
+            <label for="order" class="font-medium">Sắp xếp</label>
+            <MyInput class="w-full" id="order" type="select" v-model="filterData.orderBy" :options="[
+              { label: 'Mới nhất', value: 'DESC' },
+              { label: 'Cũ nhất', value: 'ASC' }
+            ]" optionLabel="label" optionValue="value" placeholder="Chọn thứ tự" />
+          </div>
+          <div class="flex flex-col gap-y-1 justify-end">
+            <Button label="Reset" @click="resetFilter" />
+          </div>
+
+        </div>
+        <DataTableCustom title="Danh sách Sinh Viên" :block="['toolbar', 'headerBar', 'selectAll', 'action']"
+          :data="students" :columns="optionColumn" :total="studentStore?.total" :loading="loading"
+          @fetch="fetchStudent" />
+      </div>
+    </template>
+  </ImportExportDialog>
+
+
+
 </template>
 <script setup>
 import { ref, onMounted, watchEffect, watch } from "vue";
 import * as XLSX from "xlsx";
-import { Column, DataTable, FileUpload, Message } from "primevue";
+import { Column, DataTable, FileUpload, Message, Dialog, TabPanel, TabView, Button } from "primevue";
 import { useStudentStore, useMajorStore, useDepartmentStore, useFileStore } from "@/stores/store";
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import MyInput from "@/components/form/MyInput.vue";
 import MyDrawer from "@/components/drawer/MyDrawer.vue";
 import { useRouter } from "vue-router";
+import ImportExportDialog from "@/components/drawer/ImportExportDialog.vue";
+import { useExcelStore } from "@/stores/excel";
 
 
-const visibleLeft = ref(false);
 const studentStore = useStudentStore();
 const majorsStore = useMajorStore();
 const fileStore = useFileStore();
 const departmentsStore = useDepartmentStore();
+const excelStore = useExcelStore()
+const router = useRouter();
+
 const students = ref([]);
 const departments = ref([]);
 const majors = ref([]);
+const optionColumn = ref([
+  { field: 'code', header: 'Mã sinh viên', sortable: true },
+  { field: 'user.fullname', header: 'Họ và tên', sortable: true },
+  { field: 'user.email', header: 'Email', sortable: true },
+  { field: 'major.name', header: 'Ngành học', sortable: true },
+  { field: 'department.name', header: 'Khoa', sortable: true }
+])
+const visibleLeft = ref(false);
 const src = ref(null);
 const file = ref(null);
 const loading = ref(false);
 const isEditing = ref(false);
 const isImport = ref(false);
-
+const openDialog = ref(false);
+const typeDialog = ref('import')
 const editedStudentId = ref(null);
-const newStudent = ref({
-  code: "",
-  user: {
-    email: "",
-    fullname: "", // Cung cấp giá trị hợp lệ
-    birth_date: null, // Định dạng YYYY-MM-DD (ISO)
-    phone: "",// Loại bỏ khoảng trắng nếu cần
-    avatar: ""
-  },
-  major_id: 0, // Để null thay vì chuỗi rỗng nếu chưa có giá trị
-  department_id: 0
-});
+const newStudent = ref({ code: "", user: { email: "", fullname: "", birth_date: null, phone: "", avatar: "" }, major_id: null, department_id: null });
 const maxDate = ref(new Date());
 maxDate.value.setFullYear(maxDate.value.getFullYear() - 18);
+const filterData = ref({ department_id: '', major_id: '', orderBy: 'ASC' });
 
 onMounted(async () => {
-  await studentStore.fetchItems();
-  await majorsStore.fetchItems();
-  await departmentsStore.fetchItems();
+  await Promise.all([studentStore.fetchItems(), majorsStore.fetchItems(), departmentsStore.fetchItems()]);
+
 });
-watchEffect(() => {
+watchEffect(async () => {
   students.value = studentStore.items;
-  majors.value = majorsStore.items;
   departments.value = departmentsStore.items;
-});
+  majors.value = majorsStore.items;
+})
+
 watch(
   () => newStudent.value.department_id,
   (newDeptId) => {
     if (!isEditing.value) {
-      majors.value = newDeptId.major || [];
+      majors.value = newDeptId?.major || [];
     }
   },
   { immediate: true }
 );
 
 
-const fetchStudent = async (newPage, newLimit, newSearch) => {
+const fetchStudent = async (newPage, newLimit, newSearch, filter = {}) => {
   await studentStore.fetchItems(
     newSearch ? 1 : newPage,
     newSearch ? studentStore.total : newLimit,
-    newSearch
+    newSearch,
+    filter
   );
 };
-const addStudent = () => {
-  visibleLeft.value = true;
+
+const resetFilter = async () => {
+  filterData.value = {
+    department_id: '',
+    major_id: '',
+    orderBy: 'ASC' // giá trị mặc định nếu có
+  };
+  await fetchStudent(1, null, null, filterData.value);
 };
+
+
+watch(filterData, async (newFilters) => {
+  await fetchStudent(1, null, null, newFilters);
+}, { immediate: true, deep: true });
+
+
 
 const saveStudent = async () => {
   const newData = {
@@ -178,10 +260,7 @@ const editStudent = (dataEdit) => {
   visibleLeft.value = true;
 };
 
-const importStudent = () => {
-  visibleLeft.value = true;
-  isImport.value = true;
-};
+
 
 const cancelForm = () => {
   visibleLeft.value = false;
@@ -204,6 +283,9 @@ const cancelForm = () => {
   };
 };
 
+const getDetail = (data) => {
+  if (data?.user?.id) router.push(`/user-detail/${data?.user?.id}`);
+};
 
 const excelData = ref([]);
 const errors = ref([]);
@@ -215,10 +297,7 @@ const fieldMappings = {
   enrollment_year: (v) => parseInt(v) || "",
 };
 
-const router = useRouter();
-const getDetail = (data) => {
-  if (data?.user?.id) router.push(`/user-detail/${data?.user?.id}`);
-};
+
 
 const validators = {
   student_code: (v) => (!v ? "Mã sinh viên không được để trống." : ""),
@@ -229,48 +308,28 @@ const validators = {
     !v || v < 2000 || v > new Date().getFullYear() ? "Năm nhập học không hợp lệ." : "",
 };
 
-const handleFileUpload = (event) => {
-  const file = event.files[0];
-  if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const binaryString = e.target.result;
-    const workbook = XLSX.read(binaryString, { type: "binary" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    processData(XLSX.utils.sheet_to_json(sheet, { header: 1 }));
-  };
-  reader.readAsBinaryString(file);
-};
+const handleOpenDialog = (type = 'export') => {
+  openDialog.value = true
+  typeDialog.value = type
 
-const processData = (jsonData) => {
-  errors.value = [];
-  const rawData = jsonData.slice(1);
+}
+const resetDialog = () => {
+  openDialog.value = false
+}
 
-  excelData.value = rawData.map((row, index) => {
-    const item = Object.keys(fieldMappings).reduce((acc, key, i) => {
-      acc[key] = fieldMappings[key](row[i]);
-      return acc;
-    }, {});
 
-    Object.keys(validators).forEach((key) => {
-      const error = validators[key](item[key]);
-      if (error) errors.value.push(`Row ${index + 1}: ${error}`);
-    });
 
-    return item;
-  });
-};
+const exportData = () => {
+  excelStore.exportToExcel({
+    data: students.value,
+    columns: optionColumn.value,
+    fileName: 'DanhSachSinhVien.xlsx'
+  })
+}
 
-const formatDate = (excelDate) => {
-  if (!excelDate) return "";
-  if (typeof excelDate === "number") {
-    const date = XLSX.SSF.parse_date_code(excelDate);
-    return `${date.d}/${date.m}/${date.y}`;
-  }
-  return excelDate.split("/").length === 3 ? excelDate : "";
-};
 const selectedIds = ref([]);
+
 const submitDataImport = async () => {
   await studentStore.addItem(JSON.stringify(excelData.value));
   excelData.value = [];
@@ -281,15 +340,4 @@ const handleSelectData = (ids) => {
 };
 
 
-async function onFileSelect(event) {
-  const filedata = event.files[0];
-
-  // Preview ảnh
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    src.value = e.target.result;
-  };
-  reader.readAsDataURL(filedata);
-  file.value = filedata;
-}
 </script>

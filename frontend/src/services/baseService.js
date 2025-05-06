@@ -1,13 +1,18 @@
 import api from '@/api/api'
 
 const baseService = (resource) => ({
-  fetchAll: async (page = 1, limit = 10, search = '') => {
-    const params = { page, limit }
-    if (search) params.search = search
-    const { data } = await api.get(`/${resource}`, { params })
+  fetchAll: async (page = 1, limit = 10, search = '', filters = {}) => {
+    const params = {
+      page,
+      limit,
+      ...(search && { search }),
+      ...filters,
+    };
 
-    return data.data
+    const { data } = await api.get(`/${resource}`, { params });
+    return data.data;
   },
+
 
   getById: async (id) => {
    const { data } = await api.get(`/${resource}/${id}`)

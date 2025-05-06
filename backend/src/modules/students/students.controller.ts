@@ -41,6 +41,9 @@ export class StudentsController {
 
   @Get()
   async findAll(
+    @Query('department_id') department_id?: string,
+    @Query('major_id') major_id?: string,
+    @Query('orderBy') orderBy: string = 'DESC',
     @Query('search') search?: string,
     @Query('limit') limit?: number,
     @Query('page') page?: number,
@@ -48,7 +51,14 @@ export class StudentsController {
     Response<{ items: Student[]; total: number; limit?: number; page?: number }>
   > {
     try {
-      const students = await this.studentService.getAllStudent(search, limit, page);
+      const students = await this.studentService.getAllStudent(
+        department_id,
+        major_id,
+        orderBy,
+        search,
+        limit,
+        page
+      );
       return new Response(students, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

@@ -10,46 +10,32 @@
             :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
     </div>
 
-    <DataTableCustom title="Danh sách đề tài - Admin" :data="projects" :columns="[
-        { field: 'title', header: 'Tên đề tài', },
-        { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
-        { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
-        { field: 'course.name', header: 'Học kỳ' },
-        {
-            field: 'status',
-            header: 'Trạng thái',
-            type: 'status',
-            statuses: [
-                { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
-                { value: 'pending', label: 'Đang chờ duyệt', class: 'bg-yellow-100 text-yellow-700' },
-                { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
-                { value: 'public', label: 'Đã công bố', class: 'bg-violet-100 text-violet-700' }
-            ]
-        }
-    ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @add="addProject" @edit="editProject"
-        @delete="deleteProject" @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail" />
+    <DataTableCustom :block="['toolbar', 'headerBar', 'selectAll', 'action']" title="Danh sách đề tài - Admin"
+        :data="projects" :columns="[
+            { field: 'title', header: 'Tên đề tài', },
+            { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
+            { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
+            { field: 'course.name', header: 'Học kỳ' },
+            {
+                field: 'status',
+                header: 'Trạng thái',
+                type: 'status',
+                statuses: [
+                    { value: 'propose', label: 'Đề xuất', class: 'bg-blue-100 text-blue-700' },
+                    { value: 'pending', label: 'Đang chờ duyệt', class: 'bg-yellow-100 text-yellow-700' },
+                    { value: 'approve', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
+                    { value: 'public', label: 'Đã công bố', class: 'bg-violet-100 text-violet-700' }
+                ]
+            }
+        ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @rowSelect="getDetail" />
 
 
-    <MyDrawer class="w-full" title="đề tài" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveProject"
-        :showImport="isImport" v-model:visible="visibleLeft" position="right" :closable="false">
-        <div class="grid grid-cols-2 mt-5 gap-x-10">
-            <div class="flex flex-col gap-4">
-                <MyInput v-model="newData.title" title="Tên đề tài" id="name" required />
-                <MyInput v-model="newData.description" title="Mô tả" id="description" required />
-                <MyInput v-model="newData.content" title="Nội dung" id="content" required />
-                <MyInput v-model="newData.max_total_group" title="Số lượng nhóm tham gia" id="max_total_group"
-                    required />
-            </div>
-        </div>
-    </MyDrawer>
 
 </template>
 <script setup>
 import { ref, onMounted, watchEffect, watch } from "vue";
 import { useProjectStore } from "@/stores/store";
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
-import MyInput from "@/components/form/MyInput.vue";
-import MyDrawer from "@/components/drawer/MyDrawer.vue";
 import { useRouter } from "vue-router";
 import { Button } from "primevue";
 

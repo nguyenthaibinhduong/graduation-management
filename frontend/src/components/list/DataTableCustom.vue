@@ -17,7 +17,7 @@
         <Button v-if="blockFuntion('import')" size="small" label="Import" class="mr-2" icon="pi pi-plus"
           severity="contrast" @click="$emit('import')" />
         <Button v-if="blockFuntion('export')" size="small" label="Export" icon="pi pi-download" severity="contrast"
-          @click="exportToExcel" />
+          @click="$emit('export')" />
       </template>
     </Toolbar>
     <div class="mx-auto  text-sm">
@@ -140,7 +140,7 @@ const props = defineProps({
   block: Array
 })
 
-const emit = defineEmits(['edit', 'delete', 'add', 'fetch', 'import', 'selectOne', 'selectAll', 'rowSelect'])
+const emit = defineEmits(['edit', 'delete', 'add', 'fetch', 'import', 'export', 'selectOne', 'selectAll', 'rowSelect'])
 const search = ref('')
 const limit = ref(10)
 const page = ref(1)
@@ -158,6 +158,7 @@ const toggleDropdown = (event, data) => {
 watch([page, limit, search], ([newPage, newLimit, newSearch]) => {
   emit('fetch', newPage, newLimit, newSearch)
 })
+
 
 watch(selectedRows, (newSelection) => {
   emit('selectOne', newSelection)
@@ -206,20 +207,6 @@ const onPageChange = (event) => {
 }
 const handleGetRow = (e) => {
   emit('rowSelect', e.data)
-}
-const exportToExcel = () => {
-  const formattedData = props.data.map((row) => {
-    return props.columns.reduce((acc, col) => {
-      acc[col.header] = row[col.field]
-      return acc
-    }, {})
-  })
-
-  const ws = XLSX.utils.json_to_sheet(formattedData)
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Dữ liệu')
-  const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
-  saveAs(new Blob([excelBuffer]), 'Data.xlsx')
 }
 
 const confirm = useConfirm()
