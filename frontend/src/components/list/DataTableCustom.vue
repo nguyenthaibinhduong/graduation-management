@@ -128,8 +128,7 @@ import {
   ConfirmDialog,
   useConfirm,
 } from 'primevue'
-import * as XLSX from 'xlsx'
-import { saveAs } from 'file-saver'
+
 
 const props = defineProps({
   title: String,

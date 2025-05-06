@@ -40,8 +40,14 @@ export function createBaseStore(entity) {
       await fetchItems()
       showToast("Xóa thành công!", "success");
     }
+
+    const importItems = async (items) => {
+      await baseService(entity).import(items)
+      await fetchItems()
+      showToast("Import thành công!", "success");
+    }
     
 
-    return { items,item, total, fetchItems, addItem, updateItem, deleteItem,findItem }
+    return { items,item, total, fetchItems, addItem, updateItem, deleteItem,findItem ,importItems}
   })
 }

@@ -28,7 +28,7 @@
 
   </div>
   <DataTableCustom title="Danh sách Sinh Viên" :data="students" :columns="optionColumn" :total="studentStore?.total"
-    :loading="loading" @fetch="fetchStudent" @add="visibleLeft.value = true" @edit="editStudent" @delete="deleteStudent"
+    :loading="loading" @fetch="fetchStudent" @add="visibleLeft = true" @edit="editStudent" @delete="deleteStudent"
     @selectOne="handleSelectData" @selectAll="handleSelectData" @rowSelect="getDetail"
     @export="handleOpenDialog('export')" @import="handleOpenDialog('import')" />
 
@@ -88,7 +88,46 @@
     </div>
   </MyDrawer>
 
-  <ImportExportDialog v-model:visible="openDialog" :type="typeDialog" @hide="resetDialog" @export="exportData">
+  <ImportExportDialog v-model:visible="openDialog" :type="typeDialog" @hide="resetDialog" @export="exportData"
+    @import="handleImport" :isShowUpload="(importValue?.department_id != '' && importValue?.major_id != '')">
+    <template #import>
+      <div class="w-full pb-2">
+        <div class="w-full grid grid-cols-4 gap-4 bg-white p-3 rounded-md shadow-sm text-sm">
+
+          <!-- Khoa -->
+          <div class="flex flex-col gap-y-1">
+            <label for="department" class="font-medium">Khoa</label>
+            <MyInput class="w-full" id="department" type="select" v-model="importValue.department_id"
+              :options="departments" optionLabel="name" optionValue="id" placeholder="Chọn khoa" />
+          </div>
+
+          <div class="flex flex-col gap-y-1">
+            <label for="major" class="font-medium">Chuyên ngành</label>
+            <MyInput class="w-full" id="major" type="select" v-model="importValue.major_id" :options="majors"
+              optionLabel="name" optionValue="id" placeholder="Chọn chuyên ngành" />
+          </div>
+          <div class="flex flex-col gap-y-1 justify-end">
+            <Button label="Tải file mẫu" icon="pi pi-download" class="p-button-secondary" @click="getTemplate" />
+          </div>
+          <div class="flex flex-col gap-y-1 justify-end">
+            <Button :disabled="!importedData?.length > 0" label="Import Data" icon="pi pi-plus" class="btn-submit"
+              @click="handleAddImport" />
+          </div>
+
+        </div>
+
+        <DataTableCustom v-if="importedData?.length > 0" title="Danh sách Sinh Viên"
+          :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="importedData" :columns="[
+            { field: 'code', header: 'Mã sinh viên' },
+            { field: 'user.fullname', header: 'Họ và tên' },
+            { field: 'user.email', header: 'Email' },
+            { field: 'user.birth_date', header: 'Ngày sinh' },
+            { field: 'user.phone', header: 'Số điện thoại' },
+            { field: 'user.avatar', header: 'Link ảnh' }
+          ]" :total="importedData?.total" />
+      </div>
+
+    </template>
     <template #export>
       <!-- UI export tuỳ chỉnh -->
       <div class="w-full pb-2">
@@ -132,8 +171,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watchEffect, watch } from "vue";
-import * as XLSX from "xlsx";
-import { Column, DataTable, FileUpload, Message, Dialog, TabPanel, TabView, Button } from "primevue";
+import { Column, DataTable, FileUpload, Message, Button } from "primevue";
 import { useStudentStore, useMajorStore, useDepartmentStore, useFileStore } from "@/stores/store";
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import MyInput from "@/components/form/MyInput.vue";
@@ -141,6 +179,8 @@ import MyDrawer from "@/components/drawer/MyDrawer.vue";
 import { useRouter } from "vue-router";
 import ImportExportDialog from "@/components/drawer/ImportExportDialog.vue";
 import { useExcelStore } from "@/stores/excel";
+import dayjs from 'dayjs';
+import { showToast } from "@/utils/toast";
 
 
 const studentStore = useStudentStore();
@@ -165,7 +205,6 @@ const src = ref(null);
 const file = ref(null);
 const loading = ref(false);
 const isEditing = ref(false);
-const isImport = ref(false);
 const openDialog = ref(false);
 const typeDialog = ref('import')
 const editedStudentId = ref(null);
@@ -173,6 +212,10 @@ const newStudent = ref({ code: "", user: { email: "", fullname: "", birth_date: 
 const maxDate = ref(new Date());
 maxDate.value.setFullYear(maxDate.value.getFullYear() - 18);
 const filterData = ref({ department_id: '', major_id: '', orderBy: 'ASC' });
+const importValue = ref({ department_id: '', major_id: '' });
+const importedData = ref([]);
+
+
 
 onMounted(async () => {
   await Promise.all([studentStore.fetchItems(), majorsStore.fetchItems(), departmentsStore.fetchItems()]);
@@ -193,6 +236,7 @@ watch(
   },
   { immediate: true }
 );
+
 
 
 const fetchStudent = async (newPage, newLimit, newSearch, filter = {}) => {
@@ -260,7 +304,13 @@ const editStudent = (dataEdit) => {
   visibleLeft.value = true;
 };
 
-
+const formatDate = (rowData) => {
+  if (rowData.user.birth_date) {
+    // Chuyển đổi ngày sinh từ ISO 8601 sang định dạng ngày mong muốn
+    return dayjs(rowData.user.birth_date).format('DD/MM/YYYY');
+  }
+  return '';
+};
 
 const cancelForm = () => {
   visibleLeft.value = false;
@@ -287,26 +337,6 @@ const getDetail = (data) => {
   if (data?.user?.id) router.push(`/user-detail/${data?.user?.id}`);
 };
 
-const excelData = ref([]);
-const errors = ref([]);
-const fieldMappings = {
-  name: (v) => v || "",
-  student_code: (v) => v || "",
-  date_of_birth: (v) => formatDate(v),
-  major: (v) => v || "",
-  enrollment_year: (v) => parseInt(v) || "",
-};
-
-
-
-const validators = {
-  student_code: (v) => (!v ? "Mã sinh viên không được để trống." : ""),
-  name: (v) => (!v ? "Họ và tên không được để trống." : ""),
-  date_of_birth: (v) => (!v ? "Ngày sinh không hợp lệ (dd/mm/YYYY)" : ""),
-  major: (v) => (!v ? "Ngành học không được để trống." : ""),
-  enrollment_year: (v) =>
-    !v || v < 2000 || v > new Date().getFullYear() ? "Năm nhập học không hợp lệ." : "",
-};
 
 
 const handleOpenDialog = (type = 'export') => {
@@ -316,6 +346,9 @@ const handleOpenDialog = (type = 'export') => {
 }
 const resetDialog = () => {
   openDialog.value = false
+  importedData.value = []
+  importValue.value = { department_id: '', major_id: '' }
+
 }
 
 
@@ -330,14 +363,74 @@ const exportData = () => {
 
 const selectedIds = ref([]);
 
-const submitDataImport = async () => {
-  await studentStore.addItem(JSON.stringify(excelData.value));
-  excelData.value = [];
+const getTemplate = () => {
+  excelStore.downloadExcelTemplate(
+    [{
+      code: '',
+      email: '',
+      fullname: '',
+      birth_date: '',
+      phone: '',
+      avatar: '',
+    }],
+    'student_template.xlsx'
+  )
+
 };
 
 const handleSelectData = (ids) => {
   selectedIds.value = ids;
 };
 
+const validateStudent = (row, index) => {
+  if (!row.code || !row.email || !row.fullname) {
+    throw new Error(`Dòng ${index + 2} thiếu trường bắt buộc!`)
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(row.email)) {
+    throw new Error(`Email không hợp lệ tại dòng ${index + 2}: ${row.email}`)
+  }
+}
+
+// Hàm map dữ liệu sinh viên
+const mapStudent = (row) => ({
+  code: row.code,
+  user: {
+    email: row.email,
+    fullname: row.fullname,
+    birth_date: row.birth_date ? new Date(row.birth_date) : null,
+    phone: row.phone || '',
+    avatar: row.avatar || ''
+  },
+  major_id: importValue.value?.major_id,
+  department_id: importValue.value?.department_id
+})
+
+
+const handleImport = async (file) => {
+  if (!importValue.value?.department_id || !importValue.value?.major_id) {
+    showToast('Cần chọn khoa và chuyên ngành để import', 'error')
+    file = null
+  } else {
+    const data = await excelStore.importExcel(file, {
+      key: 'students',
+      validateFn: validateStudent, // Hàm validate dữ liệu sinh viên
+      mapFn: mapStudent // Hàm map dữ liệu
+    })
+    importedData.value = data
+    console.log(data);
+
+  }
+}
+
+const handleAddImport = async () => {
+  if (!importedData.value || !importValue.value?.department_id || !importValue.value?.major_id) {
+    showToast('Dữ liệu chưa có hoặc chưa hợp lệ', 'error')
+  } else {
+    await studentStore.importItems(importedData.value);
+    resetDialog();
+  }
+
+}
 
 </script>

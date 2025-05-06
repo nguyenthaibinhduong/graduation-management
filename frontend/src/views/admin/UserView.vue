@@ -7,6 +7,7 @@
       field: 'role',
       header: 'Vai trò',
       type: 'status',
+      sortable: true,
       statuses: [
         { value: 'student', label: 'Sinh viên', class: 'bg-blue-100 text-blue-700' },
         {

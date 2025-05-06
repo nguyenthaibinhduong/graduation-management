@@ -125,4 +125,24 @@ export class StudentsController {
       );
     }
   }
+
+  @Post('import')
+  async importStudents(@Body() students:[]): Promise<Response<void> | HttpException> {
+    try {
+      // Thực hiện việc thêm nhiều sinh viên vào cơ sở dữ liệu
+      const result = await this.studentService.createManyStudent(students);
+      const data = {
+        message: `Đã thêm ${result.success} sinh viên.`,
+        errors: result.errors,
+      }
+      // Trả về phản hồi thành công
+      return new Response<any>(data, HttpStatus.SUCCESS, 'Thêm sinh viên thành công');
+    } catch (error) {
+      // Xử lý lỗi khi có sự cố
+      throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: error.message },
+          HttpStatus.ERROR,
+        );
+    }
+  }
 }

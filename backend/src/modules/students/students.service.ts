@@ -74,7 +74,7 @@ async getAllStudent(
 }
 
 
-  async createStudent(student: CreateStudentDto): Promise<Student> {
+async createStudent(student: CreateStudentDto): Promise<Student> {
     const { department_id, major_id, user, ...data } = student;
     const [department, major] = await Promise.all([
       this.departmentRepository.createQueryBuilder('department').where('department.id = :id', { id: department_id }).getOne(),
@@ -96,7 +96,7 @@ async getAllStudent(
     }
 
     
-  }
+}
 
 async updateStudent(id: string, dataStudent: UpdateStudentDto): Promise<Student> {
   try {
@@ -165,7 +165,27 @@ async updateStudent(id: string, dataStudent: UpdateStudentDto): Promise<Student>
   } catch (error) {
     throw new InternalServerErrorException(error.message || 'Có lỗi xảy ra khi cập nhật sinh viên');
   }
-}
+  }
+
+  async createManyStudent(students: CreateStudentDto[]): Promise<{ success: number; errors: string[] }> {
+    const errors: string[] = [];
+    let success = 0;
+
+    for (let i = 0; i < students.length; i++) {
+      const student = students[i];
+      try {
+        await this.createStudent(student);
+        success++;
+      } catch (error) {
+        errors.push(`Dòng ${i + 2}: ${error.message}`);
+      }
+    }
+
+    return { success, errors };
+  }
+
+  
+  
 
 
 

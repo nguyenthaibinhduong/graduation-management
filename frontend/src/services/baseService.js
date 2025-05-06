@@ -36,6 +36,12 @@ const baseService = (resource) => ({
       return api.post(`/${resource}/remove-multi`, ids)
     }
   },
+
+  import: async (items) => {
+    if (items.length>0) {
+     return api.post(`/${resource}/import`, items)
+    }
+  },
   
 })
 

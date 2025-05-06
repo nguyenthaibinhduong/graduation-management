@@ -1,13 +1,16 @@
 <template>
-    <Dialog :visible="props.visible" modal header="Import - Export" :style="{ width: '70vw' }"
+    <Dialog :visible="props.visible" modal header="Import - Export" :style="{ width: '80vw' }"
         @update:visible="val => emit('update:visible', val)" @after-hide="() => emit('hide')">
         <TabView v-model:activeIndex="activeIndex">
             <TabPanel header="Import">
-                <div class="p-4 space-y-4">
+                <div v-if="props.isShowUpload" class="p-4 space-y-4">
                     <FileUpload mode="basic" accept=".xlsx, .xls" @select="onFileSelect" />
-                    <Button label="Tải file mẫu" icon="pi pi-download" class="p-button-secondary"
-                        @click="downloadTemplate" />
+
                 </div>
+                <slot name="import">
+                    <!-- Default export UI -->
+
+                </slot>
             </TabPanel>
 
             <TabPanel header="Export">
@@ -30,6 +33,7 @@ import * as XLSX from 'xlsx';
 import { Dialog, TabView, TabPanel, Button, FileUpload } from 'primevue';
 
 const props = defineProps({
+    isShowUpload: Boolean,
     visible: Boolean,
     type: {
         type: String,
@@ -47,27 +51,11 @@ watch(() => props.type, (newType) => {
 });
 
 // Handle file selection and convert to JSON
-function onFileSelect(event) {
-    const file = event.files[0];
+const onFileSelect = (event) => {
+    const file = event.files?.[0]; // Lấy file từ event.files
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const workbook = XLSX.read(e.target.result, { type: 'binary' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(sheet);
-        emit('import', data);
-    };
-    reader.readAsBinaryString(file);
-}
-
-// Download a blank template for import
-function downloadTemplate(template) {
-    const sample = template;
-    const ws = XLSX.utils.json_to_sheet(sample);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Template');
-    XLSX.writeFile(wb, 'template.xlsx');
-}
+    emit('import', file);
+};
 
 // Trigger export event
 function exportData() {
