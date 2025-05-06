@@ -81,11 +81,12 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token')
   const authStore = useAuthStore()
+  await authStore.fetchUser();
   const userRole = authStore.user?.role
   if (to.meta.requiresAuth && !token) {
     return next('/login')
   }
-   if (to.meta.roles && !to.meta.roles.includes(userRole)) {
+   if (to?.meta?.roles && !to.meta?.roles?.includes(userRole)) {
     return next('/not-found')
   }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
