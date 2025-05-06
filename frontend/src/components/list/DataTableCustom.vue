@@ -98,8 +98,8 @@
     </div>
     <Toolbar class="mt-6 bg-slate-100">
       <template #start>
-        <Select size="small" v-model="limit" :options="[2, 5, 10, 20]" @change="onLimitChange"
-          placeholder="Hiện bản ghi" class="w-45" />
+        <Select size="small" v-model="limit" :options="(total > 20) ? [2, 5, 10, 20, total] : [2, 5, 10, 20]"
+          @change="onLimitChange" placeholder="Hiện bản ghi" class="w-45" />
       </template>
 
       <template #end>

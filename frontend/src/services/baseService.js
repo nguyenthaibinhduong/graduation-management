@@ -38,8 +38,8 @@ const baseService = (resource) => ({
   },
 
   import: async (items) => {
-    if (items.length>0) {
-     return api.post(`/${resource}/import`, items)
+    if (items.length > 0) {
+      return api.post(`/${resource}/import`, items)
     }
   },
   

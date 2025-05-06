@@ -115,7 +115,11 @@
           </div>
 
         </div>
-
+        <div v-if="importErrors.length > 0" class="bg-red-100 border border-red-400 text-red-700 p-4 mt-4 rounded-lg">
+          <div v-for="(error, index) in importErrors" :key="index" class="font-semibold mb-2">
+            {{ error }}
+          </div>
+        </div>
         <DataTableCustom v-if="importedData?.length > 0" title="Danh sách Sinh Viên"
           :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="importedData" :columns="[
             { field: 'code', header: 'Mã sinh viên' },
@@ -348,6 +352,7 @@ const resetDialog = () => {
   openDialog.value = false
   importedData.value = []
   importValue.value = { department_id: '', major_id: '' }
+  importErrors.value = []
 
 }
 
@@ -422,13 +427,19 @@ const handleImport = async (file) => {
 
   }
 }
-
+const importErrors = ref([]);
 const handleAddImport = async () => {
   if (!importedData.value || !importValue.value?.department_id || !importValue.value?.major_id) {
     showToast('Dữ liệu chưa có hoặc chưa hợp lệ', 'error')
   } else {
-    await studentStore.importItems(importedData.value);
-    resetDialog();
+    const data = await studentStore.importItems(importedData.value)
+    if (data && data?.errors.length > 0) {
+      importErrors.value = data?.errors
+    } else {
+      await fetchStudent()
+      resetDialog()
+      showToast(data?.message, 'success',)
+    }
   }
 
 }

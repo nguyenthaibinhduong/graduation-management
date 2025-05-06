@@ -177,7 +177,7 @@ async updateStudent(id: string, dataStudent: UpdateStudentDto): Promise<Student>
         await this.createStudent(student);
         success++;
       } catch (error) {
-        errors.push(`Dòng ${i + 2}: ${error.message}`);
+        errors.push(`Dòng ${i + 1}: ${error.message}`);
       }
     }
 

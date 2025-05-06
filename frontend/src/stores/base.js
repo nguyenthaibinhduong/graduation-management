@@ -42,9 +42,7 @@ export function createBaseStore(entity) {
     }
 
     const importItems = async (items) => {
-      await baseService(entity).import(items)
-      await fetchItems()
-      showToast("Import thành công!", "success");
+      return (await baseService(entity).import(items))?.data?.data
     }
     
 
