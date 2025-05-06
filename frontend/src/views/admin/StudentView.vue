@@ -341,13 +341,22 @@ const getDetail = (data) => {
   if (data?.user?.id) router.push(`/user-detail/${data?.user?.id}`);
 };
 
+const selectedIds = ref([]);
+const handleSelectData = (ids) => {
+  selectedIds.value = ids;
+};
+
+// ============================== XU LY EXPORT - IMPORT ==============================//
 
 
+// MỞ DIALOG
 const handleOpenDialog = (type = 'export') => {
   openDialog.value = true
   typeDialog.value = type
 
 }
+
+// ĐÓNG DIALOG
 const resetDialog = () => {
   openDialog.value = false
   importedData.value = []
@@ -357,7 +366,7 @@ const resetDialog = () => {
 }
 
 
-
+// EXPORT THEO COLUMN CỦA BẢNG
 const exportData = () => {
   excelStore.exportToExcel({
     data: students.value,
@@ -366,8 +375,8 @@ const exportData = () => {
   })
 }
 
-const selectedIds = ref([]);
 
+// TẢI FILE MẪU
 const getTemplate = () => {
   excelStore.downloadExcelTemplate(
     [{
@@ -383,10 +392,8 @@ const getTemplate = () => {
 
 };
 
-const handleSelectData = (ids) => {
-  selectedIds.value = ids;
-};
 
+// VALIDATE DATA IMPORT
 const validateStudent = (row, index) => {
   if (!row.code || !row.email || !row.fullname) {
     throw new Error(`Dòng ${index + 2} thiếu trường bắt buộc!`)
@@ -397,7 +404,7 @@ const validateStudent = (row, index) => {
   }
 }
 
-// Hàm map dữ liệu sinh viên
+// MAP DATA ĐỂ TẠO JSON THEO CẤU  TRÚC MONG MUỐN
 const mapStudent = (row) => ({
   code: row.code,
   user: {
@@ -411,7 +418,7 @@ const mapStudent = (row) => ({
   department_id: importValue.value?.department_id
 })
 
-
+// XỬ LÝ IMPORT
 const handleImport = async (file) => {
   if (!importValue.value?.department_id || !importValue.value?.major_id) {
     showToast('Cần chọn khoa và chuyên ngành để import', 'error')
