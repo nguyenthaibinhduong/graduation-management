@@ -3,6 +3,22 @@
         @update:visible="val => emit('update:visible', val)" @after-hide="() => emit('hide')">
         <TabView v-model:activeIndex="activeIndex">
             <TabPanel header="Import">
+                <div
+                    class="w-full mx-auto mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-md text-blue-900 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-2">📤 Hướng dẫn Import dữ liệu</h3>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        <ul class="list-disc list-inside ml-4">
+                            <li>Chọn đầy đủ các trường bắt buộc như Khoa, Chức vụ, Chuyên ngành, ...</li>
+                            <li>Nếu chưa có file mẫu, hãy tải về và điền đúng cấu trúc yêu cầu.</li>
+                            <li>Tải file Excel đúng định dạng lên hệ thống. Nếu hợp lệ, dữ liệu sẽ hiển thị; nếu không,
+                                hệ thống sẽ báo lỗi theo từng dòng.</li>
+                            <li>Nhấn <strong>Import Data</strong> để hoàn tất.</li>
+                        </ul>
+                        <strong>Lưu ý:</strong> Email không được trùng lặp. Nếu không dùng đến, có thể để trống hoặc
+                        loại bỏ khỏi file.
+                    </ul>
+                </div>
+
                 <div v-if="props.isShowUpload" class="p-4 space-y-4">
                     <FileUpload mode="basic" accept=".xlsx, .xls" @select="onFileSelect" />
 
@@ -14,6 +30,18 @@
             </TabPanel>
 
             <TabPanel header="Export">
+                <div
+                    class="w-full mx-auto mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-md text-blue-900 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-2">📤 Hướng dẫn Export dữ liệu</h3>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        <ul class="list-disc list-inside ml-4">
+                            <li>Chọn bộ lọc phù hợp theo dữ liệu muốn xuất (Khoa, Chức vụ, v.v.).</li>
+                            <li>Chọn số lượng bản ghi hiển thị trên bảng dữ liệu.</li>
+                            <li>Nhấn nút <strong>Export</strong> để tải dữ liệu về máy dưới dạng Excel.</li>
+                        </ul>
+
+                    </ul>
+                </div>
 
                 <slot name="export">
                     <!-- Default export UI -->
