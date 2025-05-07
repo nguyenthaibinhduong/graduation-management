@@ -78,7 +78,7 @@ api.interceptors.response.use(
         // Nếu messages là một mảng, duyệt qua từng lỗi
         messages.forEach((msg) => showToast(msg, 'error','Lỗi'))
       } else {
-        showToast(messages || 'Dữ liệu không hợp lệ.', 'error','Lỗi')
+        showToast( 'Dữ liệu không hợp lệ.', 'error','Lỗi')
       }
 
       return Promise.reject('Dữ liệu không hợp lệ.')
@@ -86,7 +86,7 @@ api.interceptors.response.use(
     if (status === 403) {
       authStore.logout()
       showToast(
-        error.response?.data?.message || 'Bạn không có quyền truy cập vào tính năng này.',
+        'Bạn không có quyền truy cập vào tính năng này.',
         'error','Lỗi'
       )
       return Promise.reject('Bạn không có quyền truy cập vào tính năng này.')
@@ -99,11 +99,11 @@ api.interceptors.response.use(
       return Promise.reject('Không tìm thấy trang bạn yêu cầu.')
     }
     if (status === 500) {
-      showToast(error.response?.data?.message || 'Đã xảy ra lỗi trong hệ thống.', 'error','Lỗi')
-      return Promise.reject('Đã xảy ra l��i trong hệ thống.')
+      showToast('Đã xảy ra lỗi trong hệ thống.', 'error','Lỗi')
+      return Promise.reject('Đã xảy ra lỗi trong hệ thống.')
     }
 
-    return Promise.reject(error.response.data.message || 'Lỗi')
+    return Promise.reject( 'Lỗi')
   }
 )
 

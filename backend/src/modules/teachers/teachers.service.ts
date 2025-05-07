@@ -1,8 +1,9 @@
+
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
 import { Teacher } from 'src/entities/teacher.entity';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, Like, Repository } from 'typeorm';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
@@ -64,42 +65,50 @@ export class TeachersService extends BaseService<Teacher> {
 
 
   async getAllTeachers(
+    department_id?: any,
+    position_ids?: number[],
+    orderBy?: string,
     search?: string,
     limit?: number,
     page?: number,
-  ): Promise<{
-    items: Teacher[];
-    total: number;
-    limit?: number;
-    page?: number;
-  }> {
-    const queryBuilder = this.teacherRepository
-      .createQueryBuilder('teacher')
-      .leftJoinAndSelect('teacher.user', 'user')
-      .leftJoinAndSelect('teacher.position', 'position')
-      .leftJoinAndSelect('teacher.department', 'department');
-
-    if (search) {
-      queryBuilder.where('user.username LIKE :search', {
-        search: `%${search}%`,
+  ): Promise<{items: Teacher[];total: number;limit?: number;page?: number}> {
+    const where: any = {
+        ...(search && {
+          user: {
+            fullname: Like(`%${search}%`)
+          }
+        }),
+        ...(department_id && { department: { id: department_id } }),
+        ...(position_ids?.length>0  && { position: {id:In(position_ids) } }),
+      };
+    
+      const [items, total] = await this.repository.findAndCount({
+        where,
+        relations: {
+          user: true,
+          position: true,
+          department: true
+        },
+        order: {
+          created_at: orderBy === 'DESC' ? 'DESC' : 'ASC' // ví dụ cho sort
+        },
+        skip: limit && page ? (page - 1) * limit : undefined,
+        take: limit,
       });
-    }
-
-    const total = await queryBuilder.getCount();
-
-    if (limit && page) {
-      queryBuilder.skip((page - 1) * limit).take(limit);
-    }
-
-    const items = await queryBuilder.getMany();
-
-    items.forEach((item) => {
-      if (item.user) {
-        delete item.user.password;
-      }
-    });
-
-    return { items, total, ...(limit && { limit }), ...(page && { page }) };
+    
+      // Xóa mật khẩu khỏi kết quả trả về
+      items.forEach((teacher) => {
+        if (teacher.user) {
+          delete teacher.user.password;
+        }
+      });
+    
+      return {
+        items,
+        total,
+        ...(limit && { limit }),
+        ...(page && { page })
+      };
   }
 
   async updateTeacher(
@@ -146,5 +155,22 @@ export class TeachersService extends BaseService<Teacher> {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async createManyTeacher(teachers: CreateTeacherDto[]): Promise<{ success: number; errors: string[] }> {
+      const errors: string[] = [];
+      let success = 0;
+  
+      for (let i = 0; i < teachers.length; i++) {
+        const teacher = teachers[i];
+        try {
+          await this.createTeacher(teacher);
+          success++;
+        } catch (error) {
+          errors.push(`Dòng ${i + 1}: ${error.message}`);
+        }
+      }
+  
+      return { success, errors };
   }
 }

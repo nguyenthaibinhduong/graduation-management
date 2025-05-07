@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full grid grid-cols-5 gap-4 bg-white p-3 rounded-md shadow-sm text-sm">
+  <div class="w-full grid grid-cols-4 gap-4 bg-white p-3 rounded-md shadow-sm text-sm">
 
     <!-- Khoa -->
     <div class="flex flex-col gap-y-1">
@@ -67,25 +67,7 @@
       </div>
     </div>
 
-    <div v-if="isImport" class="mt-6">
-      <FileUpload mode="basic" chooseLabel="Tải lên file Excel" accept=".xlsx, .xls" @select="handleFileUpload" />
 
-      <Message v-if="errors.length" severity="error">
-        <ul class="list-disc ml-5">
-          <li v-for="(error, index) in errors" :key="index">{{ error }}</li>
-        </ul>
-      </Message>
-
-      <DataTable v-if="excelData.length" :value="excelData" class="mt-3">
-        <Column field="name" header="Họ và tên"></Column>
-        <Column field="student_code" header="Mã sinh viên"></Column>
-        <Column field="date_of_birth" header="Ngày sinh"></Column>
-        <Column field="major" header="Ngành học"></Column>
-        <Column field="enrollment_year" header="Năm nhập học"></Column>
-      </DataTable>
-
-
-    </div>
   </MyDrawer>
 
   <ImportExportDialog v-model:visible="openDialog" :type="typeDialog" @hide="resetDialog" @export="exportData"
@@ -430,7 +412,6 @@ const handleImport = async (file) => {
       mapFn: mapStudent // Hàm map dữ liệu
     })
     importedData.value = data
-    console.log(data);
 
   }
 }

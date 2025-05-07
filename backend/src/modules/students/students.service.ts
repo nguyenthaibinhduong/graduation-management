@@ -26,9 +26,9 @@ export class StudentsService extends BaseService<Student> {
     super(studentRepository);
   }
 async getAllStudent(
-  department_id: any,
-  major_id: any,
-  orderBy: string,
+  department_id?: any,
+  major_id?: any,
+  orderBy?: string,
   search?: string,
   limit?: number,
   page?: number,

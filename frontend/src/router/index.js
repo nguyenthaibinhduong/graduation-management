@@ -94,7 +94,6 @@ router.beforeEach(async (to, from, next) => {
       const res = await axios.post('http://localhost:3034/api/v1/auth/verify-token', { token })
       if (res.status === 201) {
         authStore.setAuth(true)
-        console.log('Token hợp lệ')
         return next()
       }
     } catch (error) {
@@ -111,17 +110,14 @@ router.beforeEach(async (to, from, next) => {
           if (refreshRes.status === 201 && refreshRes.data.access_token) {
             localStorage.setItem('token', refreshRes.data.access_token)
             authStore.setAuth(true)
-            console.log('Token mới hợp lệ sau refresh')
             return next()
           }
         } catch (refreshError) {
-          console.error('Không thể refresh token:', refreshError)
           authStore.setAuth(false)
           localStorage.removeItem('token')
           return next('/login')
         }
       } else {
-        console.error('Không thể xác thực token:', error)
         authStore.setAuth(false)
         localStorage.removeItem('token')
         return next('/login')

@@ -1,8 +1,7 @@
 import { Teacher } from 'src/entities/teacher.entity';
 import { Department } from 'src/entities/department.entity';
 import { Position } from 'src/entities/position.entity';
-import { Committee } from 'src/entities/committee.entity';
-import { User, UserRole } from 'src/entities/user.entity';
+import { User } from 'src/entities/user.entity';
 import { fakerVI as faker } from '@faker-js/faker'; // Giả sử bạn có sẵn UserFactory
 
 export class TeacherFactory {
@@ -12,7 +11,7 @@ export class TeacherFactory {
     positions?: Position[],
   ): Promise<Partial<Teacher>> {
     return {
-      code: faker.string.alphanumeric(8).toUpperCase(),
+      code: user?.username,
       user: user,
       department: department,
       degree: faker.helpers.arrayElement(['Thạc sĩ', 'Tiến sĩ', 'Giáo sư']),

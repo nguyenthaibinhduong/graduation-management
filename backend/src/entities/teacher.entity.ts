@@ -44,7 +44,7 @@ export class Teacher {
   degree: string;
 
   @CreateDateColumn()
-    created_at: Date; // Ngày tạo tài khoản
+  created_at: Date; // Ngày tạo tài khoản
   
   @UpdateDateColumn()
   updated_at: Date; // Ngày cập nhật thông tin người dùng

@@ -42,6 +42,9 @@ export class TeachersController {
 
   @Get()
   async findAll(
+    @Query('departmentId') department_id?: string,
+    @Query('positionIds') position_ids?: number[],
+    @Query('orderBy') orderBy: string = 'DESC',
     @Query('search') search?: string,
     @Query('limit') limit?: number,
     @Query('page') page?: number,
@@ -50,6 +53,9 @@ export class TeachersController {
   > {
     try {
       const teachers = await this.teacherService.getAllTeachers(
+        department_id,
+        position_ids,
+        orderBy,
         search,
         limit,
         page,
@@ -115,6 +121,26 @@ export class TeachersController {
         { statusCode: HttpStatus.ERROR, message: error.message },
         HttpStatus.ERROR,
       );
+    }
+  }
+
+   @Post('import')
+  async importStudents(@Body() teachers:[]): Promise<Response<void> | HttpException> {
+    try {
+      // Thực hiện việc thêm nhiều sinh viên vào cơ sở dữ liệu
+      const result = await this.teacherService.createManyTeacher(teachers);
+      const data = {
+        message: `Đã thêm ${result.success} giảng viên.`,
+        errors: result.errors,
+      }
+      // Trả về phản hồi thành công
+      return new Response<any>(data, HttpStatus.SUCCESS, 'Thêm giảng viên thành công');
+    } catch (error) {
+      // Xử lý lỗi khi có sự cố
+      throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: error.message },
+          HttpStatus.ERROR,
+        );
     }
   }
 }
