@@ -122,20 +122,20 @@ export class TeachersService extends BaseService<Teacher> {
       }
     });
 
-    const teachers = items.map((teacher) => {
-      const { id, user, ...rest } = teacher;
-      return {
-        ...rest,
-        id: this.jwtUtilityService.encodeId(id),
-        user: {
-          ...user,
-          id: this.jwtUtilityService.encodeId(user.id.toString()),
-        },
-      };
-    });
+    // const teachers = items.map((teacher) => {
+    //   const { id, user, ...rest } = teacher;
+    //   return {
+    //     ...rest,
+    //     id: this.jwtUtilityService.encodeId(id),
+    //     user: {
+    //       ...user,
+    //       id: this.jwtUtilityService.encodeId(user.id.toString()),
+    //     },
+    //   };
+    // });
 
     return {
-      items: teachers,
+      items,
       total,
       ...(limit && { limit }),
       ...(page && { page }),
