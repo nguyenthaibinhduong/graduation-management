@@ -96,9 +96,16 @@ export class StudentsController {
   @Put(':id')
   async update(
     @DecodedId(['params', 'id']) id: string,
-    @Body(new ValidationPipe()) student: UpdateStudentDto,
+    @Body(new ValidationPipe()) body: UpdateStudentDto,
+    @DecodedId(['body', 'department_id']) department_id?: string,
+    @DecodedId(['body', 'major_id']) major_id?: string,
   ): Promise<Response<Student>> {
     try {
+      const student = {
+        ...body,
+        department_id,
+        major_id,
+      };
       const updatedStudent = await this.studentService.updateStudent(
         id,
         student,
