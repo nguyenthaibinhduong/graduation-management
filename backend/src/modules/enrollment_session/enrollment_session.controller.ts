@@ -18,6 +18,7 @@ import { EnrollmentSessionsService } from './enrollment_session.service';
 import { CreateEnrollmentSessionDto } from './dto/create-enrollment_session.dto';
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { Response } from 'src/common/globalClass';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('enrollment_sessions')
 @UseGuards(JwtAuthGuard)
@@ -26,10 +27,13 @@ export class EnrollmentSessionsController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) enrollmentSession: CreateEnrollmentSessionDto,
+    @Body(new ValidationPipe()) enrollmentSession: any,
+    @DecodedId(['body', 'department_id']) department_id: any,
+    @DecodedId(['body', 'course_id']) course_id: any
   ): Promise<Response<EnrollmentSession>> {
     try {
-      const newEnrollmentSession = await this.enrollmentSessionService.createEnrollmentSession(enrollmentSession);
+      const data =  { ...enrollmentSession,department_id, course_id }
+      const newEnrollmentSession = await this.enrollmentSessionService.createEnrollmentSession(data);
       return new Response(newEnrollmentSession, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -59,7 +63,7 @@ export class EnrollmentSessionsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<EnrollmentSession>> {
+  async findOne(@DecodedId(["params"]) id: number): Promise<Response<EnrollmentSession>> {
     try {
       const enrollmentSession = await this.enrollmentSessionService.getById({ where: { id } });
       return enrollmentSession
@@ -72,7 +76,7 @@ export class EnrollmentSessionsController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) enrollmentSession: CreateEnrollmentSessionDto,
   ): Promise<Response<EnrollmentSession>> {
     try {
@@ -89,7 +93,7 @@ export class EnrollmentSessionsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
       await this.enrollmentSessionService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);

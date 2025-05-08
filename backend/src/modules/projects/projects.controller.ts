@@ -109,7 +109,7 @@ export class ProjectsController {
   @Get('find/:type/:id/:obj_id')
   async findOne(
     @Param('type') type: string,
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Param('obj_id') obj_id: number,
   ): Promise<Response<Project>> {
     try {
@@ -130,7 +130,7 @@ export class ProjectsController {
   @Put('update/:type/:id')
   async update(
     @Param('type') type: string,
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) project: CreateProjectDto,
   ): Promise<Response<Project>> {
     try {
@@ -153,7 +153,7 @@ export class ProjectsController {
   @Delete('delete/:type/:id/:obj_id')
   async remove(
     @Param('type') type: string,
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Param('obj_id') obj_id: number,
   ): Promise<Response<void>> {
     try {

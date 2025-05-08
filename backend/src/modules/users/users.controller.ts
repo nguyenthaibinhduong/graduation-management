@@ -21,6 +21,7 @@ import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('users')
 //@UseGuards(JwtAuthGuard)
@@ -84,7 +85,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<User>> {
+  async findOne(@DecodedId(["params"]) id: number): Promise<Response<User>> {
     try {
       const decodedId = this.jwtUtilityService.decodeId(id);
       const user = await this.userService.findByID(decodedId);
@@ -101,7 +102,7 @@ export class UsersController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) user: UpdateUserDto,
   ): Promise<Response<User>> {
     try {
@@ -122,7 +123,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
       await this.userService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);

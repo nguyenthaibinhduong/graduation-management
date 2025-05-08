@@ -19,6 +19,7 @@ import { CoursesService } from "./courses.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { Course } from "src/entities/course.entity";
 import { Response } from 'src/common/globalClass';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('courses')
 // @UseGuards(JwtAuthGuard)
@@ -60,7 +61,7 @@ export class CoursesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<Course>> {
+  async findOne(@DecodedId(["params"]) id: number): Promise<Response<Course>> {
     try {
       const course = await this.courseService.getById({ where: { id } });
       return course
@@ -73,7 +74,7 @@ export class CoursesController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) course: CreateCourseDto,
   ): Promise<Response<Course>> {
     try {
@@ -91,7 +92,7 @@ export class CoursesController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
       await this.courseService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);

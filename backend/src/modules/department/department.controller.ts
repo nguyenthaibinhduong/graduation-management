@@ -18,6 +18,7 @@ import { Department } from 'src/entities/department.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('departments')
 @UseGuards(JwtAuthGuard)
@@ -68,7 +69,7 @@ export class DepartmentController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<Department>> {
+  async findOne(@DecodedId(["params"]) id: number): Promise<Response<Department>> {
     try {
       const department = await this.departmentService.getById({
         where: { id },
@@ -83,7 +84,7 @@ export class DepartmentController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) department: UpdateDepartmentDto,
   ): Promise<Response<Department>> {
     try {
@@ -101,7 +102,7 @@ export class DepartmentController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
       await this.departmentService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);

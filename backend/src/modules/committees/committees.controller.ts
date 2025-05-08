@@ -18,6 +18,7 @@ import { Committee } from 'src/entities/committee.entity';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { Response } from 'src/common/globalClass';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('committees')
 export class CommitteesController {
@@ -55,7 +56,7 @@ export class CommitteesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Response<any>> {
+  async findOne(@DecodedId(["params"]) id: string): Promise<Response<any>> {
     try {
       const decodeId = this.jwtUtilityService.decodeId(id);
       const committee = await this.committeesService.getCommitteeById(decodeId);
@@ -70,7 +71,7 @@ export class CommitteesController {
 
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @DecodedId(["params"]) id: string,
     @Body(new ValidationPipe()) updateCommitteeDto: UpdateCommitteeDto,
   ): Promise<Response<Committee>> {
     try {
@@ -90,12 +91,27 @@ export class CommitteesController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) createCommitteeDto: CreateCommitteeDto,
+
+    @Body(new ValidationPipe()) createCommitteeDto: any,
+    @DecodedId(['body', 'evaluation_id']) evaluation_id: any,
+    @DecodedId(['body', 'course_id']) course_id: any,
+    @DecodedId(['body', 'department_id']) department_id: any,
+    @DecodedId(['body', 'project_ids']) project_ids: any,
+    @DecodedId(['body', 'teacher_ids']) teacher_ids: any
   ): Promise<Response<Committee>> {
     try {
+      const data:any = {
+        ...createCommitteeDto,
+      course_id,
+      department_id,
+      evaluation_id,
+      project_ids,
+      teacher_ids,
+      
+    } 
       // Await the result of the service method
       const newCommittee =
-        await this.committeesService.createCommittee(createCommitteeDto);
+        await this.committeesService.createCommittee(data);
       return new Response(newCommittee, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -106,7 +122,7 @@ export class CommitteesController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: string): Promise<Response<void>> {
     try {
       const decodeId = this.jwtUtilityService.decodeId(id);
       const deletedCommittee =
