@@ -227,8 +227,10 @@ const confirmDelete = (id = null) => {
     accept: () => {
       if (id !== null) {
         emit('delete', id)
+        selectedRows.value = []
       } else if (selectedRows.value.length > 0) {
         emit('delete', selectedRows.value)
+        selectedRows.value = []
       } else {
       }
     },

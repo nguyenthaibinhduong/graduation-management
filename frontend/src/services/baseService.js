@@ -27,11 +27,12 @@ const baseService = (resource) => ({
   },
 
   delete: async (ids) => {
-    // Check if ids is an array
+
     if (!Array.isArray(ids)) {
       return api.delete(`/${resource}/${ids}`)
     } else {
-      return api.post(`/${resource}/remove-multi`, ids)
+      
+      return api.post(`/${resource}/remove-multi`, {ids})
     }
   },
 
