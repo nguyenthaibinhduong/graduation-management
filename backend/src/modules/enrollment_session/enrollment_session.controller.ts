@@ -18,6 +18,7 @@ import { EnrollmentSessionsService } from './enrollment_session.service';
 import { CreateEnrollmentSessionDto } from './dto/create-enrollment_session.dto';
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { Response } from 'src/common/globalClass';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('enrollment_sessions')
 @UseGuards(JwtAuthGuard)
@@ -59,7 +60,7 @@ export class EnrollmentSessionsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<EnrollmentSession>> {
+  async findOne(@DecodedId(["params"]) id: number): Promise<Response<EnrollmentSession>> {
     try {
       const enrollmentSession = await this.enrollmentSessionService.getById({ where: { id } });
       return enrollmentSession
@@ -72,7 +73,7 @@ export class EnrollmentSessionsController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) enrollmentSession: CreateEnrollmentSessionDto,
   ): Promise<Response<EnrollmentSession>> {
     try {
@@ -89,7 +90,7 @@ export class EnrollmentSessionsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
       await this.enrollmentSessionService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);

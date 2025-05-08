@@ -4,6 +4,7 @@ import { CreateMajorDto } from './dto/create-major.dto';
 import { Major } from 'src/entities/major.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('majors')
 export class MajorsController {
@@ -44,7 +45,7 @@ export class MajorsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<Major>> {
+  async findOne(@DecodedId(['params']) id: number): Promise<Response<Major>> {
     try {
       const major = await this.majorService.getById({ where: { id } });
       return major
@@ -57,7 +58,7 @@ export class MajorsController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(['params']) id: number,
     @Body(new ValidationPipe()) major: CreateMajorDto,
   ): Promise<Response<Major>> {
     try {
@@ -75,7 +76,7 @@ export class MajorsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(['params']) id: number): Promise<Response<void>> {
     try {
       await this.majorService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
@@ -86,7 +87,7 @@ export class MajorsController {
 
   @Post('remove-multi')
   async removeMulti(
-    @Body() ids: number[],
+    @DecodedId(['body','ids']) ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
       await this.majorService.delete(ids);

@@ -18,6 +18,7 @@ import { Committee } from 'src/entities/committee.entity';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { Response } from 'src/common/globalClass';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('committees')
 export class CommitteesController {
@@ -55,7 +56,7 @@ export class CommitteesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Response<any>> {
+  async findOne(@DecodedId(["params"]) id: string): Promise<Response<any>> {
     try {
       const decodeId = this.jwtUtilityService.decodeId(id);
       const committee = await this.committeesService.getCommitteeById(decodeId);
@@ -70,7 +71,7 @@ export class CommitteesController {
 
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @DecodedId(["params"]) id: string,
     @Body(new ValidationPipe()) updateCommitteeDto: UpdateCommitteeDto,
   ): Promise<Response<Committee>> {
     try {
@@ -106,7 +107,7 @@ export class CommitteesController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: string): Promise<Response<void>> {
     try {
       const decodeId = this.jwtUtilityService.decodeId(id);
       const deletedCommittee =

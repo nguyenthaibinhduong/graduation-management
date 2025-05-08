@@ -18,6 +18,7 @@ import { EvaluationForm } from 'src/entities/evaluation_form.entity';
 import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('evaluation-forms')
   @UseGuards(JwtAuthGuard)
@@ -68,7 +69,7 @@ export class EvaluationFormController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<EvaluationForm>> {
+  async findOne(@DecodedId(["params"]) id: number): Promise<Response<EvaluationForm>> {
     try {
       const form = await this.EvaluationFormService.getDatailEvaluation(id);
       return form
@@ -81,7 +82,7 @@ export class EvaluationFormController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) form: UpdateEvaluationFormDto,
   ): Promise<Response<EvaluationForm>> {
     try {
@@ -99,7 +100,7 @@ export class EvaluationFormController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
       await this.EvaluationFormService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);

@@ -97,7 +97,7 @@ export class TeachersController {
 
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @DecodedId(["params"]) id: string,
     @Body(new ValidationPipe()) teacher: UpdateTeacherDto,
   ): Promise<Response<Teacher>> {
     try {

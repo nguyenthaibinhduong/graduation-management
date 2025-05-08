@@ -18,6 +18,7 @@ import { HttpStatus, Message } from 'src/common/globalEnum';
 import { Response } from 'src/common/globalClass';
 import { Group } from 'src/entities/group.entity';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('groups')
 @UseGuards(JwtAuthGuard)
@@ -46,7 +47,7 @@ export class GroupsController {
   @Get()
   async findAll(
     @Query('status') status?: string,
-    @Query('department_id') department_id?: number | string,
+    @DecodedId(['query','department_id']) department_id?: number | string,
    @Query('search') search?: string,
   @Query('limit') limit?: number,
   @Query('page') page?: number,
@@ -66,7 +67,7 @@ export class GroupsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<Group>> {
+  async findOne(@DecodedId(["params"]) id: number): Promise<Response<Group>> {
     try {
       const group = await this.groupsService.getById({ where: { id } });
       return group
@@ -79,7 +80,7 @@ export class GroupsController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) updateGroupDto: UpdateGroupDto,
   ): Promise<Response<Group>> {
     try {
@@ -98,7 +99,7 @@ export class GroupsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
       const deletedGroup = await this.groupsService.delete(id);
       return new Response(deletedGroup, HttpStatus.SUCCESS, Message.SUCCESS);
@@ -127,9 +128,8 @@ export class GroupsController {
 
   @Post('register-project')
   async registerProject(
-    @Body('group_id', new ValidationPipe({ transform: true })) groupId: number,
-    @Body('project_id', new ValidationPipe({ transform: true }))
-    projectId: number,
+    @DecodedId(["body","group_id"]) groupId: number,
+    @DecodedId(["body","project_id"]) projectId: number,
   ): Promise<Response<void>> {
     try {
       const registeredGroup = await this.groupsService.registerProject(
@@ -180,7 +180,7 @@ export class GroupsController {
   @Post('invite-response/:type')
   async respondToInvite(
   @Param('type') type: 'accept' | 'reject',
-  @Body('group_id') groupId: number,
+  @DecodedId(["body","group_id"]) groupId: number,
   @Request() request: any,
 ): Promise<Response<any>> {
   try {
@@ -205,7 +205,7 @@ export class GroupsController {
 
   @Post('update-status/:groupId')
   async updateStatusGroup(
-    @Param("groupId") groupId: string | number,
+    @DecodedId(["params","group_id"]) groupId: string | number,
     @Body('status') status: number,
     @Request() request: any,
 ): Promise<Response<any>> {
@@ -231,7 +231,7 @@ export class GroupsController {
 
   @Post('lock-group')
   async lockGroup(
-    @Body('department_id') department_id: number,
+    @DecodedId(["body","department_id"]) department_id: number,
     @Request() request: any,
 ): Promise<Response<any>> {
   try {
