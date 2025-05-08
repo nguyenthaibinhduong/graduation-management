@@ -32,9 +32,16 @@ export class TeachersController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) teacher: CreateTeacherDto,
+    @Body(new ValidationPipe()) body: CreateTeacherDto,
+    @DecodedId(['body', 'departmentId']) departmentId?: string,
+    @DecodedId(['body', 'positionIds']) positionIds?: number[],
   ): Promise<Response<Teacher>> {
     try {
+      const teacher = {
+        ...body,
+        departmentId,
+        positionIds,
+      };
       const newTeacher = await this.teacherService.createTeacher(teacher);
       return new Response(newTeacher, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
@@ -47,8 +54,8 @@ export class TeachersController {
 
   @Get()
   async findAll(
-    @Query('departmentId') department_id?: string,
-    @Query('positionIds') position_ids?: number[],
+    @DecodedId(['query', 'departmentId']) department_id?: string,
+    @DecodedId(['query', 'positionIds']) position_ids?: number[],
     @Query('orderBy') orderBy: string = 'DESC',
     @Query('search') search?: string,
     @Query('limit') limit?: number,
@@ -75,9 +82,8 @@ export class TeachersController {
   }
 
   @Get(':id')
-  async findOne(@DecodedId('params')  id: number): Promise<Response<Teacher>> {
+  async findOne(@DecodedId(['params']) id: number): Promise<Response<Teacher>> {
     try {
-     
       const teacher = await this.teacherService.getById({
         where: { id },
       });
@@ -109,7 +115,7 @@ export class TeachersController {
   }
 
   @Delete(':id')
-  async remove(@DecodedId('params') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(['params']) id: number): Promise<Response<void>> {
     try {
       // const decodedId = this.jwtUtilityService.decodeId(id);
       await this.teacherService.delete(id);
@@ -119,21 +125,20 @@ export class TeachersController {
     }
   }
 
- @Post('remove-multi')
-async removeMulti(
-  @DecodedId('body') ids: number[],
-): Promise<Response<void>> {
-  try {
-    await this.teacherService.delete(ids);
-    return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
-  } catch (error) {
-    throw new HttpException(
-      { statusCode: HttpStatus.ERROR, message: error.message },
-      HttpStatus.ERROR,
-    );
+  @Post('remove-multi')
+  async removeMulti(
+    @DecodedId(['body']) ids: number[],
+  ): Promise<Response<void>> {
+    try {
+      await this.teacherService.delete(ids);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
   }
-}
-
 
   @Post('import')
   async importStudents(

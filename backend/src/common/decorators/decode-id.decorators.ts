@@ -1,4 +1,3 @@
-// decoded-id.decorator.ts
 import {
   createParamDecorator,
   ExecutionContext,
@@ -9,45 +8,51 @@ import { JwtUtilityService } from 'src/common/jwtUtility.service';
 type IdSource = 'params' | 'query' | 'body' | 'headers';
 
 export const DecodedId = createParamDecorator(
-  (source: IdSource | undefined, ctx: ExecutionContext): number | number[] => {
+  (
+    data: [IdSource?, string?], // [source, fieldName]
+    ctx: ExecutionContext,
+  ): number | number[] => {
     const request = ctx.switchToHttp().getRequest();
-    const jwtUtilityService = new JwtUtilityService();
+    const jwtUtilityService = new JwtUtilityService(); // Nếu dùng static thì gọi class trực tiếp
+
+    const [source, fieldName] = data || [];
 
     let rawId: string | string[] | undefined;
 
-    switch (source) {
-      case 'params':
-        rawId = request.params?.id;
-        break;
-      case 'query':
-        rawId = request.query?.id;
-        break;
-      case 'body':
-        rawId = request.body?.ids ?? request.body?.id;
-        break;
-      case 'headers':
-        rawId = request.headers?.['x-id'];
-        break;
-      default:
-        rawId =
-        request.body?.ids ??
-        request.body?.id ??
-        request.params?.id ??
-        request.query?.id ??
-        request.headers?.['x-id'];; 
-    }
+    const getField = (
+      source: IdSource | undefined,
+      field: string | undefined,
+    ) => {
+      if (!source) {
+        return (
+          request.body?.[field ?? 'id'] ??
+          request.params?.[field ?? 'id'] ??
+          request.query?.[field ?? 'id'] ??
+          request.headers?.[field ?? 'x-id']
+        );
+      }
 
-    if (!rawId || (Array.isArray(rawId) && rawId.length === 0)) {
-      throw new BadRequestException(
-        `ID is required${source ? ` in ${source}` : ''}`,
-      );
-    }
+      const sourceObj = {
+        params: request.params,
+        query: request.query,
+        body: request.body,
+        headers: request.headers,
+      }[source];
+
+      return sourceObj?.[field ?? 'id'];
+    };
+
+    rawId = getField(source, fieldName);
 
     try {
-      if (Array.isArray(rawId)) {
-        return rawId.map((id) => jwtUtilityService.decodeId(id));
+      if (rawId) {
+        if (Array.isArray(rawId)) {
+          return rawId.map((id) => jwtUtilityService.decodeId(id));
+        }
+        return jwtUtilityService.decodeId(rawId);
+      } else {
+        return null;
       }
-      return jwtUtilityService.decodeId(rawId);
     } catch (err) {
       throw new BadRequestException('Invalid or malformed ID');
     }

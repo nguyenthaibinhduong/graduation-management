@@ -30,12 +30,11 @@ export class TeachersService extends BaseService<Teacher> {
     @InjectRepository(Department)
     private readonly departmentRepository: Repository<Department>,
     private readonly dataSource: DataSource,
-
   ) {
     super(teacherRepository);
   }
 
-  async createTeacher(teacherDto: CreateTeacherDto): Promise<Teacher> {
+  async createTeacher(teacherDto: any): Promise<Teacher> {
     const { user, positionIds, departmentId, ...teacherData } = teacherDto;
     await this.check_exist_no_data(
       Teacher,
@@ -72,7 +71,8 @@ export class TeachersService extends BaseService<Teacher> {
         department,
         position: positions,
       });
-      return await this.teacherRepository.save(newTeacher);
+      const dataTc: any = await this.teacherRepository.save(newTeacher);
+      return dataTc;
     } catch (error) {
       throw new BadRequestException(`Lỗi khi thêm giáo viên: ${error.message}`);
     }

@@ -24,8 +24,6 @@ export class CreateTeacherDto {
   degree: string;
 
   @IsArray()
-  @IsOptional()
-  @IsInt({ each: true })
   positionIds?: number[];
 
   @IsNotEmpty()
