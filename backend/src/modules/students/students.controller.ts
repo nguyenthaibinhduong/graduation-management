@@ -77,7 +77,9 @@ export class StudentsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<Student>> {
+  async findOne(
+    @DecodedId(['params', 'id']) id: number,
+  ): Promise<Response<Student>> {
     try {
       const student = await this.studentService.getById({ where: { id } });
       return student
@@ -93,7 +95,7 @@ export class StudentsController {
 
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @DecodedId(['params', 'id']) id: string,
     @Body(new ValidationPipe()) student: UpdateStudentDto,
   ): Promise<Response<Student>> {
     try {
@@ -113,7 +115,9 @@ export class StudentsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(
+    @DecodedId(['params', 'id']) id: number,
+  ): Promise<Response<void>> {
     try {
       await this.studentService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
