@@ -32,7 +32,6 @@ export class CommitteesService extends BaseService<Committee> {
     @InjectRepository(Teacher)
     private readonly teacherRepository: Repository<Teacher>,
     private readonly dataSource: DataSource,
-    private readonly jwtUtilityService: JwtUtilityService,
   ) {
     super(committeeRepository);
   }
@@ -97,22 +96,14 @@ export class CommitteesService extends BaseService<Committee> {
         );
       }
 
-      // Decode teacher_ids
-      const decodedTeacherIds = teacher_ids.map((id) =>
-        this.jwtUtilityService.decodeId(id),
-      );
-
       // Validate teachers
-      const teachers = decodedTeacherIds.length
-        ? await this.teacherRepository.findBy({ id: In(decodedTeacherIds) })
+      const teachers = teacher_ids.length
+        ? await this.teacherRepository.findBy({ id: In(teacher_ids) })
         : [];
-      if (
-        decodedTeacherIds.length &&
-        teachers.length !== decodedTeacherIds.length
-      ) {
+      if (teacher_ids.length && teachers.length !== teacher_ids.length) {
         const foundIds = teachers.map((t) => t.id.toString());
-        const missingIds = decodedTeacherIds.filter(
-          (id) => !foundIds.includes(id),
+        const missingIds = teacher_ids.filter(
+          (id: any) => !foundIds.includes(id),
         );
         throw new NotFoundException(
           `Teachers with IDs ${missingIds.join(', ')} not found`,
@@ -340,21 +331,9 @@ export class CommitteesService extends BaseService<Committee> {
       skip: limit && page ? (page - 1) * limit : undefined,
       take: limit,
     });
-    // const committees = items.map((committee) => ({
-    //   ...committee,
-    //   encodedId: this.jwtUtilityService.encodeId(committee.id),
-    // }));
-    //replace committee.id with encodedId
-    const committees = items.map((committee) => {
-      const { id, ...rest } = committee;
-      return {
-        ...rest,
-        id: this.jwtUtilityService.encodeId(id),
-      };
-    });
 
     return {
-      items: committees,
+      items,
       total,
       ...(limit && { limit }),
       ...(page && { page }),
@@ -381,11 +360,9 @@ export class CommitteesService extends BaseService<Committee> {
     if (!committee) {
       throw new NotFoundException(`Committee not found`);
     }
-    delete committee.id;
-    const encodedId = this.jwtUtilityService.encodeId(committee.id);
+
     return {
       ...committee,
-      encodedId,
     };
   }
 }

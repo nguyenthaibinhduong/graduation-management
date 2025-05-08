@@ -1,9 +1,21 @@
-import { DeepPartial, EntityTarget, FindOneOptions, FindOptionsWhere, In, Like, Repository } from 'typeorm';
+import {
+  DeepPartial,
+  EntityTarget,
+  FindOneOptions,
+  FindOptionsWhere,
+  In,
+  Like,
+  Repository,
+} from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { NotFoundException } from '@nestjs/common';
+import { JwtUtilityService } from './jwtUtility.service';
 
 export abstract class BaseService<T> {
-  protected constructor(protected readonly repository: Repository<T>) {}
+  protected constructor(
+    protected readonly repository: Repository<T>,
+    protected readonly jwtUtilityService: JwtUtilityService,
+  ) {}
   //thêm một đối tượng
   async create(data: DeepPartial<T> | DeepPartial<T>[]): Promise<T | T[]> {
     if (Array.isArray(data)) {
@@ -18,7 +30,7 @@ export abstract class BaseService<T> {
       throw new NotFoundException('Entity not found');
     }
     return entity;
-  } 
+  }
   // lấy tất cả đối tượng có phân trang
   async getAll(
     search?: string,
@@ -36,7 +48,7 @@ export abstract class BaseService<T> {
 
     return { items, total, ...(limit && { limit }), ...(page && { page }) };
   }
-  // cập nhật 
+  // cập nhật
   async update(
     id: number,
     options: FindOneOptions<T>,
@@ -76,10 +88,12 @@ export abstract class BaseService<T> {
     where: any,
     errorMessage: string,
   ): Promise<void> {
-    const existingRecord = await this.repository.manager.findOne(entity, { where });
-    
+    const existingRecord = await this.repository.manager.findOne(entity, {
+      where,
+    });
+
     if (existingRecord) {
-      throw new Error(errorMessage); 
+      throw new Error(errorMessage);
     }
   }
 
@@ -89,10 +103,12 @@ export abstract class BaseService<T> {
     where: any,
     errorMessage: string,
   ): Promise<void> {
-    const existingRecord = await this.repository.manager.findOne(entity, {...where });
-    
+    const existingRecord = await this.repository.manager.findOne(entity, {
+      ...where,
+    });
+
     if (!existingRecord) {
-      throw new Error(errorMessage); 
+      throw new Error(errorMessage);
     }
   }
 
@@ -102,22 +118,27 @@ export abstract class BaseService<T> {
     where: any,
     errorMessage: string,
   ): Promise<T> {
-    const existingRecord = await this.repository.manager.findOne(entity, { ...where });
+    const existingRecord = await this.repository.manager.findOne(entity, {
+      ...where,
+    });
 
     if (!existingRecord && errorMessage) {
       throw new Error(errorMessage);
     }
 
-    return existingRecord; 
+    return existingRecord;
   }
-
 
   // ============= Loại bỏ pasword ra khỏi thông tin user ==============================//
- remove_password_field(items: any) {
-  if (items?.password) {
+  remove_password_field(items: any) {
+    if (items?.password) {
       delete items.password;
+    }
+    return items;
   }
-  return items;
-}
 
+  // Decode id
+  decode_id(id: any) {
+    return this.jwtUtilityService.decodeId(id);
+  }
 }
