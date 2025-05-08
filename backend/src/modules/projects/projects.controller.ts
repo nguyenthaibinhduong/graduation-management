@@ -18,6 +18,7 @@ import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from 'src/entities/project.entity';
 import { Response } from 'src/common/globalClass';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard)
@@ -76,10 +77,10 @@ export class ProjectsController {
 
   @Get()
   async findAll(
-    @Query('teacher_id') teacher_id?: number,
-    @Query('course_id') course_id?: number,
+    @DecodedId(['query', 'teacher_id']) teacher_id?: number,
+    @DecodedId(['query', 'course_id']) course_id?: number,
     @Query('status') status?: string,
-    @Query('student_id') student_id?: number,
+    @DecodedId(['query', 'student_id']) student_id?: number,
     @Query('search') search?: string,
     @Query('limit') limit?: number,
     @Query('page') page?: number,

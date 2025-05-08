@@ -18,6 +18,7 @@ import { PositionsService } from './positions.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { Position } from 'src/entities/position.entity';
 import { Response } from 'src/common/globalClass';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('positions')
 // @UseGuards(JwtAuthGuard)
@@ -45,7 +46,12 @@ export class PositionsController {
     @Query('limit') limit?: number,
     @Query('page') page?: number,
   ): Promise<
-    Response<{ items: Position[]; total: number; limit?: number; page?: number }>
+    Response<{
+      items: Position[];
+      total: number;
+      limit?: number;
+      page?: number;
+    }>
   > {
     try {
       const positions = await this.positionService.getAll(search, limit, page);
@@ -59,7 +65,9 @@ export class PositionsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<Position>> {
+  async findOne(
+    @DecodedId(['params']) id: number,
+  ): Promise<Response<Position>> {
     try {
       const position = await this.positionService.getById({ where: { id } });
       return position
@@ -72,7 +80,7 @@ export class PositionsController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @DecodedId(['params']) id: number,
     @Body(new ValidationPipe()) position: CreatePositionDto,
   ): Promise<Response<Position>> {
     try {
@@ -90,7 +98,7 @@ export class PositionsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@DecodedId(['params']) id: number): Promise<Response<void>> {
     try {
       await this.positionService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
@@ -101,7 +109,7 @@ export class PositionsController {
 
   @Post('remove-multi')
   async removeMulti(
-    @Body() ids: number[],
+    @DecodedId(['body', 'ids']) ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
       await this.positionService.delete(ids);

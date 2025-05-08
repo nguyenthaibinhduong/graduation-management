@@ -18,6 +18,7 @@ import { Response } from 'src/common/globalClass';
 import { HttpStatus, Message } from 'src/common/globalEnum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('students')
 @UseGuards(JwtAuthGuard)
@@ -26,9 +27,16 @@ export class StudentsController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) student: CreateStudentDto ,
+    @Body(new ValidationPipe()) body: CreateStudentDto,
+    @DecodedId(['body', 'department_id']) department_id?: string,
+    @DecodedId(['body', 'major_id']) major_id?: string,
   ): Promise<Response<Student>> {
     try {
+      const student = {
+        ...body,
+        department_id,
+        major_id,
+      };
       const newStudent = await this.studentService.createStudent(student);
       return new Response(newStudent, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
@@ -41,8 +49,8 @@ export class StudentsController {
 
   @Get()
   async findAll(
-    @Query('department_id') department_id?: string,
-    @Query('major_id') major_id?: string,
+    @DecodedId(['query', 'department_id']) department_id?: string,
+    @DecodedId(['query', 'major_id']) major_id?: string,
     @Query('orderBy') orderBy: string = 'DESC',
     @Query('search') search?: string,
     @Query('limit') limit?: number,
@@ -57,7 +65,7 @@ export class StudentsController {
         orderBy,
         search,
         limit,
-        page
+        page,
       );
       return new Response(students, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
@@ -69,14 +77,16 @@ export class StudentsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Response<Student>> {
+  async findOne(
+    @DecodedId(['params', 'id']) id: number,
+  ): Promise<Response<Student>> {
     try {
       const student = await this.studentService.getById({ where: { id } });
       return student
         ? new Response(student, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
     } catch (error) {
-     throw new HttpException(
+      throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
         HttpStatus.ERROR,
       );
@@ -85,11 +95,14 @@ export class StudentsController {
 
   @Put(':id')
   async update(
-    @Param('id') id: string ,
+    @DecodedId(['params', 'id']) id: string,
     @Body(new ValidationPipe()) student: UpdateStudentDto,
   ): Promise<Response<Student>> {
     try {
-      const updatedStudent = await this.studentService.updateStudent(id,student);
+      const updatedStudent = await this.studentService.updateStudent(
+        id,
+        student,
+      );
       return updatedStudent
         ? new Response(updatedStudent, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
@@ -102,7 +115,9 @@ export class StudentsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(
+    @DecodedId(['params', 'id']) id: number,
+  ): Promise<Response<void>> {
     try {
       await this.studentService.delete(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
@@ -113,7 +128,7 @@ export class StudentsController {
 
   @Post('remove-multi')
   async removeMulti(
-    @Body() ids: number[],
+    @DecodedId(['body', 'ids']) ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
       await this.studentService.delete(ids);
@@ -127,22 +142,28 @@ export class StudentsController {
   }
 
   @Post('import')
-  async importStudents(@Body() students:[]): Promise<Response<void> | HttpException> {
+  async importStudents(
+    @Body() students: [],
+  ): Promise<Response<void> | HttpException> {
     try {
       // Thực hiện việc thêm nhiều sinh viên vào cơ sở dữ liệu
       const result = await this.studentService.createManyStudent(students);
       const data = {
         message: `Đã thêm ${result.success} sinh viên.`,
         errors: result.errors,
-      }
+      };
       // Trả về phản hồi thành công
-      return new Response<any>(data, HttpStatus.SUCCESS, 'Thêm sinh viên thành công');
+      return new Response<any>(
+        data,
+        HttpStatus.SUCCESS,
+        'Thêm sinh viên thành công',
+      );
     } catch (error) {
       // Xử lý lỗi khi có sự cố
       throw new HttpException(
-          { statusCode: HttpStatus.ERROR, message: error.message },
-          HttpStatus.ERROR,
-        );
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 }

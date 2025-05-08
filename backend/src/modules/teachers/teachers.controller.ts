@@ -127,7 +127,7 @@ export class TeachersController {
 
   @Post('remove-multi')
   async removeMulti(
-    @DecodedId(['body']) ids: number[],
+    @DecodedId(['body', 'ids']) ids: number[],
   ): Promise<Response<void>> {
     try {
       await this.teacherService.delete(ids);

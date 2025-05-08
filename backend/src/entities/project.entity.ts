@@ -38,7 +38,7 @@ export class Project {
   @JoinColumn({ name: 'teacher_id' })
   teacher: Teacher;
 
-  @ManyToOne(() => Student, (student) => student.id)
+  @ManyToOne(() => Student, (student) => student.id, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'student_id' })
   student: Student;
 
