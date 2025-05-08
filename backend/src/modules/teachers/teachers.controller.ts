@@ -78,7 +78,7 @@ export class TeachersController {
     try {
       const decodedId = this.jwtUtilityService.decodeId(id);
       const teacher = await this.teacherService.getById({
-        where: { id },
+        where: { id: decodedId },
       });
       return teacher
         ? new Response(teacher, HttpStatus.SUCCESS, Message.SUCCESS)
@@ -94,8 +94,9 @@ export class TeachersController {
     @Body(new ValidationPipe()) teacher: UpdateTeacherDto,
   ): Promise<Response<Teacher>> {
     try {
+      const decodedId = this.jwtUtilityService.decodeId(id);
       const updatedTeacher = await this.teacherService.updateTeacher(
-        id,
+        decodedId,
         teacher,
       );
       return updatedTeacher
@@ -109,7 +110,8 @@ export class TeachersController {
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<Response<void>> {
     try {
-      await this.teacherService.deleteTeacher(id);
+      const decodedId = this.jwtUtilityService.decodeId(id);
+      await this.teacherService.delete(decodedId);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -121,7 +123,8 @@ export class TeachersController {
     @Body() ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.teacherService.deleteTeacher(ids);
+      const decodedIds = ids.map((id) => this.jwtUtilityService.decodeId(id));
+      await this.teacherService.delete(decodedIds);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

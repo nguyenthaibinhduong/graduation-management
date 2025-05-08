@@ -29,11 +29,13 @@ export class Teacher {
 
   @ManyToMany(() => Committee, (committee) => committee.teachers, {
     cascade: true,
+    onDelete: 'CASCADE',
   })
   committees: Committee[];
 
   @ManyToMany(() => Position, (position) => position.teachers, {
     cascade: true,
+    onDelete: 'CASCADE',
   })
   @JoinTable({
     name: 'teacher_positions',

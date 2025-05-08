@@ -408,7 +408,7 @@ watch(visibleLeft, (newVal) => {
 
 const router = useRouter()
 const getDetail = (data) => {
-  if (data?.encodedId) router.push(`/user-detail/${data?.encodedId}`)
+  if (data?.id) router.push(`/user-detail/${data?.id}`)
 }
 // ============================== XU LY EXPORT - IMPORT ==============================//
 const openDialog = ref(false)

@@ -16,6 +16,7 @@ import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { Department } from 'src/entities/department.entity';
 import { ne } from '@faker-js/faker/.';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
+import { Project } from 'src/entities/project.entity';
 
 @Injectable()
 export class TeachersService extends BaseService<Teacher> {
@@ -125,8 +126,7 @@ export class TeachersService extends BaseService<Teacher> {
       const { id, user, ...rest } = teacher;
       return {
         ...rest,
-        encodedId: this.jwtUtilityService.encodeId(id),
-        id,
+        id: this.jwtUtilityService.encodeId(id),
         user: {
           ...user,
           id: this.jwtUtilityService.encodeId(user.id.toString()),
@@ -195,26 +195,6 @@ export class TeachersService extends BaseService<Teacher> {
     } finally {
       await queryRunner.release();
     }
-  }
-
-  async deleteTeacher(id: number | number[]): Promise<void> {
-    const ids = Array.isArray(id) ? id : [id];
-
-    // Check for related rows in the `projects` table
-    const relatedProjects: any = await this.repository
-      .createQueryBuilder('teachers')
-      .leftJoinAndSelect('teachers.projects', 'projects')
-      .where('teachers.id IN (:...ids)', { ids })
-      .getMany();
-
-    if (relatedProjects.some((teacher: any) => teacher.length > 0)) {
-      throw new Error(
-        'Cannot delete teacher(s) because there are related projects.',
-      );
-    }
-
-    // Delete the teacher(s)
-    await this.repository.delete(ids);
   }
 
   async createManyTeacher(
