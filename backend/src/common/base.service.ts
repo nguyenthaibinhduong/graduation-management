@@ -9,13 +9,11 @@ import {
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { NotFoundException } from '@nestjs/common';
-import { JwtUtilityService } from './jwtUtility.service';
 
 export abstract class BaseService<T> {
   protected constructor(
     protected readonly repository: Repository<T>,
-    protected readonly jwtUtilityService: JwtUtilityService,
-  ) {}
+  ) { }
   //thêm một đối tượng
   async create(data: DeepPartial<T> | DeepPartial<T>[]): Promise<T | T[]> {
     if (Array.isArray(data)) {
@@ -137,8 +135,4 @@ export abstract class BaseService<T> {
     return items;
   }
 
-  // Decode id
-  decode_id(id: any) {
-    return this.jwtUtilityService.decodeId(id);
-  }
 }

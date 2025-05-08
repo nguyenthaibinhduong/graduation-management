@@ -30,9 +30,9 @@ export class TeachersService extends BaseService<Teacher> {
     @InjectRepository(Department)
     private readonly departmentRepository: Repository<Department>,
     private readonly dataSource: DataSource,
-    protected readonly jwtUtilityService: JwtUtilityService,
+
   ) {
-    super(teacherRepository, jwtUtilityService);
+    super(teacherRepository);
   }
 
   async createTeacher(teacherDto: CreateTeacherDto): Promise<Teacher> {
