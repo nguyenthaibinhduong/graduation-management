@@ -91,12 +91,27 @@ export class CommitteesController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) createCommitteeDto: CreateCommitteeDto,
+
+    @Body(new ValidationPipe()) createCommitteeDto: any,
+    @DecodedId(['body', 'evaluation_id']) evaluation_id: any,
+    @DecodedId(['body', 'course_id']) course_id: any,
+    @DecodedId(['body', 'department_id']) department_id: any,
+    @DecodedId(['body', 'project_ids']) project_ids: any,
+    @DecodedId(['body', 'teacher_ids']) teacher_ids: any
   ): Promise<Response<Committee>> {
     try {
+      const data:any = {
+        ...createCommitteeDto,
+      course_id,
+      department_id,
+      evaluation_id,
+      project_ids,
+      teacher_ids,
+      
+    } 
       // Await the result of the service method
       const newCommittee =
-        await this.committeesService.createCommittee(createCommitteeDto);
+        await this.committeesService.createCommittee(data);
       return new Response(newCommittee, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

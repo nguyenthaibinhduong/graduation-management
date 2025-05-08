@@ -28,9 +28,14 @@ export class EvaluationFormController {
   @Post()
   async create(
     @Body(new ValidationPipe()) data: CreateEvaluationFormDto,
+    @DecodedId(['body', 'criteria_ids']) criteria_ids: any
   ): Promise<Response<void>> {
     try {
-      const newEvaluationForm = await this.EvaluationFormService.createEvaluation(data);
+      const datas = {
+        ...data,
+        criteria_ids
+      }
+      const newEvaluationForm = await this.EvaluationFormService.createEvaluation(datas);
       return new Response(newEvaluationForm, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

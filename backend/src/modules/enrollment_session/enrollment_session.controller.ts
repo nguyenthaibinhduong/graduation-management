@@ -27,10 +27,13 @@ export class EnrollmentSessionsController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) enrollmentSession: CreateEnrollmentSessionDto,
+    @Body(new ValidationPipe()) enrollmentSession: any,
+    @DecodedId(['body', 'department_id']) department_id: any,
+    @DecodedId(['body', 'course_id']) course_id: any
   ): Promise<Response<EnrollmentSession>> {
     try {
-      const newEnrollmentSession = await this.enrollmentSessionService.createEnrollmentSession(enrollmentSession);
+      const data =  { ...enrollmentSession,department_id, course_id }
+      const newEnrollmentSession = await this.enrollmentSessionService.createEnrollmentSession(data);
       return new Response(newEnrollmentSession, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
