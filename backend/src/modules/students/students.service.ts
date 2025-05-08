@@ -1,3 +1,6 @@
+import { JwtUtilityService } from "src/common/jwtUtility.service";
+
+import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 import {
   BadRequestException,
   Injectable,
@@ -127,8 +130,11 @@ export class StudentsService extends BaseService<Student> {
     dataStudent: UpdateStudentDto,
   ): Promise<Student> {
     try {
-      const { department_id, major_id, user, ...data } = dataStudent;
+      const { department_id, major_id, user, ...data }:any = dataStudent;
 
+      if (user && user.id) {
+        delete user.id; // Xóa password trước khi trả về
+      }
       const existingStudent = await this.studentRepository
         .createQueryBuilder('student')
         .leftJoinAndSelect('student.major', 'major')
@@ -136,6 +142,7 @@ export class StudentsService extends BaseService<Student> {
         .leftJoinAndSelect('student.user', 'user')
         .where('student.id = :id', { id })
         .getOne();
+
 
       if (!existingStudent) {
         throw new NotFoundException('Sinh viên không tồn tại');

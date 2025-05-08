@@ -161,12 +161,15 @@ export class TeachersService extends BaseService<Teacher> {
         },
         'Giáo viên không tại',
       );
-
+      if (teacherData && teacherData?.user?.id) {
+        delete teacherData?.user?.id; // Xóa password trước khi trả về
+      }
       // Update user
       const updatedUser = await this.userRepository.save({
         ...existingTeacher.user,
         ...teacherData.user,
       });
+
       // Update department
       const updatedDepartment = await this.departmentRepository.findOneBy({
         id: departmentId,
