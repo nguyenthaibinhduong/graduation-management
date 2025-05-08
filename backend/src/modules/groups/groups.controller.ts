@@ -205,7 +205,7 @@ export class GroupsController {
 
   @Post('update-status/:groupId')
   async updateStatusGroup(
-    @DecodedId(["params","group_id"]) groupId: string | number,
+    @DecodedId(["params","groupId"]) groupId: string | number,
     @Body('status') status: number,
     @Request() request: any,
 ): Promise<Response<any>> {
