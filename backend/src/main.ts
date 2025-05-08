@@ -11,8 +11,8 @@ async function bootstrap() {
   app.use(cookieParser());
   app.enableCors({ origin: 'http://localhost:5173', credentials: true });
   const configService = app.get(ConfigService);
-  const jwtUtilityService = app.get(JwtUtilityService); // Lấy từ DI container
-  app.useGlobalInterceptors(new EncryptIdInterceptor(jwtUtilityService));
+  // const jwtUtilityService = app.get(JwtUtilityService); // Lấy từ DI container
+  // app.useGlobalInterceptors(new EncryptIdInterceptor(jwtUtilityService));
   const port = configService.get('APP_PORT');
   app.setGlobalPrefix('api/v1', { exclude: [''] });
   await app.listen(port);
