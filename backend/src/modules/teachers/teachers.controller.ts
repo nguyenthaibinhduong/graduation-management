@@ -99,13 +99,16 @@ export class TeachersController {
   async update(
     @DecodedId(["params"]) id: string,
     @Body(new ValidationPipe()) teacher: UpdateTeacherDto,
+    @DecodedId(["body", "positionIds"]) positionIds: any,
+    @DecodedId(["body","departmentId"]) departmentId: any,
   ): Promise<Response<Teacher>> {
     try {
-      const decodedId = this.jwtUtilityService.decodeId(id);
-      const updatedTeacher = await this.teacherService.updateTeacher(
-        decodedId,
-        teacher,
-      );
+      const data = {
+        ...teacher,
+        positionIds,
+        departmentId,
+      }
+      const updatedTeacher = await this.teacherService.updateTeacher(id,data);
       return updatedTeacher
         ? new Response(updatedTeacher, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
