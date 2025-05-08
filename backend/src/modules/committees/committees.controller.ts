@@ -56,10 +56,10 @@ export class CommitteesController {
   }
 
   @Get(':id')
-  async findOne(@DecodedId(["params"]) id: string): Promise<Response<any>> {
+  async findOne(@DecodedId(["params"])  id: string): Promise<Response<any>> {
     try {
-      const decodeId = this.jwtUtilityService.decodeId(id);
-      const committee = await this.committeesService.getCommitteeById(decodeId);
+     
+      const committee = await this.committeesService.getCommitteeById(id);
       return new Response(committee, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

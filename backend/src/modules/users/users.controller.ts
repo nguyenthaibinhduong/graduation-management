@@ -87,8 +87,7 @@ export class UsersController {
   @Get(':id')
   async findOne(@DecodedId(["params"]) id: number): Promise<Response<User>> {
     try {
-      const decodedId = this.jwtUtilityService.decodeId(id);
-      const user = await this.userService.findByID(decodedId);
+      const user = await this.userService.findByID(id);
       return user
         ? new Response(user, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);

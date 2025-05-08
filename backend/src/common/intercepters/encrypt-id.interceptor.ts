@@ -18,24 +18,29 @@ export class EncryptIdInterceptor implements NestInterceptor {
     );
   }
 
-  private encodeIdRecursive(data: any): any {
-    if (Array.isArray(data)) {
-      return data.map((item) => this.encodeIdRecursive(item));
-    } else if (data && typeof data === 'object') {
-      const encoded = { ...data };
-      if ('id' in encoded) {
-        encoded.id = this.jwtUtilityService.encodeId(encoded.id);
-      }
-
-      // encode các object lồng bên trong (nếu có)
-      for (const key of Object.keys(encoded)) {
-        if (typeof encoded[key] === 'object') {
-          encoded[key] = this.encodeIdRecursive(encoded[key]);
-        }
-      }
-
-      return encoded;
+private encodeIdRecursive(data: any): any {
+  if (Array.isArray(data)) {
+    return data.map((item) => this.encodeIdRecursive(item));
+  } else if (data && typeof data === 'object') {
+    // ❗ Bỏ qua instance của Date
+    if (data instanceof Date) {
+      return data;
     }
-    return data;
+
+    const encoded = { ...data };
+    if ('id' in encoded) {
+      encoded.id = this.jwtUtilityService.encodeId(encoded.id);
+    }
+
+    for (const key of Object.keys(encoded)) {
+      if (typeof encoded[key] === 'object') {
+        encoded[key] = this.encodeIdRecursive(encoded[key]);
+      }
+    }
+
+    return encoded;
   }
+  return data;
+}
+
 }
