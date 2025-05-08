@@ -18,7 +18,7 @@ import { Department } from './department.entity';
 @Entity('teachers')
 export class Teacher {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: number | string;
 
   @Column({ unique: true })
   code: string;
@@ -27,10 +27,14 @@ export class Teacher {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToMany(() => Committee, (committee) => committee.teachers)
+  @ManyToMany(() => Committee, (committee) => committee.teachers, {
+    cascade: true,
+  })
   committees: Committee[];
 
-  @ManyToMany(() => Position, (position) => position.teachers)
+  @ManyToMany(() => Position, (position) => position.teachers, {
+    cascade: true,
+  })
   @JoinTable({
     name: 'teacher_positions',
   })
@@ -45,7 +49,7 @@ export class Teacher {
 
   @CreateDateColumn()
   created_at: Date; // Ngày tạo tài khoản
-  
+
   @UpdateDateColumn()
   updated_at: Date; // Ngày cập nhật thông tin người dùng
 }

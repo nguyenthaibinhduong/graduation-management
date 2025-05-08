@@ -5,15 +5,15 @@ import { sign, verify } from 'jsonwebtoken';
 export class JwtUtilityService {
   private readonly secretKey = process.env.JWT_SECRET_KEY;
   // Encode an ID
-  encodeId(id: number): string {
+  encodeId(id: any): any {
     return sign({ id }, this.secretKey, { expiresIn: '1d' });
   }
 
   // Decode an ID
-  decodeId(encodedId: string): number {
+  decodeId(encodedId: any): any {
     try {
-      const decoded = verify(encodedId, this.secretKey) as { id: number };
-      return decoded.id; 
+      const decoded = verify(encodedId, this.secretKey) as { id: any };
+      return decoded.id;
     } catch (error) {
       throw new BadRequestException('Invalid or expired encoded ID');
     }

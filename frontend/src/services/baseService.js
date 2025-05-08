@@ -7,19 +7,16 @@ const baseService = (resource) => ({
       limit,
       ...(search && { search }),
       ...filters,
-    };
+    }
 
-    const { data } = await api.get(`/${resource}`, { params });
-    return data.data;
-  },
-
-
-  getById: async (id) => {
-   const { data } = await api.get(`/${resource}/${id}`)
+    const { data } = await api.get(`/${resource}`, { params })
     return data.data
   },
 
-  
+  getById: async (id) => {
+    const { data } = await api.get(`/${resource}/${id}`)
+    return data.data
+  },
 
   create: async (payload) => {
     return api.post(`/${resource}`, payload)
@@ -30,7 +27,8 @@ const baseService = (resource) => ({
   },
 
   delete: async (ids) => {
-    if (!ids.length) {
+    // Check if ids is an array
+    if (!Array.isArray(ids)) {
       return api.delete(`/${resource}/${ids}`)
     } else {
       return api.post(`/${resource}/remove-multi`, ids)
@@ -42,7 +40,6 @@ const baseService = (resource) => ({
       return api.post(`/${resource}/import`, items)
     }
   },
-  
 })
 
 export default baseService

@@ -20,12 +20,15 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Controller('users')
 //@UseGuards(JwtAuthGuard)
-  
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly jwtUtilityService: JwtUtilityService,
+  ) {}
 
   @Post()
   async create(
@@ -35,10 +38,10 @@ export class UsersController {
       const newUser = await this.userService.create(user);
       return new Response(newUser, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
-     throw new HttpException(
-             { statusCode: HttpStatus.ERROR, message: error.message },
-             HttpStatus.ERROR,
-           );
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 
@@ -83,7 +86,8 @@ export class UsersController {
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Response<User>> {
     try {
-      const user = await this.userService.findByID(id);
+      const decodedId = this.jwtUtilityService.decodeId(id);
+      const user = await this.userService.findByID(decodedId);
       return user
         ? new Response(user, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);

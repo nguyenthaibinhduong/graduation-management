@@ -1,5 +1,9 @@
-
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
 import { Teacher } from 'src/entities/teacher.entity';
@@ -11,6 +15,7 @@ import { Position } from 'src/entities/position.entity';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { Department } from 'src/entities/department.entity';
 import { ne } from '@faker-js/faker/.';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Injectable()
 export class TeachersService extends BaseService<Teacher> {
@@ -24,22 +29,32 @@ export class TeachersService extends BaseService<Teacher> {
     @InjectRepository(Department)
     private readonly departmentRepository: Repository<Department>,
     private readonly dataSource: DataSource,
+    private readonly jwtUtilityService: JwtUtilityService,
   ) {
     super(teacherRepository);
   }
 
   async createTeacher(teacherDto: CreateTeacherDto): Promise<Teacher> {
     const { user, positionIds, departmentId, ...teacherData } = teacherDto;
-    await this.check_exist_no_data(Teacher, { code: teacherData.code }, 'Giáo viên đã tồn tại');
+    await this.check_exist_no_data(
+      Teacher,
+      { code: teacherData.code },
+      'Giáo viên đã tồn tại',
+    );
     //const department = await this.check_exist_with_data(Department,{ id: departmentId },'Khoa không tồn tại');
-    const department = await this.departmentRepository.findOneBy({ id: departmentId });
+    const department = await this.departmentRepository.findOneBy({
+      id: departmentId,
+    });
     let positions = [];
-    if (positionIds?.length > 0) positions = await this.positionRepository.find({ where: { id: In(positionIds) }});
+    if (positionIds?.length > 0)
+      positions = await this.positionRepository.find({
+        where: { id: In(positionIds) },
+      });
 
     // 4. Tạo User
     const { password, ...userData }: any = user;
     const hashedPassword = await bcrypt.hash(password ?? 'password', 10);
-    const newUser:any = this.userRepository.create({
+    const newUser: any = this.userRepository.create({
       ...userData,
       password: hashedPassword,
       role: 'teacher',
@@ -62,8 +77,6 @@ export class TeachersService extends BaseService<Teacher> {
     }
   }
 
-
-
   async getAllTeachers(
     department_id?: any,
     position_ids?: number[],
@@ -71,48 +84,66 @@ export class TeachersService extends BaseService<Teacher> {
     search?: string,
     limit?: number,
     page?: number,
-  ): Promise<{items: Teacher[];total: number;limit?: number;page?: number}> {
+  ): Promise<{
+    items: any[];
+    total: number;
+    limit?: number;
+    page?: number;
+  }> {
     const where: any = {
-        ...(search && {
-          user: {
-            fullname: Like(`%${search}%`)
-          }
-        }),
-        ...(department_id && { department: { id: department_id } }),
-        ...(position_ids?.length>0  && { position: {id:In(position_ids) } }),
-      };
-    
-      const [items, total] = await this.repository.findAndCount({
-        where,
-        relations: {
-          user: true,
-          position: true,
-          department: true
+      ...(search && {
+        user: {
+          fullname: Like(`%${search}%`),
         },
-        order: {
-          created_at: orderBy === 'DESC' ? 'DESC' : 'ASC' // ví dụ cho sort
-        },
-        skip: limit && page ? (page - 1) * limit : undefined,
-        take: limit,
-      });
-    
-      // Xóa mật khẩu khỏi kết quả trả về
-      items.forEach((teacher) => {
-        if (teacher.user) {
-          delete teacher.user.password;
-        }
-      });
-    
+      }),
+      ...(department_id && { department: { id: department_id } }),
+      ...(position_ids?.length > 0 && { position: { id: In(position_ids) } }),
+    };
+
+    const [items, total] = await this.repository.findAndCount({
+      where,
+      relations: {
+        user: true,
+        position: true,
+        department: true,
+      },
+      order: {
+        created_at: orderBy === 'DESC' ? 'DESC' : 'ASC', // ví dụ cho sort
+      },
+      skip: limit && page ? (page - 1) * limit : undefined,
+      take: limit,
+    });
+
+    // Xóa mật khẩu khỏi kết quả trả về
+    items.forEach((teacher) => {
+      if (teacher.user) {
+        delete teacher.user.password;
+      }
+    });
+
+    const teachers = items.map((teacher) => {
+      const { id, user, ...rest } = teacher;
       return {
-        items,
-        total,
-        ...(limit && { limit }),
-        ...(page && { page })
+        ...rest,
+        encodedId: this.jwtUtilityService.encodeId(id),
+        id,
+        user: {
+          ...user,
+          id: this.jwtUtilityService.encodeId(user.id.toString()),
+        },
       };
+    });
+
+    return {
+      items: teachers,
+      total,
+      ...(limit && { limit }),
+      ...(page && { page }),
+    };
   }
 
   async updateTeacher(
-    id: number,
+    id: string,
     teacher: UpdateTeacherDto,
   ): Promise<Teacher | null> {
     const { positionIds, departmentId, ...teacherData } = teacher;
@@ -122,15 +153,24 @@ export class TeachersService extends BaseService<Teacher> {
     await queryRunner.startTransaction();
 
     try {
-      const existingTeacher = await this.check_exist_with_data(Teacher,{
-        where: { id },
-        relations: ['user'],
-      },'Giáo viên không tại');
+      const existingTeacher = await this.check_exist_with_data(
+        Teacher,
+        {
+          where: { id },
+          relations: ['user'],
+        },
+        'Giáo viên không tại',
+      );
 
       // Update user
-      const updatedUser = await this.userRepository.save({...existingTeacher.user,...teacherData.user});
+      const updatedUser = await this.userRepository.save({
+        ...existingTeacher.user,
+        ...teacherData.user,
+      });
       // Update department
-      const updatedDepartment = await this.departmentRepository.findOneBy({id: departmentId,});
+      const updatedDepartment = await this.departmentRepository.findOneBy({
+        id: departmentId,
+      });
       // Update teacher
       const updatedTeacher = await this.teacherRepository.save({
         ...existingTeacher,
@@ -157,20 +197,42 @@ export class TeachersService extends BaseService<Teacher> {
     }
   }
 
-  async createManyTeacher(teachers: CreateTeacherDto[]): Promise<{ success: number; errors: string[] }> {
-      const errors: string[] = [];
-      let success = 0;
-  
-      for (let i = 0; i < teachers.length; i++) {
-        const teacher = teachers[i];
-        try {
-          await this.createTeacher(teacher);
-          success++;
-        } catch (error) {
-          errors.push(`Dòng ${i + 1}: ${error.message}`);
-        }
+  async deleteTeacher(id: number | number[]): Promise<void> {
+    const ids = Array.isArray(id) ? id : [id];
+
+    // Check for related rows in the `projects` table
+    const relatedProjects: any = await this.repository
+      .createQueryBuilder('teachers')
+      .leftJoinAndSelect('teachers.projects', 'projects')
+      .where('teachers.id IN (:...ids)', { ids })
+      .getMany();
+
+    if (relatedProjects.some((teacher: any) => teacher.length > 0)) {
+      throw new Error(
+        'Cannot delete teacher(s) because there are related projects.',
+      );
+    }
+
+    // Delete the teacher(s)
+    await this.repository.delete(ids);
+  }
+
+  async createManyTeacher(
+    teachers: CreateTeacherDto[],
+  ): Promise<{ success: number; errors: string[] }> {
+    const errors: string[] = [];
+    let success = 0;
+
+    for (let i = 0; i < teachers.length; i++) {
+      const teacher = teachers[i];
+      try {
+        await this.createTeacher(teacher);
+        success++;
+      } catch (error) {
+        errors.push(`Dòng ${i + 1}: ${error.message}`);
       }
-  
-      return { success, errors };
+    }
+
+    return { success, errors };
   }
 }

@@ -19,11 +19,15 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { Teacher } from 'src/entities/teacher.entity';
 import { Response } from 'src/common/globalClass';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Controller('teachers')
 @UseGuards(JwtAuthGuard)
 export class TeachersController {
-  constructor(private readonly teacherService: TeachersService) {}
+  constructor(
+    private readonly teacherService: TeachersService,
+    private readonly jwtUtilityService: JwtUtilityService,
+  ) {}
 
   @Post()
   async create(
@@ -72,7 +76,10 @@ export class TeachersController {
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Response<Teacher>> {
     try {
-      const teacher = await this.teacherService.getById({ where: { id } });
+      const decodedId = this.jwtUtilityService.decodeId(id);
+      const teacher = await this.teacherService.getById({
+        where: { id },
+      });
       return teacher
         ? new Response(teacher, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
@@ -83,7 +90,7 @@ export class TeachersController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body(new ValidationPipe()) teacher: UpdateTeacherDto,
   ): Promise<Response<Teacher>> {
     try {
@@ -102,7 +109,7 @@ export class TeachersController {
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<Response<void>> {
     try {
-      await this.teacherService.delete(id);
+      await this.teacherService.deleteTeacher(id);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -114,7 +121,7 @@ export class TeachersController {
     @Body() ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.teacherService.delete(ids);
+      await this.teacherService.deleteTeacher(ids);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -124,23 +131,29 @@ export class TeachersController {
     }
   }
 
-   @Post('import')
-  async importStudents(@Body() teachers:[]): Promise<Response<void> | HttpException> {
+  @Post('import')
+  async importStudents(
+    @Body() teachers: [],
+  ): Promise<Response<void> | HttpException> {
     try {
       // Thực hiện việc thêm nhiều sinh viên vào cơ sở dữ liệu
       const result = await this.teacherService.createManyTeacher(teachers);
       const data = {
         message: `Đã thêm ${result.success} giảng viên.`,
         errors: result.errors,
-      }
+      };
       // Trả về phản hồi thành công
-      return new Response<any>(data, HttpStatus.SUCCESS, 'Thêm giảng viên thành công');
+      return new Response<any>(
+        data,
+        HttpStatus.SUCCESS,
+        'Thêm giảng viên thành công',
+      );
     } catch (error) {
       // Xử lý lỗi khi có sự cố
       throw new HttpException(
-          { statusCode: HttpStatus.ERROR, message: error.message },
-          HttpStatus.ERROR,
-        );
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
     }
   }
 }

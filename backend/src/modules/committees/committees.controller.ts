@@ -21,9 +21,9 @@ import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Controller('committees')
 export class CommitteesController {
-  constructor(private readonly committeesService: CommitteesService,
+  constructor(
+    private readonly committeesService: CommitteesService,
     private readonly jwtUtilityService: JwtUtilityService,
-
   ) {}
 
   @Get()
@@ -70,12 +70,13 @@ export class CommitteesController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body(new ValidationPipe()) updateCommitteeDto: UpdateCommitteeDto,
   ): Promise<Response<Committee>> {
     try {
+      const decodeId = this.jwtUtilityService.decodeId(id);
       const updatedGroup = await this.committeesService.updateCommittee(
-        id,
+        decodeId,
         updateCommitteeDto,
       );
       return new Response(updatedGroup, HttpStatus.SUCCESS, Message.SUCCESS);
@@ -105,10 +106,16 @@ export class CommitteesController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<Response<void>> {
+  async remove(@Param('id') id: string): Promise<Response<void>> {
     try {
-      const deletedCommittee = await this.committeesService.deleteCommittee(id);
-      return new Response(deletedCommittee, HttpStatus.SUCCESS, Message.SUCCESS);
+      const decodeId = this.jwtUtilityService.decodeId(id);
+      const deletedCommittee =
+        await this.committeesService.deleteCommittee(decodeId);
+      return new Response(
+        deletedCommittee,
+        HttpStatus.SUCCESS,
+        Message.SUCCESS,
+      );
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -118,10 +125,14 @@ export class CommitteesController {
   }
   @Post('remove-multi')
   async removeMulti(
-    @Body() ids: number[],
+    @Body() ids: string[],
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.committeesService.deleteCommittee(ids);
+      const idArray = Array.isArray(ids) ? ids : [ids];
+      const decodedIds = idArray.map((id) => {
+        return this.jwtUtilityService.decodeId(id);
+      });
+      await this.committeesService.deleteCommittee(decodedIds);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

@@ -6,12 +6,20 @@
       { field: 'name', header: 'Tên hội đồng', sortable: true },
       { field: 'description', header: 'Mô tả', sortable: true },
       { field: 'course.name', header: 'Học kỳ', sortable: true },
-      { field: 'department.name', header: 'Khoa', sortable: true },
-      { field: 'status', header: 'Trạng thái', sortable: true, type: 'status', 
+      {
+        field: 'department.name',
+        header: 'Khoa',
+        sortable: true,
+      },
+      {
+        field: 'status',
+        header: 'Trạng thái',
+        sortable: true,
+        type: 'status',
         statuses: [
-          { value: 'active', label: 'Đang hoạt động', class: 'bg-blue-100 text-blue-700' }, 
-          { value: 'inactive', label: 'Ngừng hoạt động', class: 'bg-red-100 text-red-700' }
-        ] 
+          { value: 'active', label: 'Đang hoạt động', class: 'bg-blue-100 text-blue-700' },
+          { value: 'inactive', label: 'Ngừng hoạt động', class: 'bg-red-100 text-red-700' },
+        ],
       },
     ]"
     :total="committeeStore?.total"
@@ -194,7 +202,7 @@ watchEffect(() => {
   committees.value = committeeStore.items.map((committee) => ({
     ...committee,
     encodedId: committee.encodedId,
-  }));
+  }))
   departments.value = departmentStore.items
   courses.value = courseStore.items
   teachers.value = teacherStore.items.map((teacher) => ({
@@ -209,14 +217,13 @@ const fetchCommittee = async (newPage, newLimit, newSearch) => {
     newSearch ? 1 : newPage,
     newSearch ? studentStore.total : newLimit,
     newSearch
-  );
-};
+  )
+}
 
 const addCommittee = () => {
   clearValues()
   visibleLeft.value = true
   isEditing.value = false
-  
 }
 
 const clearValues = () => {
@@ -247,43 +254,44 @@ const cancelForm = () => {
 
 const saveCommittee = async () => {
   try {
-    loading.value = true;
+    loading.value = true
 
-    newCommittee.value.total_teacher = newCommittee.value.teacher_ids.length;
-    newCommittee.value.total_project = newCommittee.value.project_ids.length;
+    newCommittee.value.total_teacher = newCommittee.value.teacher_ids.length
+    newCommittee.value.total_project = newCommittee.value.project_ids.length
 
     if (isEditing.value) {
-      await committeeStore.updateItem(editedCommitteeId.value, newCommittee.value);
+      await committeeStore.updateItem(editedCommitteeId.value, newCommittee.value)
     } else {
-      await committeeStore.addItem(newCommittee.value);
+      await committeeStore.addItem(newCommittee.value)
     }
-    
-    cancelForm();
+
+    cancelForm()
   } catch (error) {
-    Message.error('Failed to save committee. Please try again.');
+    Message.error('Failed to save committee. Please try again.')
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 const editCommittee = (committee) => {
-  editedCommitteeId.value = committee.id;
-  newCommittee.value = {...committee, 
+  editedCommitteeId.value = committee.id
+  newCommittee.value = {
+    ...committee,
     teacher_ids: committee.teachers.map((teacher) => teacher.id),
     project_ids: committee.projects.map((project) => project.id),
     course_id: committee.course.id,
     department_id: committee.department.id,
-  };
-  isEditing.value = true;
-  visibleLeft.value = true;
-};
+  }
+  isEditing.value = true
+  visibleLeft.value = true
+}
 
 const deleteCommittee = async (ids) => {
-  await committeeStore.deleteItem(ids);
-};
+  await committeeStore.deleteItem(ids)
+}
 
-const router = useRouter();
+const router = useRouter()
 const getDetail = (data) => {
-  if (data?.encodedId) router.push(`/committee-management/${data?.encodedId}`);
-};
+  if (data?.id) router.push(`/committee-management/${data?.id}`)
+}
 </script>

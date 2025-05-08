@@ -16,9 +16,8 @@ import { UpdateCommitteeDto } from './dto/update-committee.dto';
 import { BaseService } from 'src/common/base.service';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
-
 @Injectable()
-export class CommitteesService extends BaseService<Committee>{
+export class CommitteesService extends BaseService<Committee> {
   constructor(
     @InjectRepository(Committee)
     private readonly committeeRepository: Repository<Committee>,
@@ -34,7 +33,9 @@ export class CommitteesService extends BaseService<Committee>{
     private readonly teacherRepository: Repository<Teacher>,
     private readonly dataSource: DataSource,
     private readonly jwtUtilityService: JwtUtilityService,
-  ) {super(committeeRepository);}
+  ) {
+    super(committeeRepository);
+  }
 
   async createCommittee(commiteeData: CreateCommitteeDto): Promise<Committee> {
     const {
@@ -86,7 +87,7 @@ export class CommitteesService extends BaseService<Committee>{
 
       // Validate projects
       const projects = project_ids
-        ? await this.projectRepository.findBy({id: In(project_ids)})
+        ? await this.projectRepository.findBy({ id: In(project_ids) })
         : [];
       if (project_ids && projects.length !== project_ids.length) {
         const foundIds = projects.map((p) => p.id);
@@ -138,7 +139,7 @@ export class CommitteesService extends BaseService<Committee>{
   }
 
   async updateCommittee(
-    id: number,
+    id: string,
     updateData: UpdateCommitteeDto,
   ): Promise<Committee> {
     const {
@@ -159,7 +160,13 @@ export class CommitteesService extends BaseService<Committee>{
       // Find the existing committee
       const existingCommittee = await this.committeeRepository.findOne({
         where: { id },
-        relations: ['course', 'department', 'evaluationForm', 'projects', 'teachers'],
+        relations: [
+          'course',
+          'department',
+          'evaluationForm',
+          'projects',
+          'teachers',
+        ],
       });
 
       if (!existingCommittee) {
@@ -176,52 +183,71 @@ export class CommitteesService extends BaseService<Committee>{
 
       // Validate department
       const department = department_id
-        ? await this.departmentRepository.findOne({ where: { id: department_id } })
+        ? await this.departmentRepository.findOne({
+            where: { id: department_id },
+          })
         : existingCommittee.department;
       if (department_id && !department) {
-        throw new NotFoundException(`Department with ID ${department_id} not found`);
+        throw new NotFoundException(
+          `Department with ID ${department_id} not found`,
+        );
       }
 
       // Validate evaluation form
       const evaluationForm = evaluation_id
-        ? await this.evaluationFormRepository.findOne({ where: { id: evaluation_id } })
+        ? await this.evaluationFormRepository.findOne({
+            where: { id: evaluation_id },
+          })
         : existingCommittee.evaluationForm;
       if (evaluation_id && !evaluationForm) {
-        throw new NotFoundException(`Evaluation form with ID ${evaluation_id} not found`);
+        throw new NotFoundException(
+          `Evaluation form with ID ${evaluation_id} not found`,
+        );
       }
 
       // Validate projects
       const projects = project_ids
-        ? await this.projectRepository.findBy({id: In(project_ids)})
+        ? await this.projectRepository.findBy({ id: In(project_ids) })
         : existingCommittee.projects;
       if (project_ids && projects.length !== project_ids.length) {
         const foundIds = projects.map((p) => p.id);
         const missingIds = project_ids.filter((id) => !foundIds.includes(id));
-        throw new NotFoundException(`Projects with IDs ${missingIds.join(', ')} not found`);
+        throw new NotFoundException(
+          `Projects with IDs ${missingIds.join(', ')} not found`,
+        );
       }
 
       // Validate teachers
       const teachers = teacher_ids
-        ? await this.teacherRepository.findBy({id: In(teacher_ids)})
+        ? await this.teacherRepository.findBy({ id: In(teacher_ids) })
         : existingCommittee.teachers;
       if (teacher_ids && teachers.length !== teacher_ids.length) {
         const foundIds = teachers.map((t) => t.id);
         const missingIds = teacher_ids.filter((id) => !foundIds.includes(id));
-        throw new NotFoundException(`Teachers with IDs ${missingIds.join(', ')} not found`);
+        throw new NotFoundException(
+          `Teachers with IDs ${missingIds.join(', ')} not found`,
+        );
       }
 
       // Update the committee
-      const updatedCommittee = queryRunner.manager.merge(Committee, existingCommittee, {
-        ...data,
-        course,
-        department,
-        evaluationForm,
-        projects,
-        teachers,
-      });
+      const updatedCommittee = queryRunner.manager.merge(
+        Committee,
+        existingCommittee,
+        {
+          ...data,
+          course,
+          department,
+          evaluationForm,
+          projects,
+          teachers,
+        },
+      );
 
       // Save the updated committee
-      const savedCommittee = await queryRunner.manager.save(Committee, updatedCommittee);
+      const savedCommittee = await queryRunner.manager.save(
+        Committee,
+        updatedCommittee,
+      );
 
       // Commit the transaction
       await queryRunner.commitTransaction();
@@ -236,7 +262,7 @@ export class CommitteesService extends BaseService<Committee>{
     }
   }
 
-  async deleteCommittee(ids: number | number[]): Promise<void> {
+  async deleteCommittee(ids: string | string[]): Promise<void> {
     // Start a transaction
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -304,38 +330,50 @@ export class CommitteesService extends BaseService<Committee>{
       skip: limit && page ? (page - 1) * limit : undefined,
       take: limit,
     });
+    // const committees = items.map((committee) => ({
+    //   ...committee,
+    //   encodedId: this.jwtUtilityService.encodeId(committee.id),
+    // }));
+    //replace committee.id with encodedId
+    const committees = items.map((committee) => {
+      const { id, ...rest } = committee;
+      return {
+        ...rest,
+        id: this.jwtUtilityService.encodeId(id),
+      };
+    });
 
-    const committees = items.map((committee) => ({
-      ...committee,
-      encodedId: this.jwtUtilityService.encodeId(committee.id),
-    }));
-    committees.forEach((committee) => delete committee.id);
-    return { items: committees, total, ...(limit && { limit }), ...(page && { page }) };
+    return {
+      items: committees,
+      total,
+      ...(limit && { limit }),
+      ...(page && { page }),
+    };
   }
 
-  async getCommitteeById(id: number): Promise<any> {
+  async getCommitteeById(id: string): Promise<any> {
     const committee = await this.committeeRepository
-    .createQueryBuilder('committee')
-    .leftJoin('committee.course', 'course')
-    .addSelect(['course.name'])
-    .leftJoin('committee.department', 'department')
-    .addSelect(['department.name'])
-    .leftJoinAndSelect('committee.evaluationForm', 'evaluationForm')
-    .leftJoin('committee.projects', 'projects')
-    .addSelect(['projects.title'])
-    .leftJoin('committee.teachers', 'teachers')
-    .addSelect(['teachers.code'])
-    .innerJoin('teachers.user', 'user')
-    .addSelect(['user.fullname', 'user.username'])
-    .where('committee.id = :id', { id })
-    .getOne();
+      .createQueryBuilder('committee')
+      .leftJoin('committee.course', 'course')
+      .addSelect(['course.name'])
+      .leftJoin('committee.department', 'department')
+      .addSelect(['department.name'])
+      .leftJoinAndSelect('committee.evaluationForm', 'evaluationForm')
+      .leftJoin('committee.projects', 'projects')
+      .addSelect(['projects.title'])
+      .leftJoin('committee.teachers', 'teachers')
+      .addSelect(['teachers.code'])
+      .innerJoin('teachers.user', 'user')
+      .addSelect(['user.fullname', 'user.username'])
+      .where('committee.id = :id', { id })
+      .getOne();
 
     if (!committee) {
       throw new NotFoundException(`Committee not found`);
     }
     delete committee.id;
     const encodedId = this.jwtUtilityService.encodeId(committee.id);
-    return { 
+    return {
       ...committee,
       encodedId,
     };
