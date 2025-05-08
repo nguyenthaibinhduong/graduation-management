@@ -11,6 +11,6 @@ import { JwtUtilityService } from 'src/common/jwtUtility.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Teacher, User, Position, Department])],
   controllers: [TeachersController],
-  providers: [TeachersService, JwtUtilityService],
+  providers: [TeachersService],
 })
 export class TeachersModule {}
