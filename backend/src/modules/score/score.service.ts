@@ -49,7 +49,7 @@ export class ScoreService {
       if (!group) {
         throw new NotFoundException('Nhóm không tồn tại');
       }
-      // //find student id by group id
+      //find student id by group id
       const students = await queryRunner.manager.find(Student, {
         where: { group: { id: groupId } },
         relations: ['group'],
@@ -64,7 +64,7 @@ export class ScoreService {
       score.comment = createScoreDto.comment;
       const savedScore = await queryRunner.manager.save(Score, score);
 
-      // // Create ScoreDetail entities for each student
+      //Create ScoreDetail entities for each student
       for (const detail of createScoreDetailDto) {
         const scoreDetail = new ScoreDetail();
         scoreDetail.score = savedScore;

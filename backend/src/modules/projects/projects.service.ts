@@ -15,11 +15,13 @@ import { Student } from 'src/entities/student.entity';
 import { Teacher } from 'src/entities/teacher.entity';
 import { Course } from 'src/entities/course.entity';
 import { User } from 'src/entities/user.entity';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 @Injectable()
 export class ProjectsService extends BaseService<Project> {
   constructor(
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    private readonly jwtUtilityService: JwtUtilityService,
   ) {
     super(projectRepository);
   }
@@ -102,7 +104,9 @@ export class ProjectsService extends BaseService<Project> {
         'student.department',
         'course',
       ];
-      where.status = status ? status : In(['pending', 'approve', 'public','propose']);
+      where.status = status
+        ? status
+        : In(['pending', 'approve', 'public', 'propose']);
     }
     const [items, total] = await this.projectRepository.findAndCount(options);
     items.forEach((item) => {
@@ -133,9 +137,9 @@ export class ProjectsService extends BaseService<Project> {
   async createProject(dto: CreateProjectDto, type: string): Promise<Project> {
     try {
       const { teacher_id, student_id, ...data }: any = dto;
-
+      let decodedTeacherId = this.jwtUtilityService.decodeId(teacher_id);
       const teacher = await this.projectRepository.manager.findOne(Teacher, {
-        where: { id: teacher_id },
+        where: { id: decodedTeacherId },
         relations: ['user', 'department'],
       });
       if (!teacher) throw new NotFoundException('Giảng viên không tồn tại');
@@ -252,7 +256,11 @@ export class ProjectsService extends BaseService<Project> {
     });
     if (!project) throw new NotFoundException('Đề tài không tồn tại');
 
-    if (type === 'student' && project.student?.id != obj_id && project?.status != 'public')
+    if (
+      type === 'student' &&
+      project.student?.id != obj_id &&
+      project?.status != 'public'
+    )
       throw new NotFoundException('Không có quyền truy cập đề tài này');
 
     if (type === 'teacher' && project.teacher?.id != obj_id)

@@ -129,7 +129,7 @@ export class TeachersService extends BaseService<Teacher> {
         id: this.jwtUtilityService.encodeId(id),
         user: {
           ...user,
-          id: this.jwtUtilityService.encodeId(user.id.toString()),
+          id: this.jwtUtilityService.encodeId(user.id),
         },
       };
     });

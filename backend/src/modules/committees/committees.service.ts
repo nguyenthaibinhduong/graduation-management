@@ -97,13 +97,23 @@ export class CommitteesService extends BaseService<Committee> {
         );
       }
 
+      // Decode teacher_ids
+      const decodedTeacherIds = teacher_ids.map((id) =>
+        this.jwtUtilityService.decodeId(id),
+      );
+
       // Validate teachers
-      const teachers = teacher_ids
-        ? await this.teacherRepository.findBy({ id: In(teacher_ids) })
+      const teachers = decodedTeacherIds.length
+        ? await this.teacherRepository.findBy({ id: In(decodedTeacherIds) })
         : [];
-      if (teacher_ids && teachers.length !== teacher_ids.length) {
-        const foundIds = teachers.map((t) => t.id);
-        const missingIds = teacher_ids.filter((id) => !foundIds.includes(id));
+      if (
+        decodedTeacherIds.length &&
+        teachers.length !== decodedTeacherIds.length
+      ) {
+        const foundIds = teachers.map((t) => t.id.toString());
+        const missingIds = decodedTeacherIds.filter(
+          (id) => !foundIds.includes(id),
+        );
         throw new NotFoundException(
           `Teachers with IDs ${missingIds.join(', ')} not found`,
         );
@@ -364,7 +374,7 @@ export class CommitteesService extends BaseService<Committee> {
       .leftJoin('committee.teachers', 'teachers')
       .addSelect(['teachers.code'])
       .innerJoin('teachers.user', 'user')
-      .addSelect(['user.fullname', 'user.username'])
+      .addSelect(['user.fullname', 'user.username', 'user.email', 'user.phone'])
       .where('committee.id = :id', { id })
       .getOne();
 

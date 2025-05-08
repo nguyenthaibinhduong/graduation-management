@@ -18,6 +18,7 @@ import { Group } from './group.entity';
 import { Score } from './score.entity';
 import { Student } from './student.entity';
 import { Course } from './course.entity';
+import { on } from 'events';
 
 @Entity('projects')
 export class Project {
@@ -33,7 +34,7 @@ export class Project {
   @Column({ type: 'text' })
   content: string;
 
-  @ManyToOne(() => Teacher, (teacher) => teacher.id)
+  @ManyToOne(() => Teacher, (teacher) => teacher.id, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'teacher_id' })
   teacher: Teacher;
 

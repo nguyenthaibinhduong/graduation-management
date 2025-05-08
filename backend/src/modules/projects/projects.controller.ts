@@ -30,9 +30,8 @@ export class ProjectsController {
     @Body(new ValidationPipe()) project: CreateProjectDto,
   ): Promise<Response<Project>> {
     try {
-       const newProject = await this.projectService.createProject(project,type);
-        return new Response(newProject, HttpStatus.SUCCESS, Message.SUCCESS);
-      
+      const newProject = await this.projectService.createProject(project, type);
+      return new Response(newProject, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -46,9 +45,8 @@ export class ProjectsController {
     @Body() data: any,
   ): Promise<Response<void>> {
     try {
-      const updatedProject = await this.projectService.updateStatus(data,type);
+      const updatedProject = await this.projectService.updateStatus(data, type);
       return new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS);
-      
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -63,9 +61,11 @@ export class ProjectsController {
     @Body() data: any,
   ): Promise<Response<void>> {
     try {
-      const updatedProject = await this.projectService.publicProject(data,type);
+      const updatedProject = await this.projectService.publicProject(
+        data,
+        type,
+      );
       return new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS);
-      
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -83,12 +83,19 @@ export class ProjectsController {
     @Query('search') search?: string,
     @Query('limit') limit?: number,
     @Query('page') page?: number,
-    
   ): Promise<
     Response<{ items: Project[]; total: number; limit?: number; page?: number }>
   > {
     try {
-      const projects = await this.projectService.getAllProjectForObject(teacher_id,course_id,student_id,search, limit, page, status);
+      const projects = await this.projectService.getAllProjectForObject(
+        teacher_id,
+        course_id,
+        student_id,
+        search,
+        limit,
+        page,
+        status,
+      );
       return new Response(projects, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -99,10 +106,18 @@ export class ProjectsController {
   }
 
   @Get('find/:type/:id/:obj_id')
-  async findOne(@Param('type') type: string, @Param('id') id: number,@Param('obj_id') obj_id: number): Promise<Response<Project>> {
+  async findOne(
+    @Param('type') type: string,
+    @Param('id') id: number,
+    @Param('obj_id') obj_id: number,
+  ): Promise<Response<Project>> {
     try {
-      const project = await this.projectService.getProjectById(id,obj_id,type);
-      return new Response(project, HttpStatus.SUCCESS, Message.SUCCESS)
+      const project = await this.projectService.getProjectById(
+        id,
+        obj_id,
+        type,
+      );
+      return new Response(project, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -118,12 +133,14 @@ export class ProjectsController {
     @Body(new ValidationPipe()) project: CreateProjectDto,
   ): Promise<Response<Project>> {
     try {
-      const updatedProject = await this.projectService.updateProject(id, project,type);
-         return updatedProject
+      const updatedProject = await this.projectService.updateProject(
+        id,
+        project,
+        type,
+      );
+      return updatedProject
         ? new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
-      
-     
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -133,10 +150,14 @@ export class ProjectsController {
   }
 
   @Delete('delete/:type/:id/:obj_id')
-  async remove( @Param('type') type: string ,@Param('id') id: number, @Param('obj_id') obj_id: number): Promise<Response<void>> {
+  async remove(
+    @Param('type') type: string,
+    @Param('id') id: number,
+    @Param('obj_id') obj_id: number,
+  ): Promise<Response<void>> {
     try {
-      await this.projectService.deleteProject(id,obj_id,type);
-        return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+      await this.projectService.deleteProject(id, obj_id, type);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -147,13 +168,13 @@ export class ProjectsController {
 
   @Post('remove-multi/:type')
   async removeMulti(
-     @Param('type') type: string,
-    @Body() body:  {ids: number[] ,obj_id: number},
+    @Param('type') type: string,
+    @Body() body: { ids: number[]; obj_id: number },
   ): Promise<Response<void> | HttpException> {
     try {
-      if (type == "student") {
-        const {ids , obj_id } = body
-        await this.projectService.deleteProject(ids,obj_id,type);
+      if (type == 'student') {
+        const { ids, obj_id } = body;
+        await this.projectService.deleteProject(ids, obj_id, type);
         return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
       }
     } catch (error) {
