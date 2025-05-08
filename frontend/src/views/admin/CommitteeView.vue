@@ -196,7 +196,7 @@ onMounted(async () => {
   await departmentStore.fetchItems()
   await courseStore.fetchItems()
   await teacherStore.fetchItems()
-  await projectStore.fetchItems()
+  await projectStore.fetchItems('public')
 })
 watchEffect(() => {
   committees.value = committeeStore.items.map((committee) => ({

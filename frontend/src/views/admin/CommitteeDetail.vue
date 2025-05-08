@@ -58,7 +58,7 @@
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
       <h2 class="text-lg font-semibold text-gray-700 mb-4">Danh sách Giáo viên</h2>
       <DataTableCustom
-        :block="['toolbar', 'add', 'export']"
+        :block="['toolbar', 'add', 'export', 'action', 'selectOne', 'selectAll']"
         :data="committee.teachers"
         :columns="[
           { field: 'code', header: 'Mã giáo viên' },
@@ -66,14 +66,14 @@
           { field: 'user.email', header: 'Email' },
           { field: 'user.phone', header: 'Số điện thoại' },
         ]"
-        />
+      />
     </div>
 
     <!-- Projects Section -->
     <div class="bg-white shadow-md rounded-lg p-6">
       <h2 class="text-lg font-semibold text-gray-700 mb-4">Danh sách Đề tài</h2>
       <DataTableCustom
-        :block="['toolbar', 'add', 'export']"
+        :block="['toolbar', 'add', 'export', 'action', 'selectOne', 'selectAll']"
         :data="committee.projects"
         :columns="[
           { field: 'title', header: 'Tên đề tài' },
@@ -86,28 +86,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import { useCommitteeStore } from '@/stores/store';
-import DataTableCustom from '@/components/list/DataTableCustom.vue';
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useCommitteeStore } from '@/stores/store'
+import DataTableCustom from '@/components/list/DataTableCustom.vue'
 
-const route = useRoute();
-const committeeStore = useCommitteeStore();
-const committee = ref({});
+const route = useRoute()
+const committeeStore = useCommitteeStore()
+const committee = ref({})
 
 onMounted(async () => {
-  const encodedId = route.params.id;
-  await committeeStore.findItem(encodedId);
-  committee.value = committeeStore.item ?? {};
-   
-});
+  const encodedId = route.params.id
+  await committeeStore.findItem(encodedId)
+  committee.value = committeeStore.item ?? {}
+})
 
 const formatDate = (date) => {
-  if (!date) return 'N/A';
+  if (!date) return 'N/A'
   return new Date(date).toLocaleDateString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-  });
-};
+  })
+}
 </script>
