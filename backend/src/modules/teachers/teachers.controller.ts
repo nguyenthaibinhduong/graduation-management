@@ -97,7 +97,7 @@ export class TeachersController {
 
   @Put(':id')
   async update(
-    @DecodedId(["params"]) id: string,
+    @DecodedId(['params']) id: string,
     @Body(new ValidationPipe()) teacher: UpdateTeacherDto,
   ): Promise<Response<Teacher>> {
     try {
@@ -141,24 +141,36 @@ export class TeachersController {
   }
 
   @Post('import')
-  async importStudents(
-    @Body() teachers: [],
+  async importTeachers(
+    @Body() teachers: CreateTeacherDto[],
   ): Promise<Response<void> | HttpException> {
     try {
-      // Thực hiện việc thêm nhiều sinh viên vào cơ sở dữ liệu
-      const result = await this.teacherService.createManyTeacher(teachers);
+      // Decode department_id and position_ids for each teacher
+      const decodedTeachers = teachers.map((teacher) => ({
+        ...teacher,
+        departmentId: this.jwtUtilityService.decodeId(teacher.departmentId),
+        positionIds: teacher.positionIds?.map((id) =>
+          this.jwtUtilityService.decodeId(id),
+        ),
+      }));
+
+      // Call the service to create multiple teachers
+      const result =
+        await this.teacherService.createManyTeacher(decodedTeachers);
+
       const data = {
         message: `Đã thêm ${result.success} giảng viên.`,
         errors: result.errors,
       };
-      // Trả về phản hồi thành công
+
+      // Return a success response
       return new Response<any>(
         data,
         HttpStatus.SUCCESS,
         'Thêm giảng viên thành công',
       );
     } catch (error) {
-      // Xử lý lỗi khi có sự cố
+      // Handle errors
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
         HttpStatus.ERROR,

@@ -19,11 +19,15 @@ import { HttpStatus, Message } from 'src/common/globalEnum';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Controller('students')
 @UseGuards(JwtAuthGuard)
 export class StudentsController {
-  constructor(private readonly studentService: StudentsService) {}
+  constructor(
+    private readonly studentService: StudentsService,
+    private readonly jwtUtilityService: JwtUtilityService,
+  ) {}
 
   @Post()
   async create(
@@ -150,23 +154,33 @@ export class StudentsController {
 
   @Post('import')
   async importStudents(
-    @Body() students: [],
+    @Body() students: CreateStudentDto[],
   ): Promise<Response<void> | HttpException> {
     try {
-      // Thực hiện việc thêm nhiều sinh viên vào cơ sở dữ liệu
-      const result = await this.studentService.createManyStudent(students);
+      // Decode department_id and major_id for each student
+      const decodedStudents = students.map((student) => ({
+        ...student,
+        department_id: this.jwtUtilityService.decodeId(student.department_id),
+        major_id: this.jwtUtilityService.decodeId(student.major_id),
+      }));
+
+      // Call the service to create multiple students
+      const result =
+        await this.studentService.createManyStudent(decodedStudents);
+
       const data = {
         message: `Đã thêm ${result.success} sinh viên.`,
         errors: result.errors,
       };
-      // Trả về phản hồi thành công
+
+      // Return a success response
       return new Response<any>(
         data,
         HttpStatus.SUCCESS,
         'Thêm sinh viên thành công',
       );
     } catch (error) {
-      // Xử lý lỗi khi có sự cố
+      // Handle errors
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
         HttpStatus.ERROR,
