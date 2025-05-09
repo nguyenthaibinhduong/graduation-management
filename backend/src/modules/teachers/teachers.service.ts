@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -142,63 +143,93 @@ export class TeachersService extends BaseService<Teacher> {
     };
   }
 
-  async updateTeacher(
-    id: string,
-    teacher: UpdateTeacherDto,
-  ): Promise<Teacher | null> {
-    const { positionIds, departmentId, ...teacherData } = teacher;
+async updateTeacher(
+  id: string,
+  teacher: UpdateTeacherDto,
+): Promise<Teacher> {
+  try {
+    const { positionIds, departmentId, user, ...teacherData }: any = teacher;
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    const existingTeacher = await this.teacherRepository
+      .createQueryBuilder('teacher')
+      .leftJoinAndSelect('teacher.user', 'user')
+      .leftJoinAndSelect('teacher.department', 'department')
+      .leftJoinAndSelect('teacher.position', 'position')
+      .where('teacher.id = :id', { id })
+      .getOne();
 
-    try {
-      const existingTeacher = await this.check_exist_with_data(
-        Teacher,
-        {
-          where: { id },
-          relations: ['user'],
-        },
-        'Giáo viên không tại',
-      );
-      if (teacherData && teacherData?.user?.id) {
-        delete teacherData?.user?.id; // Xóa password trước khi trả về
-      }
-      // Update user
-      const updatedUser = await this.userRepository.save({
-        ...existingTeacher.user,
-        ...teacherData.user,
-      });
-
-      // Update department
-      const updatedDepartment = await this.departmentRepository.findOneBy({
-        id: departmentId,
-      });
-      // Update teacher
-      const updatedTeacher = await this.teacherRepository.save({
-        ...existingTeacher,
-        ...teacherData,
-        user: updatedUser,
-        department: updatedDepartment,
-      });
-
-      // Update positions
-      if (positionIds && positionIds.length > 0) {
-        const positions = await this.positionRepository.find({
-          where: { id: In(positionIds) },
-        });
-        updatedTeacher.position = positions;
-      }
-
-      await queryRunner.commitTransaction();
-      return updatedTeacher;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
+    if (!existingTeacher) {
+      throw new NotFoundException('Giáo viên không tồn tại');
     }
+
+    if (user && user?.id) {
+      delete user?.id; // Tránh ghi đè ID người dùng
+    }
+
+    if (user) {
+      await this.userRepository
+        .createQueryBuilder()
+        .update()
+        .set({ ...user })
+        .where('id = :id', { id: existingTeacher.user.id })
+        .execute();
+    }
+
+    let department = existingTeacher.department;
+    if (departmentId) {
+      department = await this.departmentRepository
+        .createQueryBuilder()
+        .where('id = :id', { id: departmentId })
+        .getOne();
+
+      if (!department) {
+        throw new NotFoundException('Khoa không tồn tại');
+      }
+    }
+
+    let positions = existingTeacher.position;
+    if (positionIds && Array.isArray(positionIds)) {
+      positions = await this.positionRepository
+        .createQueryBuilder('position')
+        .where('position.id IN (:...ids)', { ids: positionIds })
+        .getMany();
+
+      if (positions.length !== positionIds.length) {
+        throw new NotFoundException('Một hoặc nhiều chức vụ không tồn tại');
+      }
+    }
+
+    await this.teacherRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        ...teacherData,
+        department,
+        position: positions,
+      })
+      .where('id = :id', { id })
+      .execute();
+
+    const updatedTeacher = await this.teacherRepository
+      .createQueryBuilder('teacher')
+      .leftJoinAndSelect('teacher.user', 'user')
+      .leftJoinAndSelect('teacher.department', 'department')
+      .leftJoinAndSelect('teacher.position', 'position')
+      .where('teacher.id = :id', { id })
+      .getOne();
+
+    if (updatedTeacher?.user) {
+      delete updatedTeacher.user.password; // Xóa password trước khi trả về
+    }
+
+    return updatedTeacher;
+  } catch (error) {
+    throw new InternalServerErrorException(
+      error.message || 'Có lỗi xảy ra khi cập nhật giáo viên',
+    );
   }
+}
+
 
   async createManyTeacher(
     teachers: CreateTeacherDto[],
