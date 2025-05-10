@@ -12,10 +12,11 @@
 
 
           <Button type="button" @click="toggleProfileMenu" aria-label="Profile Menu"
-            class="p-button-rounded p-button-text text-blue-800" v-tooltip.bottom="'Profile Menu'">
+            class="p-button-rounded p-button-text text-blue-800" :title="'Profile Menu'">
             <img v-if="avatar" :src="avatar" alt="User Avatar" class="w-8 h-8 rounded-full object-cover" />
             <h6 class="font-medium m-0">{{ userName }}</h6>
           </Button>
+
         </div>
 
         <!-- Mobile menu button -->
