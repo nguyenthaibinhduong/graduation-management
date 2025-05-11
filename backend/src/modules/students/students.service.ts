@@ -130,79 +130,45 @@ export class StudentsService extends BaseService<Student> {
     dataStudent: UpdateStudentDto,
   ): Promise<Student> {
     try {
-      const { department_id, major_id, user, ...data }:any = dataStudent;
-
-      if (user && user.id) {
-        delete user.id; // Xóa password trước khi trả về
+    const { department_id, major_id, user, ...data }: any = dataStudent;
+  
+     let student = await this.check_exist_with_data(Student, {
+        where: { id },
+        relations:['department','major','user']
+      }, 'Sinh viên không tồn tại');
+      
+      if (department_id) {
+        
+        let department = await this.check_exist_with_data(Department, {
+          where: { id:department_id }
+        }, 'Khoa không tồn tại');
+        student.department = department ? department: student.department
+        
       }
-      const existingStudent = await this.studentRepository
-        .createQueryBuilder('student')
-        .leftJoinAndSelect('student.major', 'major')
-        .leftJoinAndSelect('student.department', 'department')
-        .leftJoinAndSelect('student.user', 'user')
-        .where('student.id = :id', { id })
-        .getOne();
-
-
-      if (!existingStudent) {
-        throw new NotFoundException('Sinh viên không tồn tại');
+      if (major_id) {
+        
+        let major = await this.check_exist_with_data(Major, {
+          where: { id:major_id }
+        }, 'Chuyên ngành không tồn tại');
+        student.major = major ? major: student.major
       }
-
-      const [department, major] = await Promise.all([
-        this.departmentRepository
-          .createQueryBuilder()
-          .where('id = :id', { id: department_id })
-          .getOne(),
-        this.majorRepository
-          .createQueryBuilder()
-          .where('id = :id', { id: major_id })
-          .getOne(),
-      ]);
-
-      if (!department && department_id)
-        throw new NotFoundException('Khoa không tồn tại');
-      if (!major && major_id)
-        throw new NotFoundException('Chuyên ngành không tồn tại');
-
       if (user) {
-        await this.userRepository
-          .createQueryBuilder()
-          .update()
-          .set({ ...user })
-          .where('id = :id', { id: existingStudent.user.id })
-          .execute();
+        const { id, password, ...safeUser } = user;
+        await this.repository.manager.update(User, student?.user.id, safeUser);
+
       }
+      
+      const updatedStudent = await this.repository.manager.save(Student, student);
 
-      await this.studentRepository
-        .createQueryBuilder()
-        .update()
-        .set({
-          ...data,
-          department: department ?? existingStudent.department,
-          major: major ?? existingStudent.major,
-        })
-        .where('id = :id', { id })
-        .execute();
-
-      const student = await this.studentRepository
-        .createQueryBuilder('student')
-        .leftJoinAndSelect('student.user', 'user')
-        .leftJoinAndSelect('student.department', 'department')
-        .leftJoinAndSelect('student.major', 'major')
-        .where('student.id = :id', { id })
-        .getOne();
-
-      if (student && student.user) {
-        delete student.user.password; // Xóa password trước khi trả về
-      }
-
-      return student;
+      if (updatedStudent.user) delete updatedStudent.user.password;
+      return updatedStudent;
     } catch (error) {
       throw new InternalServerErrorException(
         error.message || 'Có lỗi xảy ra khi cập nhật sinh viên',
       );
     }
   }
+  
 
   async createManyStudent(
     students: CreateStudentDto[],

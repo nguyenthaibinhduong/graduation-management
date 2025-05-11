@@ -245,4 +245,22 @@ export class UsersService extends BaseService<User> {
     user.password = hashPassword;
     return this.userRepository.save(user);
   }
+  async updateAccount(data: any, user_id: any) {
+    const { username, password, role } = data;
+  
+    // Đảm bảo await
+    const user: User = await this.check_exist_with_data(
+      User,
+      { where: { id: user_id } },
+      'Tài khoản không tồn tại'
+    );
+  
+    if (username) user.username = username;
+    if (password) user.password = await bcrypt.hash(password, 10);
+    if (role) user.role = role;
+  
+    // Dùng save để cập nhật entity
+    await this.userRepository.save(user);
+  }
+  
 }

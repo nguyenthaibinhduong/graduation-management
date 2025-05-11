@@ -103,16 +103,10 @@ export class UsersController {
   async update(
     @DecodedId(["params"]) id: number,
     @Body(new ValidationPipe()) user: UpdateUserDto,
-  ): Promise<Response<User>> {
+  ): Promise<Response<void>> {
     try {
-      const updatedUser = await this.userService.update(
-        id,
-        { where: { id } },
-        user,
-      );
-      return updatedUser
-        ? new Response(updatedUser, HttpStatus.SUCCESS, Message.SUCCESS)
-        : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
+      const updatedUser = await this.userService.updateAccount(user,id);
+      return new Response(updatedUser, HttpStatus.SUCCESS, Message.SUCCESS)
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
