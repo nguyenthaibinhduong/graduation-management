@@ -9,7 +9,6 @@
     </div>
     <DataTableCustom :title="'Danh sách đề tài đề xuất'" :data="projects" :columns="[
         { field: 'title', header: 'Tên đề tài' },
-        { field: 'description', header: 'Mô tả' },
         { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
         { field: 'course.name', header: 'Học kỳ' },
         {
@@ -92,7 +91,7 @@ onMounted(async () => {
     await authStore.fetchUser();
 
     if (authStore?.user?.student?.id) {
-        await teacherStore.fetchItems(1, null, null, { department_id: authStore.user?.student?.department?.id });
+        await teacherStore.fetchItems(1, null, null, { departmentId: authStore.user?.student?.department?.id });
         await projectStore.fetchItemsForStudent(statusData.value, authStore.user.student.id);
     } else {
     }

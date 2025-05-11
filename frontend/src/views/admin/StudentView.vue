@@ -286,6 +286,8 @@ const editStudent = (dataEdit) => {
       (item) => item.id == clonedData.department.id
     ),
   };
+  console.log(newStudent.value);
+
   isEditing.value = true;
   visibleLeft.value = true;
 };
@@ -314,8 +316,8 @@ const cancelForm = () => {
       phone: "",
       avatar: ""
     },
-    major_id: 0,
-    department_id: 0
+    major_id: null,
+    department_id: null
   };
 };
 

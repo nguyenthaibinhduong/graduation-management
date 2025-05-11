@@ -73,9 +73,12 @@
               v-if="project.status === 'public' && authStore.user?.role === 'student' && group?.status == 'approved'"
               label="Đăng ký thực hiện"
               class="btn-submit p-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white" @click="Register" />
-            <div v-if="project.status === 'public' && authStore.user?.role === 'student' && group.status == 'pending'"
+            <div v-if="project.status === 'public' && authStore.user?.role === 'student' && group?.status == 'pending'"
               class="w-full p-3 bg-yellow-50 text-yellow-400 rounded-lg">Vui lòng đợi duyệt nhóm để được đăng ký đề
               tài</div>
+            <div v-if="project.status === 'public' && authStore.user?.role === 'student' && group?.status == 'finding'"
+              class="w-full p-3 bg-yellow-50 text-yellow-400 rounded-lg">Bạn đã đăng ký đề tài. Vui lòng chờ sự phân bổ
+              Giảng viên hướng dẫn </div>
             <Button size="small" v-if="project.status === 'public' && authStore.user?.role === 'student' && !group"
               label="Đăng ký nhóm thực hiện"
               class="btn-submit p-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white"

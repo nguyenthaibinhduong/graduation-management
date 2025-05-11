@@ -16,7 +16,7 @@
     <div class="w-full p-4 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Danh sách đề tài -->
         <div class="lg:col-span-2 space-y-4">
-            <Card v-for="(project, index) in projects" :key="index"
+            <Card v-if="!group?.status == 'success'" v-for="(project, index) in projects" :key="index"
                 class="shadow-sm border border-gray-300 hover:shadow-md hover:border-blue-600 transition-all cursor-pointer rounded-xl">
                 <!-- Tiêu đề + nút thông tin -->
                 <template #title>
@@ -150,6 +150,8 @@ const statusLabel = (status) => {
         pending: "Đang chờ duyệt",
         approved: "Đã duyệt",
         reject: "Đã huỷ",
+        finding: "Đang ghi danh",
+        success: "Thực hiện đề tài"
     };
     return statuses[status] || "Không xác định";
 };
@@ -160,6 +162,8 @@ const statusClass = (status) => {
         pending: "bg-yellow-100 text-yellow-700 px-2  py-1 ms-2 text-sm rounded-full",
         approved: "bg-green-100 text-green-700 px-2  py-1 ms-2 text-sm rounded-full",
         reject: "bg-red-100 text-red-700 px-2  py-1 ms-2 text-sm rounded-full",
+        finding: "bg-yellow-300 text-white px-2  py-1 ms-2 text-sm rounded-full",
+        success: "bg-green-600 text-white px-2  py-1 ms-2 text-sm rounded-full",
     };
     return classes[status] || "";
 };
