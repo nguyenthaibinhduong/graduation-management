@@ -63,6 +63,7 @@ import MyInput from "@/components/form/MyInput.vue";
 import MyDrawer from "@/components/drawer/MyDrawer.vue";
 import { useRoute, useRouter } from "vue-router";
 import { Button } from "primevue";
+import { showToast } from "@/utils/toast";
 
 const visibleLeft = ref(false);
 const projectStore = useProjectStore();
@@ -89,8 +90,9 @@ const maxDate = ref(new Date());
 
 onMounted(async () => {
     await authStore.fetchUser();
-    await teacherStore.fetchItems();
+
     if (authStore?.user?.student?.id) {
+        await teacherStore.fetchItems(1, null, null, { department_id: authStore.user?.student?.department?.id });
         await projectStore.fetchItemsForStudent(statusData.value, authStore.user.student.id);
     } else {
     }
@@ -99,8 +101,7 @@ watchEffect(() => {
     projects.value = authStore.user?.student ? projectStore.items : [];
     student.value = authStore.user?.student || null;
     newData.value.student_id = authStore.user?.student?.id;
-    teachers.value = (teacherStore.items || [])
-        .filter((teacher) => teacher?.department?.id == student.value?.department?.id)
+    teachers.value = teacherStore.items
         .map((teacher) => {
             const { user, position, ...rest } = teacher;
             return {
@@ -111,6 +112,7 @@ watchEffect(() => {
                 },
             };
         });
+
 });
 
 watch(statusData, async (newSelection) => {
@@ -152,6 +154,10 @@ const deleteProject = async (ids) => {
 };
 
 const editProject = (dataEdit) => {
+    if (dataEdit?.status != 'propose') {
+        showToast('Đề tài này đã khóa ! Không thể thay đổi', 'error')
+        return
+    }
     editedProjectId.value = dataEdit.id;
     newData.value = {
         teacher_id: dataEdit?.teacher?.id,

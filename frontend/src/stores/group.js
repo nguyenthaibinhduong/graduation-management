@@ -85,6 +85,15 @@ export function createGroupStore(entity) {
       
     }
 
+    const changTeacher = async (param) => {
+      const { data } = await api.post(`/groups/change-teacher`, param)
+      if (data) {
+        const msg ="Đã phân công giáo viên hướng dẫn khác";
+        showToast(msg, "success");
+      }
+      
+    }
+
     const addItem = async (itemData ) => {
 
       await baseService(entity).create(itemData)
@@ -107,6 +116,6 @@ export function createGroupStore(entity) {
 
     
 
-    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus,lockGroup,registerProject}
+    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus,lockGroup,registerProject,changTeacher}
   })
 }

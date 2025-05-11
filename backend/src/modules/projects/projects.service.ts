@@ -1,3 +1,4 @@
+
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { Project } from 'src/entities/project.entity';
 import {
@@ -14,8 +15,9 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { Student } from 'src/entities/student.entity';
 import { Teacher } from 'src/entities/teacher.entity';
 import { Course } from 'src/entities/course.entity';
-import { User } from 'src/entities/user.entity';
+import { User, UserRole } from 'src/entities/user.entity';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
+import { Roles } from 'src/common/decorators/roles.decorators';
 @Injectable()
 export class ProjectsService extends BaseService<Project> {
   constructor(
@@ -243,8 +245,8 @@ export class ProjectsService extends BaseService<Project> {
 
   async getProjectById(
     id: any,
-    obj_id: number,
     type: string,
+    user:any
   ): Promise<Project> {
     const project = await this.projectRepository.findOne({
       where: { id },
@@ -254,32 +256,41 @@ export class ProjectsService extends BaseService<Project> {
         course: true,
       },
     });
+    const userProject = await this.repository.manager.findOne(User, {
+      where: { id: user?.id },
+      relations: {
+        student:true ,
+        teacher:true ,
+      },
+    })
     if (!project) throw new NotFoundException('Đề tài không tồn tại');
-
-    if (
-      type === 'student' &&
-      project.student?.id != obj_id &&
-      project?.status != 'public'
-    )
+    if (user.role == UserRole.STUDENT) {
+      if (type === 'student' &&project.student?.id != userProject?.student?.id &&  project?.status != 'public')
+        throw new NotFoundException('Không có quyền truy cập đề tài này');
+      if (project.student?.user) {
+        project.student.user = {
+          id: project.student.user.id,
+          fullname: project.student.user.fullname,
+        } as any;
+      }
+      return project;
+      
+    } else if (user.role == UserRole.TEACHER) {
+      if (type === 'teacher' && project.teacher?.id != userProject?.teacher?.id)
+        throw new NotFoundException('Không có quyền truy cập đề tài này');
+      if (project.teacher?.user) {
+        project.teacher.user = {
+          id: project.teacher.user.id,
+          fullname: project.teacher.user.fullname,
+        } as any;
+      }
+      return project;
+      
+    } else if (user.role == UserRole.ADMIN) {
+      return project;
+    } else {
       throw new NotFoundException('Không có quyền truy cập đề tài này');
-
-    if (type === 'teacher' && project.teacher?.id != obj_id)
-      throw new NotFoundException('Không có quyền truy cập đề tài này');
-
-    if (project.teacher?.user) {
-      project.teacher.user = {
-        id: project.teacher.user.id,
-        fullname: project.teacher.user.fullname,
-      } as any;
     }
-    if (project.student?.user) {
-      project.student.user = {
-        id: project.student.user.id,
-        fullname: project.student.user.fullname,
-      } as any;
-    }
-
-    return project;
   }
 
   async updateStatus(data: any, type: string): Promise<void> {

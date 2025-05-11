@@ -10,6 +10,7 @@ import {
   ValidationPipe,
   UseGuards,
   HttpException,
+  Request,
 } from '@nestjs/common';
 
 import { HttpStatus, Message } from 'src/common/globalEnum';
@@ -19,6 +20,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from 'src/entities/project.entity';
 import { Response } from 'src/common/globalClass';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
+import { Student } from 'src/entities/student.entity';
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard)
@@ -28,10 +30,13 @@ export class ProjectsController {
   @Post('create/:type')
   async create(
     @Param('type') type: string,
+    @DecodedId(['body', 'student_id']) student_id: any,
+    @DecodedId(['body', 'teacher_id']) teacher_id: any,
     @Body(new ValidationPipe()) project: CreateProjectDto,
   ): Promise<Response<Project>> {
     try {
-      const newProject = await this.projectService.createProject(project, type);
+      const data = {...project,student_id, teacher_id};
+      const newProject = await this.projectService.createProject(data, type);
       return new Response(newProject, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -43,10 +48,13 @@ export class ProjectsController {
   @Post('update-status/:type')
   async updateStatus(
     @Param('type') type: string,
+    @DecodedId(['body']) id: any,
+    @DecodedId(['body','obj_id']) obj_id: any,
     @Body() data: any,
   ): Promise<Response<void>> {
     try {
-      const updatedProject = await this.projectService.updateStatus(data, type);
+      const newData = {...data,id, obj_id};
+      const updatedProject = await this.projectService.updateStatus(newData, type);
       return new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -106,17 +114,26 @@ export class ProjectsController {
     }
   }
 
-  @Get('find/:type/:id/:obj_id')
+  @Get('find/:type/:id')
   async findOne(
     @Param('type') type: string,
     @DecodedId(["params"]) id: number,
-    @Param('obj_id') obj_id: number,
+    @Request() request: any
   ): Promise<Response<Project>> {
     try {
+
+    const user = request.user;
+
+    if (!user) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+        HttpStatus.ERROR,
+      );
+    }
       const project = await this.projectService.getProjectById(
         id,
-        obj_id,
         type,
+        user
       );
       return new Response(project, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {

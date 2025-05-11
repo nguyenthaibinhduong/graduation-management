@@ -66,7 +66,7 @@
             <label class="font-semibold text-gray-700">Ngày sinh:</label>
             <span>{{
               dayjs(authStore.user?.birth_date).format('MM/DD/YYYY') || 'Chưa cập nhật'
-              }}</span>
+            }}</span>
           </div>
           <div class="flex items-center gap-2">
             <label class="font-semibold text-gray-700">Địa chỉ:</label>

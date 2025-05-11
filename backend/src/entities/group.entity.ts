@@ -14,6 +14,7 @@ import { Student } from './student.entity';
 import { Project } from './project.entity';
 import { Score } from './score.entity';
 import { Department } from './department.entity';
+import { Teacher } from './teacher.entity';
 
 @Entity('groups')
 export class Group {
@@ -47,7 +48,9 @@ export class Group {
   @JoinColumn({ name: 'leader_id' })
   leader: Student;
   
-
+  @ManyToOne(() => Teacher, (teacher) => teacher.id, { onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'teacher_id' })
+  teacher: Teacher;
 
   @ManyToOne(() => Project, (project) => project.groups, {
     onDelete: 'CASCADE',
@@ -65,13 +68,14 @@ export class Group {
   score: Score;
 
 
+
   //Group status: pending, approved, rejected
   @Column({
     type: 'enum',
-    enum: ['create','pending', 'approved', 'rejected'],
+    enum: ['create','pending', 'approved', 'rejected','finding','success','final'],
     default: 'create',
   })
-  status: 'create' | 'pending' | 'approved' | 'rejected';
+  status: 'create' | 'pending' | 'approved' | 'rejected'|'finding'|'success'|'final';
   
 
   @CreateDateColumn()

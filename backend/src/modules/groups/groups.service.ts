@@ -43,7 +43,7 @@ async getAllGroup(
     order: {
       updated_at: orderBy,
     },
-     relations: ['students', 'students.user','leader','leader.user','student_attemp','student_attemp.user','department'],
+     relations: ['students', 'students.user','leader','leader.user','student_attemp','student_attemp.user','department','project','teacher','teacher.user'],
   };
 
   if (limit && page) {
@@ -208,7 +208,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
 
   async registerProject(groupId: number, projectId: number): Promise<any> {
     const group = await this.repository.findOne({
-      where: { id: groupId },
+      where: { id: groupId ,status: "approved"},
       relations: { project: true },
     });
     const project:any = await this.repository.manager.findOne('Project', {
@@ -216,10 +216,13 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       relations: ['groups','teacher','teacher.user'],
     });
     if (!project) {
-      throw new Error('Dự án không tồn tại');
+      throw new Error('Đề tài không tồn tại');
     }
+    // if (project?.group?.length >= project.max_total_group) {
+    //   throw new Error("Đề tài đã đầy");
+    // }
     if (!group) {
-      throw new Error('Nhóm không tồn tại');
+      throw new Error('Nhóm không tồn tại ! Hãy đăng ký nhóm');
     }
     if (group?.status != "approved") {
       throw new Error('Nhóm khoong trong đợt đăng ký');
@@ -235,7 +238,8 @@ async createGroup(data: any, user_id: any): Promise<Group> {
     }
 
     group.project = project;
-
+    group.teacher = project?.teacher;
+    group.status = 'finding';
     return this.repository.save(group);
   }
 
@@ -462,7 +466,7 @@ async lockGroup(department_id: any, userId: string) {
         throw new Error("Lỗi ! liên hệ giáo vụ để giải quyết");
       }
     } else if (userDta.role == UserRole.ADMIN) {
-      if (status == "rejected" || status == "create" || status == "pending" || status == "approved") {
+      if (status == "rejected" || status == "create" || status == "pending" || status == "approved" || status == "finding" || status =='success') {
         group.status = status;
         return this.groupRepository.save(group);
       }
@@ -471,6 +475,18 @@ async lockGroup(department_id: any, userId: string) {
       throw new ForbiddenException("Bạn đủ có quyền hạn!");
     }
   }
+
+  async changeTeacher(teacher_code: any, groupId: any) {
+    const group = await this.check_exist_with_data(Group, {
+      where: {id : groupId, status: In(['public','finding','success'])},
+    }, 'Nhóm không hợp lệ')
+    const teacher = await this.check_exist_with_data(Teacher, {
+      where:{code: teacher_code},
+    }, 'Giáo viên không hợp lệ')
+    group.teacher = teacher
+    return this.groupRepository.save(group)
+  }
+
  freshData(data: any) {
     if (data?.students) {
       data.students = data.students.map((student: any) => {
@@ -509,7 +525,15 @@ async lockGroup(department_id: any, userId: string) {
             fullname: data.leader.user?.fullname,
           },
         };
-    }
+   }
+   if (data?.teacher) {
+      delete data.teacher.created_at;
+      delete data.teacher.updated_at;
+      data.teacher = {
+        ...data.teacher,
+        fullname: data.teacher.user?.fullname,
+      };
+  }
     return data
   }
 }

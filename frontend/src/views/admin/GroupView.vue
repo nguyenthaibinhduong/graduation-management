@@ -11,6 +11,8 @@
                     { label: 'Nhóm chờ duyệt', value: 'pending' },
                     { label: 'Nhóm đã duyệt', value: 'approved' },
                     { label: 'Nhóm đã hủy', value: 'rejected' },
+                    { label: 'Nhóm đã ghi danh', value: 'finding' },
+                    { label: 'Nhóm đang làm đề tài', value: 'success' },
                 ]" optionLabel="label" optionValue="value" placeholder="Chọn trạng thái" />
             </div>
 
@@ -57,7 +59,9 @@
                         { value: 'create', label: 'Đang lập nhóm', class: 'bg-blue-100 text-blue-700' },
                         { value: 'pending', label: 'Đang chờ duyệt', class: 'bg-yellow-100 text-yellow-700' },
                         { value: 'approved', label: 'Đã duyệt', class: 'bg-green-100 text-green-700' },
-                        { value: 'rejected', label: 'Đã huỷ', class: 'bg-red-100 text-red-700' }
+                        { value: 'rejected', label: 'Đã huỷ', class: 'bg-red-100 text-red-700' },
+                        { value: 'finding', label: 'Đã ghi danh', class: 'bg-orange-100 text-orange-700' },
+                        { value: 'success', label: 'Thực hiện đề tài', class: 'bg-green-600 text-white' },
                     ]
                 }
 
@@ -82,7 +86,8 @@
 
             <div class="space-y-2 text-base">
                 <div><span class="font-medium">Tên nhóm:</span> {{ detail?.name }}</div>
-                <div><span class="font-medium">Mã nhóm:</span> {{ detail?.code }}</div>
+                <div><span class="font-medium">Mã nhóm:</span> {{ detail?.code }} - {{ detail?.department?.name }}</div>
+                <div><span class="font-medium">Đề tài:</span> {{ detail?.project?.title }}</div>
                 <div><span class="font-medium">Trưởng nhóm:</span> {{ detail?.leader?.user?.fullname }} ({{
                     detail?.leader?.code }})</div>
                 <div>
@@ -102,20 +107,27 @@
                     <span class="font-medium">Trạng thái:</span>
                     <span :class="statusClass(detail?.status)">{{ statusLabel(detail?.status) }}</span>
                 </div> -->
-                <div class="flex">
+                <div class="">
                     <div class="flex flex-col gap-y-1">
                         <label for="status" class="font-medium">Trạng thái</label>
                         <MyInput class="w-full" id="status" type="select" v-model="update.status" :options="[
                             { label: 'Đang tạo nhóm', value: 'create' },
-                            { label: 'Nhóm chờ duyệt', value: 'pending' },
-                            { label: 'Nhóm đã duyệt', value: 'approved' },
-                            { label: 'Nhóm đã hủy', value: 'rejected' },
+                            { label: 'Chờ duyệt', value: 'pending' },
+                            { label: 'Duyệt nhóm', value: 'approved' },
+                            { label: 'Ghi danh đề tài ' + (detail?.project?.title || ''), value: 'finding' },
+                            { label: 'Chấp nhận ghi danh ', value: 'success' },
                         ]" optionLabel="label" optionValue="value" placeholder="Chọn trạng thái" />
+                    </div>
+                    <div v-if="update.status == 'success'" class="flex flex-col gap-y-1 mt-2">
+                        <label for="status" class="font-medium">Phân công giảng viên hướng dẫn</label>
+                        <MyInput class="w-full" id="status" type="select" v-model="updateTeacher.teacher"
+                            :options="teachers" optionLabel="fullname" optionValue="code"
+                            placeholder="Chọn giảng viên" />
                     </div>
 
                 </div>
                 <div class="flex justify-end">
-                    <Button v-if="showUpdate" label="Cập nhật" @click="handleUpdatStatus" />
+                    <Button label="Cập nhật" @click="handleUpdatStatus" />
                 </div>
 
             </div>
@@ -127,7 +139,7 @@
 <script setup>
 import { ref, watch, onMounted, watchEffect } from 'vue';
 import DataTableCustom from '@/components/list/DataTableCustom.vue';
-import { useDepartmentStore, useGroupStore } from '@/stores/store';
+import { useDepartmentStore, useGroupStore, useTeacherStore } from '@/stores/store';
 import { Dialog, Button } from 'primevue';
 import MyInput from '@/components/form/MyInput.vue';
 import { showToast } from '@/utils/toast';
@@ -139,7 +151,7 @@ const showUpdate = ref(false);
 const groups = ref([]);
 const departments = ref([]);
 const loading = ref(false);
-
+const updateTeacher = ref({ teacher: '' })
 const update = ref({ group_id: '', status: '' });
 const filters = ref({ status: '', department_id: '', search: '', orderBy: 'asc' });
 
@@ -153,27 +165,49 @@ const fetchGroup = async (page = 1, limit = 10) => {
 const handleUpdatStatus = async () => {
     if (update.value.group_id && update.value.status) {
         await groupStore.updateStatus(update.value.group_id, update.value.status);
-        await fetchGroup();
+
         detail.value.status = update.value.status
-        reset();
+
     }
+    if (updateTeacher.value.teacher) {
+        await groupStore.changTeacher({
+            teacher_code: updateTeacher.value.teacher,
+            groupId: detail.value?.id
+        })
+    }
+    await fetchGroup();
+    reset();
 };
 
 const open = ref(false);
 const detail = ref({});
 
 // 1) onSelect gán thẳng data
-const onSelect = (data) => {
+const onSelect = async (data) => {
     if (data != null) {
         detail.value = data;
+        await teacherStore.fetchItems(1, null, null, { department_id: data?.department?.id });
+        teachers.value = (teacherStore.items || [])
+            .map((teacher) => {
+                const { user, position, department, created_at, updated_at, ...rest } = teacher;
+                return {
+                    ...rest,
+                    fullname: user.fullname,
+                };
+            });
+        updateTeacher.value.teacher = data?.teacher?.code;
+        console.log(updateTeacher.value);
+        open.value = true;
     }
-    open.value = true;
+
 };
 
 // 2) reset chỉ clear modal, không chạm detail
 const reset = () => {
     open.value = false;
     showUpdate.value = false;
+    teachers.value = []
+    updateTeacher.value.teacher = {}
 };
 
 // 3) watch detail để set update
@@ -181,20 +215,23 @@ watch(detail, (data) => {
     if (data != null) {
         update.value.group_id = data.id;
         update.value.status = data.status;
+
     }
 
 
 });
 
 // 4) watch update để bật nút
-watch(update, (newVal) => {
-    showUpdate.value = newVal.status !== detail.value?.status;
-}, { deep: true });
 
+
+const teachers = ref()
+const teacherStore = useTeacherStore()
 // other logic…
 onMounted(async () => {
     await departmentsStore.fetchItems();
+
     departments.value = departmentsStore.items;
+    teachers.value = teacherStore.items
     fetchGroup();
 });
 watch(filters, () => fetchGroup(), { deep: true });
