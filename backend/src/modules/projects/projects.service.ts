@@ -139,9 +139,8 @@ export class ProjectsService extends BaseService<Project> {
   async createProject(dto: CreateProjectDto, type: string): Promise<Project> {
     try {
       const { teacher_id, student_id, ...data }: any = dto;
-      let decodedTeacherId = this.jwtUtilityService.decodeId(teacher_id);
       const teacher = await this.projectRepository.manager.findOne(Teacher, {
-        where: { id: decodedTeacherId },
+        where: { id: teacher_id },
         relations: ['user', 'department'],
       });
       if (!teacher) throw new NotFoundException('Giảng viên không tồn tại');
@@ -326,9 +325,9 @@ export class ProjectsService extends BaseService<Project> {
     }
   }
 
-  async publicProject(data: any, type: string): Promise<void> {
+  async publicProject(data: any, type: string, user_id:any): Promise<void> {
     try {
-      const { id, session_id, user_id }: any = data;
+      const { id, session_id }: any = data;
 
       const user = await this.projectRepository.manager.findOne(User, {
         where: { id: user_id },

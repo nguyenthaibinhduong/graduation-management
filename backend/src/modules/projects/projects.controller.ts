@@ -67,12 +67,24 @@ export class ProjectsController {
   @Post('public-project/:type')
   async publicProject(
     @Param('type') type: string,
-    @Body() data: any,
+    @DecodedId(['body']) id: any,
+    @DecodedId(['body','session_id']) session_id: any,
+    @Request() request: any
   ): Promise<Response<void>> {
     try {
+      const user = request.user;
+
+      if (!user) {
+        throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+          HttpStatus.ERROR,
+        );
+      }
+      const data = { id,session_id}
       const updatedProject = await this.projectService.publicProject(
         data,
         type,
+        user?.id
       );
       return new Response(updatedProject, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {

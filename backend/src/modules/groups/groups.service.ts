@@ -261,8 +261,8 @@ async getGroupByUser(userId: number, type: string): Promise<any> {
     // Lấy group có liên quan tới student (trong students hoặc student_attemp)
     const group = await this.repository.manager.findOne(Group, {
       where: [
-        { students: { id: studentId }, status: In(["create", "pending", "approved"]) },
-        { student_attemp: { id: studentId }, status: 'pending' }
+        { students: { id: studentId }, status: In(["create", "pending", "approved","finding","success"]) },
+        { student_attemp: { id: studentId }, status: In(['pending',"finding","success"]) }
       ],
       relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user','project'],
     });
@@ -281,7 +281,7 @@ async getGroupByUser(userId: number, type: string): Promise<any> {
     } else {
       // Không phải leader nhưng nằm trong group (students hoặc student_attemp) với status pending
       if (
-        (group.status === 'pending' || group.status === "approved") &&
+        (group.status === 'pending' || group.status === "approved" || group.status === "finding" || group.status === "success") &&
         (
           group.students.some(s => s.id === studentId) ||
           group.student_attemp.some(s => s.id === studentId)
@@ -467,8 +467,7 @@ async lockGroup(department_id: any, userId: string) {
       }
     } else if (userDta.role == UserRole.ADMIN) {
       if (status == "rejected" || status == "create" || status == "pending" || status == "approved" || status == "finding" || status =='success') {
-        group.status = status;
-        return this.groupRepository.save(group);
+        return  await this.groupRepository.update(group?.id,{status});
       }
       
     } else {
