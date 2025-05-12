@@ -14,7 +14,7 @@
                 <div v-if="group?.status == 'finding'" class=" absolute bottom-5 right-5">
                     <Button
                         class="mt-3 mx-auto bg-red-600 text-white hover:bg-red-500 border-red-600 transition-colors duration-300"
-                        icon="pi pi-minus" size="small" label="Huỷ ghi danh đề tài" />
+                        icon="pi pi-minus" size="small" @click="stopProject" label="Huỷ ghi danh đề tài" />
                 </div>
             </div>
             <div v-else class=" bg-white p-6 rounded-2xl shadow-sm w-full flex flex-col items-start">
@@ -83,6 +83,7 @@ import { onMounted, ref, watchEffect } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { Button } from 'primevue';
+import { showToast } from '@/utils/toast';
 
 const grades = [
     { type: 'Giữa kỳ', score: 8.5 },
@@ -97,18 +98,43 @@ const group = ref()
 const project = ref()
 const router = useRouter()
 
+
+
 onMounted(async () => {
+    await fetchData()
+});
+watchEffect(async () => {
+    group.value = groupStore.group
+    if (groupStore?.group?.project?.id && authStore?.user?.role == 'student') {
+        project.value = projectStore.item
+    }
+
+})
+
+const fetchData = async () => {
     await authStore.fetchUser()
     await groupStore.getMyGroup()
+    project.value = projectStore.item
     if (groupStore?.group?.project?.id && authStore?.user?.role == 'student') {
         await projectStore.findItem(groupStore?.group?.project?.id, authStore?.user?.student?.id, authStore?.user?.role)
         project.value = projectStore.item
+    } else {
+        project.value = null
     }
-});
-watchEffect(() => {
-    group.value = groupStore.group
+}
 
-})
+const stopProject = async () => {
+    if (group.value?.status == 'finding') {
+        const param = {
+            projectId: project.value?.id,
+            groupId: group.value?.id
+        }
+        await groupStore.stopProject(param)
+        await fetchData()
+    } else {
+        showToast('Bạn không thể rời nhóm !', 'info')
+    }
+}
 const statusLabel = (status) => {
     const statuses = {
         create: "Đang lập nhóm",

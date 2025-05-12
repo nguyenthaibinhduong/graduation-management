@@ -93,6 +93,14 @@ export function createGroupStore(entity) {
       }
       
     }
+    const stopProject = async (param) => {
+      const { data } = await api.post(`/groups/stop-project`, param)
+      if (data) {
+        const msg ="Đã hủy ghi danh đề tài";
+        showToast(msg, "success");
+      }
+      
+    }
 
     const addItem = async (itemData ) => {
 
@@ -116,6 +124,6 @@ export function createGroupStore(entity) {
 
     
 
-    return { items,item, invite,total,group, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus,lockGroup,registerProject,changTeacher}
+    return { items,item, invite,total,group,stopProject, fetchItems, addItem, updateItem, deleteItem,findItem,getMyGroup ,getMyInvite,respondToInvite,updateStatus,lockGroup,registerProject,changTeacher}
   })
 }

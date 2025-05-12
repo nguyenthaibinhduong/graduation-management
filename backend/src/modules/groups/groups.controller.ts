@@ -279,4 +279,30 @@ export class GroupsController {
       );
     }
   }
+
+  @Post('stop-project')
+  async stopProject(
+    @DecodedId(["body", "groupId"]) groupId: number,
+    @DecodedId(["body", "projectId"]) projectId: number,
+    @Request() request: any,
+): Promise<Response<any>> {
+  try {
+    const userId = request.user?.id;
+
+    if (!userId) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+        HttpStatus.ERROR,
+      );
+    }
+
+    const result = await this.groupsService.stopProject(groupId,projectId);
+      return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
 }

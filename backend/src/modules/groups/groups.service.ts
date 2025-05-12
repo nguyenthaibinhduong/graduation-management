@@ -499,7 +499,7 @@ async lockGroup(department_id: any, userId: string) {
     const group:any = await this.check_exist_with_data(Group, {
       where: {id : groupId, status: In(['finding']), project :{id:project?.id}},
     }, 'Nhóm không hợp lệ')
-    group.project = []
+    group.project = null
     group.status = 'approved'
     await this.groupRepository.save(group)
     
