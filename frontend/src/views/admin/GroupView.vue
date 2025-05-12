@@ -116,6 +116,7 @@
                             { label: 'Duyệt nhóm', value: 'approved' },
                             { label: 'Ghi danh đề tài ' + (detail?.project?.title || ''), value: 'finding' },
                             { label: 'Chấp nhận ghi danh ', value: 'success' },
+                            { label: 'Hủy nhóm ', value: 'rejected' },
                         ]" optionLabel="label" optionValue="value" placeholder="Chọn trạng thái" />
                     </div>
                     <div v-if="update.status == 'success'" class="flex flex-col gap-y-1 mt-2">

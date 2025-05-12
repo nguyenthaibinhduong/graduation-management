@@ -187,4 +187,6 @@ const getDetail = (data) => {
 const handleSelectData = (ids) => {
     selectedIds.value = ids;
 };
+
+
 </script>

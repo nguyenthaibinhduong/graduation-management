@@ -5,12 +5,24 @@
 
         <!-- Thông tin đề tài -->
         <div class="w-full grid grid-cols-2 gap-x-4">
-            <div class="bg-white p-6 rounded-2xl shadow-sm">
+            <div v-if="project?.title" class="bg-white p-6 rounded-2xl shadow-sm relative">
                 <div class="text-xl font-semibold mb-2">Thông tin đề tài</div>
                 <div><strong>Tên đề tài:</strong> {{ project?.title || 'Chưa có' }}</div>
-                <div><strong>Mô tả:</strong> {{ project?.description || 'Không có mô tả' }}</div>
-                <div><strong>Giảng viên hướng dẫn:</strong> {{ project?.teacher?.degree + ' ' }} {{
+                <div><strong>Mô tả: <br></strong> {{ project?.description || 'Không có mô tả' }}</div>
+                <div><strong>Giảng viên hướng dẫn:</strong> {{
                     project?.teacher?.user?.fullname || 'Chưa có' }}</div>
+                <div v-if="group?.status == 'finding'" class=" absolute bottom-5 right-5">
+                    <Button
+                        class="mt-3 mx-auto bg-red-600 text-white hover:bg-red-500 border-red-600 transition-colors duration-300"
+                        icon="pi pi-minus" size="small" label="Huỷ ghi danh đề tài" />
+                </div>
+            </div>
+            <div v-else class=" bg-white p-6 rounded-2xl shadow-sm w-full flex flex-col items-start">
+                <div class="text-xl font-semibold mb-2">Thông tin đề tài</div>
+                <span class="text-gray-500 text-sm w-full text-center">Bạn hiện chưa đăng ký đề tài</span>
+                <Button class="mt-3 mx-auto bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300"
+                    icon="pi pi-plus" size="small" label="Đăng ký đề tài"
+                    @click="router.push(`/student-project-public`)" />
             </div>
 
             <!-- Thành viên nhóm -->
@@ -34,10 +46,10 @@
                             </li>
                         </ul>
                     </div>
-                    <!-- <div>
+                    <div>
                         <span class="font-medium">Trạng thái:</span>
                         <span :class="statusClass(group?.status)">{{ statusLabel(group?.status) }}</span>
-                    </div> -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,6 +81,8 @@ import Column from 'primevue/column'
 import { useGroupStore, useProjectStore } from '@/stores/store';
 import { onMounted, ref, watchEffect } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
+import { Button } from 'primevue';
 
 const grades = [
     { type: 'Giữa kỳ', score: 8.5 },
@@ -81,16 +95,41 @@ const projectStore = useProjectStore()
 const authStore = useAuthStore()
 const group = ref()
 const project = ref()
+const router = useRouter()
 
 onMounted(async () => {
     await authStore.fetchUser()
     await groupStore.getMyGroup()
     if (groupStore?.group?.project?.id && authStore?.user?.role == 'student') {
         await projectStore.findItem(groupStore?.group?.project?.id, authStore?.user?.student?.id, authStore?.user?.role)
+        project.value = projectStore.item
     }
 });
 watchEffect(() => {
     group.value = groupStore.group
-    project.value = projectStore.item
+
 })
+const statusLabel = (status) => {
+    const statuses = {
+        create: "Đang lập nhóm",
+        pending: "Đang chờ duyệt",
+        approved: "Đã duyệt",
+        reject: "Đã huỷ",
+        finding: "Đang ghi danh",
+        success: "Thực hiện đề tài"
+    };
+    return statuses[status] || "Không xác định";
+};
+
+const statusClass = (status) => {
+    const classes = {
+        create: "bg-blue-100 text-blue-700 px-2  py-1 ms-2 text-sm rounded-full",
+        pending: "bg-yellow-100 text-yellow-700 px-2  py-1 ms-2 text-sm rounded-full",
+        approved: "bg-green-100 text-green-700 px-2  py-1 ms-2 text-sm rounded-full",
+        reject: "bg-red-100 text-red-700 px-2  py-1 ms-2 text-sm rounded-full",
+        finding: "bg-yellow-300 text-white px-2  py-1 ms-2 text-sm rounded-full",
+        success: "bg-green-600 text-white px-2  py-1 ms-2 text-sm rounded-full",
+    };
+    return classes[status] || "";
+};
 </script>

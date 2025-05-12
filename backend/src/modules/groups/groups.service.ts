@@ -3,6 +3,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
 import { Group } from 'src/entities/group.entity';
+import { Project } from 'src/entities/project.entity';
 import { Student } from 'src/entities/student.entity';
 import { Teacher } from 'src/entities/teacher.entity';
 import { User, UserRole } from 'src/entities/user.entity';
@@ -432,8 +433,12 @@ async lockGroup(department_id: any, userId: string) {
       const user = await this.check_exist_with_data(User, {
           where: { id: userDta?.id },
           relations:{student:true}
-        }, 'Tài khoản không hợp lệ');
-      if (group?.leader && group?.leader?.id == user?.student?.id && group?.status != 'approved' && group?.total_member == 1){
+      }, 'Tài khoản không hợp lệ');
+      if (['approved', 'finding', 'success'].includes(group?.status)) {
+        throw new Error("Không thể Hủy nhóm trong trạng thái này");
+      }
+      if (group?.leader && group?.leader?.id == user?.student?.id && group?.status != 'approved' && group?.total_member == 1) {
+       
         group.status = "rejected";
         group.student_attemp = [];
         group.total_member = 1;
@@ -484,6 +489,21 @@ async lockGroup(department_id: any, userId: string) {
     }, 'Giáo viên không hợp lệ')
     group.teacher = teacher
     return this.groupRepository.save(group)
+  }
+
+  async stopProject(groupId: any, projectId: any) {
+    
+    const project = await this.check_exist_with_data(Project, {
+      where:{id: projectId},
+    }, 'Đề tài không hợp lệ')
+    const group:any = await this.check_exist_with_data(Group, {
+      where: {id : groupId, status: In(['finding']), project :{id:project?.id}},
+    }, 'Nhóm không hợp lệ')
+    group.project = []
+    group.status = 'approved'
+    await this.groupRepository.save(group)
+    
+
   }
 
  freshData(data: any) {

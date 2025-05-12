@@ -16,7 +16,7 @@
     <div class="w-full p-4 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Danh sách đề tài -->
         <div class="lg:col-span-2 space-y-4">
-            <Card v-if="!group?.status == 'success'" v-for="(project, index) in projects" :key="index"
+            <Card v-for="(project, index) in projects" :key="index"
                 class="shadow-sm border border-gray-300 hover:shadow-md hover:border-blue-600 transition-all cursor-pointer rounded-xl">
                 <!-- Tiêu đề + nút thông tin -->
                 <template #title>
@@ -47,7 +47,7 @@
                 <template #footer>
                     <Button icon="pi pi-plus" size="small" label="Ghi danh"
                         class="w-full mt-3 bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300"
-                        @click.stop="registerProject(project.id)" />
+                        @click.stop="registerProject(project?.id)" />
                 </template>
             </Card>
 
@@ -138,9 +138,11 @@ watch(statusData, async (newSelection) => {
     await projectStore.fetchItemsForStudent(newSelection, authStore.user.student.id);
 });
 
-const registerProject = () => {
-    if (group?.status !== "approve") {
+const registerProject = (id) => {
+    if (group.value?.status != "approved") {
         showToast("Nhóm không được phép đăng ký đề tài", 'info')
+    } else {
+        router.push(`/project-detail/${id}`)
     }
 }
 

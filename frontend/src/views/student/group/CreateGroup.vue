@@ -184,13 +184,15 @@
                     <span class="font-medium">Trạng thái:</span>
                     <span :class="statusClass(group?.status)">{{
                         statusLabel(group?.status)
-                        }}</span>
+                    }}</span>
                 </div>
                 <div class="flex justify-end space-x-2">
-                    <Button v-if="group.status !== 'approved' && student?.id != group?.leader?.id" label="Rời nhóm"
-                        icon="pi pi-sign-out" variant="outlined" severity="danger" @click="cancelGroup(group.id)" />
-                    <Button v-if="group.status !== 'approved' && student?.id == group?.leader?.id" label="Hủy nhóm"
-                        icon="pi pi-user-minus" variant="outlined" severity="danger" @click="cancelGroup(group.id)" />
+                    <Button v-if="['create', 'pending'].includes(group?.status) && student?.id != group?.leader?.id"
+                        label="Rời nhóm" icon="pi pi-sign-out" variant="outlined" severity="danger"
+                        @click="cancelGroup(group.id)" />
+                    <Button v-if="['create', 'pending'].includes(group?.status) && student?.id == group?.leader?.id"
+                        label="Hủy nhóm" icon="pi pi-user-minus" variant="outlined" severity="danger"
+                        @click="cancelGroup(group.id)" />
                 </div>
             </div>
         </div>

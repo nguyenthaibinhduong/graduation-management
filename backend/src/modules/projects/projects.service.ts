@@ -316,10 +316,7 @@ export class ProjectsService extends BaseService<Project> {
           throw new NotFoundException('Không có quyền truy cập đề tài này');
         }
       }
-
-      // Cập nhật trạng thái
-      project.status = status;
-      await this.projectRepository.save(project);
+      await this.projectRepository.update(project?.id,{status});
     } catch (error) {
       throw new BadRequestException(`Lỗi: ${error.message}`);
     }
