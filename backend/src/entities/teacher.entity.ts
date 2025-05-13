@@ -14,6 +14,7 @@ import { User } from './user.entity';
 import { Committee } from './committee.entity';
 import { Position } from './position.entity';
 import { Department } from './department.entity';
+import { Group } from './group.entity';
 
 @Entity('teachers')
 export class Teacher {
@@ -45,6 +46,15 @@ export class Teacher {
   @ManyToOne(() => Department, (department) => department.teachers)
   @JoinColumn({ name: 'department_id' })
   department: Department;
+
+  //Giao vien phan bien
+  @ManyToMany(() => Group, (group) => group.facultyReviewers)
+  @JoinTable({
+    name: 'faculty_reviewers',
+    joinColumn: { name: 'teacher_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'group_id', referencedColumnName: 'id' },
+  })
+  facultyReviewGroups?: Group[];
 
   @Column()
   degree: string;
