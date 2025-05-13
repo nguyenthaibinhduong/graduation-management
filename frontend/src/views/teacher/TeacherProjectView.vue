@@ -1,6 +1,6 @@
 <template>
   <div class="w-full flex gap-x-4 p-2 rounded-lg">
-    <Button size="small" label="Đề tài sinh viên" :outlined="statusData !== 'propose'"
+    <Button size="small" label="Đề tài đề xuất" :outlined="statusData !== 'propose'"
       :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'propose'" />
     <Button size="small" label="Đề tài chưa duyệt" :outlined="statusData !== 'pending'"
       :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'pending'" />
@@ -13,7 +13,6 @@
   </div>
   <DataTableCustom title="Danh sách đề tài - Giảng viên" :data="projects" :columns="[
     { field: 'title', header: 'Tên đề tài' },
-    { field: 'description', header: 'Mô tả' },
     { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
     { field: 'course.name', header: 'Học kỳ' },
     {

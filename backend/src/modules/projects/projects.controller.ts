@@ -214,4 +214,30 @@ export class ProjectsController {
       );
     }
   }
+
+   @Post('assign-group')
+      async assignGroup(
+        @DecodedId(["body", "group_ids"]) group_ids: number[],
+        @DecodedId(["body", "project_id"]) project_id: number,
+        @Request() request: any,
+    ): Promise<Response<any>> {
+      try {
+        const userId = request.user?.id;
+    
+        if (!userId) {
+          throw new HttpException(
+            { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+            HttpStatus.ERROR,
+          );
+        }
+    
+        const result = await this.projectService.assignGroupForProject(group_ids,project_id,userId);
+          return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
+        } catch (error) {
+          throw new HttpException(
+            { statusCode: HttpStatus.ERROR, message: error.message },
+            HttpStatus.ERROR,
+          );
+        }
+      }
 }

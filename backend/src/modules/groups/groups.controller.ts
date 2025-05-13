@@ -129,13 +129,19 @@ export class GroupsController {
   @Post('register-project')
   async registerProject(
     @DecodedId(["body","group_id"]) groupId: number,
-    @DecodedId(["body","project_id"]) projectId: number,
+    @DecodedId(["body", "project_id"]) projectId: number,
+    @Request() request: any
   ): Promise<Response<void>> {
     try {
-      const registeredGroup = await this.groupsService.registerProject(
-        groupId,
-        projectId,
+      const userId = request.user?.id;
+
+    if (!userId || !groupId) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin' },
+        HttpStatus.ERROR,
       );
+    }
+      const registeredGroup = await this.groupsService.registerProject(groupId,projectId,userId);
       return new Response(registeredGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

@@ -127,6 +127,23 @@ export abstract class BaseService<T> {
     return existingRecord;
   }
 
+  async check_exist_with_datas<T>(
+    entity: EntityTarget<T>,
+    where: any,
+    length: number,
+    errorMessage: string,
+  ): Promise<T[]> {
+    const existingRecord = await this.repository.manager.find(entity, {
+      ...where,
+    });
+
+    if ((!existingRecord || existingRecord.length != length) && errorMessage) {
+      throw new Error(errorMessage);
+    }
+
+    return existingRecord;
+  }
+
   // ============= Loại bỏ pasword ra khỏi thông tin user ==============================//
   remove_password_field(items: any) {
     if (items?.password) {

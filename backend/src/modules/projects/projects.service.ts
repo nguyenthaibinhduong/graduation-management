@@ -18,6 +18,7 @@ import { Course } from 'src/entities/course.entity';
 import { User, UserRole } from 'src/entities/user.entity';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
 import { Roles } from 'src/common/decorators/roles.decorators';
+import { Group } from 'src/entities/group.entity';
 @Injectable()
 export class ProjectsService extends BaseService<Project> {
   constructor(
@@ -291,6 +292,32 @@ export class ProjectsService extends BaseService<Project> {
       throw new NotFoundException('Không có quyền truy cập đề tài này');
     }
   }
+
+  async assignGroupForProject(group_ids:any, project_id:any, user_id:any) {
+    const user:any = await this.check_exist_with_data(User, {
+      where:{id: user_id},
+    }, 'Tài khoản không hợp lệ')
+    if (['admin','teacher'].includes(user?.role)) {
+      const project:any = await this.check_exist_with_data(Project, {
+        where:{id: project_id},
+      }, 'Đề tài không hợp lệ')
+      if (group_ids?.length < 1) {
+        throw new Error("Chưa chọn nhóm để thêm");
+      }
+      const groups:any[] = await this.check_exist_with_datas(Group, {
+        where:{id: project_id},
+      }, group_ids?.length,'Danh sách nhóm không hợp lệ')
+      await this.repository.update(project?.id, {
+        groups
+      })
+
+
+    } else {
+      throw new Error("Tài khoản không có quyền");
+    }
+  }
+     
+ 
 
   async updateStatus(data: any, type: string): Promise<void> {
     try {

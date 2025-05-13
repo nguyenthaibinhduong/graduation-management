@@ -41,6 +41,10 @@ const projectService = (resource) => ({
      
       return  api.post(`/${resource}/remove-multi/${type}`,body)
     }
+  },
+
+  assign: async(data) => {
+    return  api.post(`/${resource}/assign-group`,data)
   }
    
 })

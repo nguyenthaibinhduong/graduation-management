@@ -207,28 +207,33 @@ async createGroup(data: any, user_id: any): Promise<Group> {
 }
 
 
-  async registerProject(groupId: number, projectId: number): Promise<any> {
-    const group = await this.repository.findOne({
-      where: { id: groupId ,status: "approved"},
-      relations: { project: true },
-    });
+  async registerProject(groupId: number, projectId: number, userId: any): Promise<any> {
+    const user = await this.check_exist_with_data(User, {
+      where: {
+        id: userId,
+      }
+    }, null);
+    
+    const group = await this.check_exist_with_data(Group,{
+      where: { id: groupId },
+    },'Nhóm không tồn tại ! Hãy đăng ký nhóm');
+    
     const project:any = await this.repository.manager.findOne('Project', {
       where: { id: projectId },
       relations: ['groups','teacher','teacher.user'],
     });
+    
     if (!project) {
       throw new Error('Đề tài không tồn tại');
     }
     // if (project?.group?.length >= project.max_total_group) {
     //   throw new Error("Đề tài đã đầy");
     // }
-    if (!group) {
-      throw new Error('Nhóm không tồn tại ! Hãy đăng ký nhóm');
-    }
-    if (group?.status != "approved") {
+
+    if (group?.status != "approved" && user?.role == UserRole.STUDENT) {
       throw new Error('Nhóm khoong trong đợt đăng ký');
     }
-    if (group?.project) {
+    if (group?.project && user?.role == UserRole.STUDENT) {
       throw new Error('Nhóm đã đăng ký dự án trước đó');
     }
     if (project?.status != "public") {
@@ -238,10 +243,17 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       throw new Error(`Đề tài đã quá số lượng đăng ký ! Vui lòng đăng ký đề tài hoặc liên hệ với giảng viên ${project?.teacher?.user?.fullname} đễ được hỗ trợ`);
     }
 
-    group.project = project;
-    group.teacher = project?.teacher;
-    group.status = 'finding';
-    return this.repository.save(group);
+    if (user?.role == UserRole.STUDENT) {
+      group.project = project;
+      group.teacher = project?.teacher;
+      group.status = 'finding';    
+      return this.repository.save(group);
+    } else if(user?.role == UserRole.ADMIN){
+      return this.repository.update(group?.id, {
+        project,
+        status : 'finding'
+      });
+    }
   }
 
 
@@ -339,7 +351,7 @@ async lockGroup(department_id: any, userId: string) {
       .map(group => group.id);
 
     const toDeleteIds = allGroups
-      .filter(group => !['pending', 'approved'].includes(group.status))
+      .filter(group => !['pending', 'approved','finding','success'].includes(group.status))
       .map(group => group.id);
 
     if (toApproveIds.length > 0) {
@@ -505,6 +517,9 @@ async lockGroup(department_id: any, userId: string) {
     
 
   }
+
+
+    
 
  freshData(data: any) {
     if (data?.students) {

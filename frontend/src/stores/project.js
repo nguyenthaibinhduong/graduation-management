@@ -58,6 +58,11 @@ export function createProjectStore(entity="projects") {
       showToast("Đã cập nhật trạng thái !", "success");
     }
 
-    return { items,item ,total,updateStatusItem,publicItem , fetchItems,fetchItemsForStudent,fetchItemsForTeacher,addItem,updateItem,deleteItem,findItem }
+    const assignGroup = async (data)=>{
+      await projectService(entity).assign(data)
+      showToast("Đã phân nhóm cho đề tài !", "success");
+    }
+
+    return { items,item ,total,updateStatusItem,publicItem ,assignGroup, fetchItems,fetchItemsForStudent,fetchItemsForTeacher,addItem,updateItem,deleteItem,findItem }
   })
 }

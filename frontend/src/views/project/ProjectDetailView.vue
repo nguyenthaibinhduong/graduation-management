@@ -3,23 +3,18 @@
     <Card class="w-full max-w-5xl bg-white shadow-md rounded-xl">
       <!-- Tiêu đề và trạng thái -->
       <template #title>
-        <div class="flex justify-between items-center border-b pb-4">
+        <div class="flex  items-center border-b pb-4">
           <h2 class="text-2xl font-bold text-blue-800">
             Đề tài: {{ project.title || "Chưa có tiêu đề" }}
           </h2>
-          <span :class="statusClass(project.status)">
-            {{ statusLabel(project.status) }}
-          </span>
+
         </div>
       </template>
 
       <!-- Nội dung chính -->
       <template #content>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-blue-50 rounded-md text-blue-800">
-          <div class="space-y-1">
-            <label class="font-semibold">📄 Mô tả:</label>
-            <p>{{ project.description || "Chưa cập nhật" }}</p>
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-blue-50 rounded-md text-blue-800">
+
 
           <div class="space-y-1">
             <label class="font-semibold">👨‍🏫 GV Hướng dẫn:</label>
@@ -36,10 +31,19 @@
             <p>{{ project.course?.name || "Chưa xác định" }}</p>
           </div>
         </div>
+        <div class="my-2 px-2">
+          <label class="font-semibold">📄 Mô tả:</label>
+          <p>{{ project.description || "Chưa cập nhật" }}</p>
+        </div>
 
         <!-- Nội dung chi tiết -->
         <div class="mt-8">
           <h3 class="text-center text-xl font-bold text-blue-900 mb-4">📝 Nội dung đề tài</h3>
+          <div class=" w-full flex justify-center">
+            <span :class="statusClass(project.status)">
+              {{ statusLabel(project.status) }}
+            </span>
+          </div>
           <div class="border border-gray-300 rounded-lg p-5 text-gray-800 leading-relaxed">
             <span v-html="safeHtml(project?.content) || 'Chưa cập nhật'"></span>
           </div>
