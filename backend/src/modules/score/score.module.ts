@@ -7,12 +7,13 @@ import { ScoreDetail } from 'src/entities/score_detail.entity';
 import { Project } from 'src/entities/project.entity';
 import { Group } from 'src/entities/group.entity';
 import { Student } from 'src/entities/student.entity';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Score, ScoreDetail, Project, Group, Student]),
   ],
   controllers: [ScoreController],
-  providers: [ScoreService],
+  providers: [ScoreService, JwtUtilityService],
 })
 export class ScoreModule {}

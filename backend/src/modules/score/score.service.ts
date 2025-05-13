@@ -24,6 +24,7 @@ import { BaseService } from 'src/common/base.service';
 import { Committee } from 'src/entities/committee.entity';
 import { CreateScoreDetailDto } from './dto/score-detail.dto';
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 @Injectable()
 export class ScoreService extends BaseService<Score> {
@@ -35,6 +36,7 @@ export class ScoreService extends BaseService<Score> {
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
     private readonly dataSource: DataSource,
+    private readonly jwtUtilityService: JwtUtilityService,
   ) {
     super(scoreRepository);
   }
@@ -333,32 +335,6 @@ export class ScoreService extends BaseService<Score> {
     return null;
   }
 
-  async calculateTotalScore(studentId: any): Promise<number | null> {
-    // Find score details with their related criteria
-    const scoreDetails = await this.scoreDetailRepository.find({
-      where: { student: { id: studentId } },
-      relations: ['criteria'],
-    });
-
-    if (!scoreDetails || scoreDetails.length === 0) {
-      return null;
-    }
-
-    let totalWeightedScore = 0;
-    let totalWeight = 0;
-
-    scoreDetails.forEach((scoreDetail) => {
-      const weight = scoreDetail.criteria.weightPercent || 0;
-
-      totalWeightedScore += weight * scoreDetail.scoreValue;
-
-      totalWeight += weight;
-    });
-
-    const finalScore = totalWeightedScore / totalWeight;
-    return Number(finalScore.toFixed(2));
-  }
-
   /**
    * Calculate scores by teacher type (advisor, reviewer, committee)
    * @param studentId The student ID to calculate scores for
@@ -473,6 +449,7 @@ export class ScoreService extends BaseService<Score> {
       }
 
       return {
+        studentId: this.jwtUtilityService.encodeId(studentId),
         byType: scoresByType,
         weightedTotal: finalScore,
         appliedWeights: {
@@ -493,45 +470,32 @@ export class ScoreService extends BaseService<Score> {
     }
   }
 
-  async findEnrollmentSessionIdByStudentId(
-    studentId: number,
-  ): Promise<number | null> {
+  async updateScoreDetail(
+    id: number,
+    updateData: Partial<ScoreDetail>,
+  ): Promise<ScoreDetail> {
+    const queryRunner = this.dataSource.createQueryRunner();
     try {
-      // First find the student with their group
-      const student = await this.repository.manager.findOne(Student, {
-        where: { id: studentId },
-        relations: ['group'],
-      });
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
 
-      if (!student || !student.group) {
-        return null; // Student not found or not assigned to any group
+      const scoreDetail = await queryRunner.manager.findOne(ScoreDetail, {
+        where: { id },
+      });
+      if (!scoreDetail) {
+        throw new NotFoundException('Score detail not found');
       }
 
-      // Find the group with its project
-      const group = await this.repository.manager.findOne(Group, {
-        where: { id: student.group.id },
-        relations: ['project'],
-      });
+      Object.assign(scoreDetail, updateData);
+      const updatedScoreDetail = await queryRunner.manager.save(scoreDetail);
 
-      if (!group || !group.project) {
-        return null; // Group not found or no project assigned
-      }
-
-      // Find the project with its session
-      const project = await this.repository.manager.findOne(Project, {
-        where: { id: group.project.id },
-        relations: ['session'],
-      });
-
-      if (!project || !project.session) {
-        return null; // Project not found or no session assigned
-      }
-
-      return project.session.id;
+      await queryRunner.commitTransaction();
+      return updatedScoreDetail;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error finding enrollment session by student ID',
-      );
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('Error updating score detail');
+    } finally {
+      await queryRunner.release();
     }
   }
 }

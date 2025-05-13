@@ -19,6 +19,8 @@ import {
   CreateStudentScoreDto,
 } from './dto/create-score.dto';
 import { CreateScoreDetailDto } from './dto/score-detail.dto';
+import { DecodedId } from 'src/common/decorators/decode-id.decorators';
+import { ScoreDetail } from 'src/entities/score_detail.entity';
 
 @Controller('score')
 @UseGuards(JwtAuthGuard)
@@ -108,61 +110,9 @@ export class ScoreController {
     }
   }
 
-  @Get('student/:studentId/total-score')
-  async getStudentTotalScore(
-    @Param('studentId') studentId: string | number,
-  ): Promise<Response<any>> {
-    try {
-      const totalScore = await this.scoreService.calculateTotalScore(studentId);
-      return new Response(
-        { studentId, totalScore },
-        HttpStatus.SUCCESS,
-        Message.SUCCESS,
-      );
-    } catch (error) {
-      throw new HttpException(
-        { statusCode: HttpStatus.ERROR, message: error.message },
-        HttpStatus.ERROR,
-      );
-    }
-  }
-
-  @Get('student/scores-by-type/:studentId')
-  async getScoresByTeacherType(
-    @Param('studentId') studentId: string | number,
-  ): Promise<Response<any>> {
-    try {
-      const scoresByType = await this.scoreService.calculateScoresByTeacherType(
-        Number(studentId),
-      );
-
-      if (!scoresByType) {
-        return new Response(
-          { studentId, scores: {} },
-          HttpStatus.SUCCESS,
-          'No scores found for this student',
-        );
-      }
-
-      return new Response(
-        {
-          studentId,
-          scores: scoresByType,
-        },
-        HttpStatus.SUCCESS,
-        Message.SUCCESS,
-      );
-    } catch (error) {
-      throw new HttpException(
-        { statusCode: HttpStatus.ERROR, message: error.message },
-        HttpStatus.ERROR,
-      );
-    }
-  }
-
   @Get('student/weighted-total-score/:studentId')
   async getWeightedTotalScore(
-    @Param('studentId') studentId: string | number,
+    @DecodedId(['params', 'studentId']) studentId: number,
   ): Promise<Response<any>> {
     try {
       const scoreData = await this.scoreService.calculateWeightedTotalScore(
@@ -179,7 +129,7 @@ export class ScoreController {
 
       return new Response(
         {
-          studentId,
+          studentId: scoreData.studentId,
           weightedTotal: scoreData.weightedTotal,
           byType: scoreData.byType,
           appliedWeights: scoreData.appliedWeights,
@@ -188,6 +138,29 @@ export class ScoreController {
         },
         HttpStatus.SUCCESS,
         Message.SUCCESS,
+      );
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Put('detail/:id')
+  async updateScoreDetail(
+    @Param() scoreDetailId: number,
+    @Body() updateData: Partial<ScoreDetail>,
+  ): Promise<Response<ScoreDetail>> {
+    try {
+      const updatedScoreDetail = await this.scoreService.updateScoreDetail(
+        scoreDetailId,
+        updateData,
+      );
+      return new Response(
+        updatedScoreDetail,
+        HttpStatus.SUCCESS,
+        'Score detail updated successfully',
       );
     } catch (error) {
       throw new HttpException(
