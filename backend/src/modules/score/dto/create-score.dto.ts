@@ -1,10 +1,33 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateScoreDto {
+export class CreateGroupScoreDto {
   @IsNotEmpty()
-  @IsString()
-  comment: string;
+  group_id: any;
+
+  @IsNotEmpty()
+  project_id: any;
 
   @IsOptional()
-  total_score: number;
+  @IsString()
+  comment?: string;
+
+  @IsOptional()
+  @IsNumber()
+  totalScore?: number;
+}
+
+export class CreateStudentScoreDto {
+  @IsNotEmpty()
+  student_id: any;
+
+  @IsNotEmpty()
+  project_id: any;
+
+  @IsOptional()
+  @IsString()
+  comment?: string;
+
+  @IsOptional()
+  @IsNumber()
+  totalScore?: number;
 }
