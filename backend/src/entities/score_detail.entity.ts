@@ -22,7 +22,7 @@ export class ScoreDetail {
   @JoinColumn({ name: 'score_id' })
   score: Score;
 
-  @OneToOne(() => Student, (student) => student.id)
+  @ManyToOne(() => Student, (student) => student.id)
   @JoinColumn({ name: 'student_id' })
   student: Student;
 

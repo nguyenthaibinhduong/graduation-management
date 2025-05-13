@@ -9,9 +9,9 @@ import {
 } from 'class-validator';
 
 export class CreateScoreDetailDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  score_id: number;
+  score_id?: number;
 
   @IsOptional()
   @IsNumber()
@@ -36,10 +36,10 @@ export class CreateScoreDetailDto {
   comment: string;
 
   @IsOptional()
-  @IsEnum(['GVHD', 'GVPB', 'HD'], {
-    message: 'teacherType must be one of: GVHD, GVPB, or HD',
+  @IsEnum(['advisor', 'reviewer', 'committee'], {
+    message: 'teacherType must be one of: advisor, reviewer, committee',
   })
-  teacherType?: 'GVHD' | 'GVPB' | 'HD';
+  teacherType?: 'advisor' | 'reviewer' | 'committee';
 }
 
 export class UpdateScoreDetailDto {
@@ -54,10 +54,10 @@ export class UpdateScoreDetailDto {
   comment?: string;
 
   @IsOptional()
-  @IsEnum(['GVHD', 'GVPB', 'HD'], {
-    message: 'teacherType must be one of: GVHD, GVPB, or HD',
+  @IsEnum(['advisor', 'reviewer', 'committee'], {
+    message: 'teacherType must be one of: advisor, reviewer, committee',
   })
-  teacherType?: 'GVHD' | 'GVPB' | 'HD';
+  teacherType?: 'advisor' | 'reviewer' | 'committee';
 }
 
 export class ScoreDetailResponseDto {
@@ -68,7 +68,7 @@ export class ScoreDetailResponseDto {
   teacher_id: number;
   scoreValue: number;
   comment: string;
-  teacherType?: 'GVHD' | 'GVPB' | 'HD';
+  teacherType?: 'advisor' | 'reviewer' | 'committee';
   created_at: Date;
   updated_at: Date;
 }

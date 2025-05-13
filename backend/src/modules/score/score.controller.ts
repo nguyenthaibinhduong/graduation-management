@@ -126,4 +126,74 @@ export class ScoreController {
       );
     }
   }
+
+  @Get('student/scores-by-type/:studentId')
+  async getScoresByTeacherType(
+    @Param('studentId') studentId: string | number,
+  ): Promise<Response<any>> {
+    try {
+      const scoresByType = await this.scoreService.calculateScoresByTeacherType(
+        Number(studentId),
+      );
+
+      if (!scoresByType) {
+        return new Response(
+          { studentId, scores: {} },
+          HttpStatus.SUCCESS,
+          'No scores found for this student',
+        );
+      }
+
+      return new Response(
+        {
+          studentId,
+          scores: scoresByType,
+        },
+        HttpStatus.SUCCESS,
+        Message.SUCCESS,
+      );
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Get('student/weighted-total-score/:studentId')
+  async getWeightedTotalScore(
+    @Param('studentId') studentId: string | number,
+  ): Promise<Response<any>> {
+    try {
+      const scoreData = await this.scoreService.calculateWeightedTotalScore(
+        Number(studentId),
+      );
+
+      if (!scoreData) {
+        return new Response(
+          { studentId, weighted: null, byType: {} },
+          HttpStatus.SUCCESS,
+          'No scores found for this student',
+        );
+      }
+
+      return new Response(
+        {
+          studentId,
+          weightedTotal: scoreData.weightedTotal,
+          byType: scoreData.byType,
+          appliedWeights: scoreData.appliedWeights,
+          missingEvaluations: scoreData.missingEvaluations,
+          isComplete: scoreData.isComplete,
+        },
+        HttpStatus.SUCCESS,
+        Message.SUCCESS,
+      );
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
 }

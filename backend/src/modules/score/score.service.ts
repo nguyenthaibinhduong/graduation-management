@@ -207,6 +207,9 @@ export class ScoreService extends BaseService<Score> {
     } = scoreDetail;
     const queryRunner = this.dataSource.createQueryRunner();
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
       // validate score_id
       const score = await queryRunner.manager.findOne(Score, {
         where: { id: score_id },
@@ -221,9 +224,10 @@ export class ScoreService extends BaseService<Score> {
       if (!teacher) {
         throw new NotFoundException('Teacher not found');
       }
-      // validate student_id
+      // validate student_id and get student with group relation
       const student = await queryRunner.manager.findOne(Student, {
         where: { id: student_id },
+        relations: ['group'],
       });
       if (!student) {
         throw new NotFoundException('Student not found');
@@ -236,6 +240,16 @@ export class ScoreService extends BaseService<Score> {
         throw new NotFoundException('Criteria not found');
       }
 
+      // Get group id from student and determine teacher type
+      let teacherRole = teacherType; // Use provided type as default
+
+      if (student.group) {
+        teacherRole = await this.determineTeacherType(
+          student.group.id,
+          teacher_id,
+        );
+      }
+
       // create score detail
       const scoreDetailEntity = new ScoreDetail();
       Object.assign(scoreDetailEntity, {
@@ -244,8 +258,9 @@ export class ScoreService extends BaseService<Score> {
         teacher: teacher,
         student: student,
         criteria: criteria,
-        teacherType: this.determineTeacherType(score_id, teacher_id),
+        teacherType: teacherRole,
       });
+
       // save score detail
       await queryRunner.manager.save(scoreDetailEntity);
       // commit transaction
@@ -260,15 +275,12 @@ export class ScoreService extends BaseService<Score> {
         throw error;
       }
       throw new InternalServerErrorException('Error creating score detail');
+    } finally {
+      // Always release the query runner
+      await queryRunner.release();
     }
   }
 
-  /**
-   * Determines the teacher's role type for a given group
-   * @param groupId - The ID of the group
-   * @param teacherId - The ID of the teacher
-   * @returns The type of teacher ('advisor', 'reviewer', 'committee') or null if not found
-   */
   async determineTeacherType(
     groupId: number,
     teacherId: number | string,
@@ -321,13 +333,6 @@ export class ScoreService extends BaseService<Score> {
     return null;
   }
 
-  /**
-   * Calculate weighted total score for a student using formula:
-   * totalScore = sum(weight * scoreValue) / 100
-   *
-   * @param studentId - The ID of the student
-   * @returns The weighted total score or null if no scores exist
-   */
   async calculateTotalScore(studentId: any): Promise<number | null> {
     // Find score details with their related criteria
     const scoreDetails = await this.scoreDetailRepository.find({
@@ -355,11 +360,139 @@ export class ScoreService extends BaseService<Score> {
   }
 
   /**
-   * Find enrollment session ID from project by student ID
-   *
-   * @param studentId - The ID of the student
-   * @returns The enrollment session ID or null if not found
+   * Calculate scores by teacher type (advisor, reviewer, committee)
+   * @param studentId The student ID to calculate scores for
+   * @returns Object with scores broken down by teacher type
    */
+  async calculateScoresByTeacherType(studentId: number): Promise<any> {
+    try {
+      // Get all score details for the student
+      const scoreDetails = await this.scoreDetailRepository.find({
+        where: { student: { id: studentId } },
+        relations: ['criteria', 'teacher'],
+      });
+
+      if (!scoreDetails || scoreDetails.length === 0) {
+        return null;
+      }
+
+      // Group scores by teacher type
+      const groupedScores = {
+        advisor: { totalWeightedScore: 0, totalWeight: 0, count: 0 },
+        reviewer: { totalWeightedScore: 0, totalWeight: 0, count: 0 },
+        committee: { totalWeightedScore: 0, totalWeight: 0, count: 0 },
+      };
+
+      // Process each score detail
+      scoreDetails.forEach((detail) => {
+        const type = detail.teacherType || 'unknown';
+        const weight = detail.criteria.weightPercent || 0;
+        const score = detail.scoreValue;
+
+        // Skip if invalid teacher type
+        if (!groupedScores[type] && type !== 'unknown') {
+          return;
+        }
+
+        if (groupedScores[type]) {
+          groupedScores[type].totalWeightedScore += weight * score;
+          groupedScores[type].totalWeight += weight;
+          groupedScores[type].count++;
+        }
+      });
+
+      // Calculate final scores
+      const result = {};
+      Object.entries(groupedScores).forEach(([type, data]) => {
+        if (data.totalWeight > 0 && data.count > 0) {
+          result[type] = {
+            score: Number(
+              (data.totalWeightedScore / data.totalWeight).toFixed(2),
+            ),
+            count: data.count,
+          };
+        } else {
+          result[type] = { score: null, count: 0 };
+        }
+      });
+
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error calculating scores by teacher type',
+      );
+    }
+  }
+
+  /**
+   * Calculate scores by teacher type with specified weights
+   * (advisor: 40%, reviewer: 30%, committee: 30%)
+   * @param studentId The student ID to calculate scores for
+   * @returns Object with scores broken down by teacher type and weighted total
+   */
+  async calculateWeightedTotalScore(studentId: number): Promise<any> {
+    try {
+      // Get scores by teacher type first
+      const scoresByType = await this.calculateScoresByTeacherType(studentId);
+
+      if (!scoresByType) {
+        return null;
+      }
+
+      // Define weights for each teacher type
+      const typeWeights = {
+        advisor: 0.4, // 40%
+        reviewer: 0.3, // 30%
+        committee: 0.3, // 30%
+      };
+
+      // Calculate weighted final score
+      let weightedTotal = 0;
+      let appliedWeightTotal = 0;
+      let missingTypes = [];
+
+      // Check which scores we have and calculate weighted score
+      Object.entries(typeWeights).forEach(([type, weight]) => {
+        if (scoresByType[type]?.score !== null) {
+          weightedTotal += scoresByType[type].score * weight;
+          appliedWeightTotal += weight;
+        } else {
+          missingTypes.push(type);
+        }
+      });
+
+      // Calculate final weighted score
+      let finalScore = null;
+      if (appliedWeightTotal > 0) {
+        // Normalize the score if we're missing some teacher types
+        if (appliedWeightTotal < 1) {
+          finalScore = Number((weightedTotal / appliedWeightTotal).toFixed(2));
+        } else {
+          finalScore = Number(weightedTotal.toFixed(2));
+        }
+      }
+
+      return {
+        byType: scoresByType,
+        weightedTotal: finalScore,
+        appliedWeights: {
+          advisor:
+            scoresByType.advisor?.score !== null ? typeWeights.advisor : 0,
+          reviewer:
+            scoresByType.reviewer?.score !== null ? typeWeights.reviewer : 0,
+          committee:
+            scoresByType.committee?.score !== null ? typeWeights.committee : 0,
+        },
+        missingEvaluations: missingTypes,
+        isComplete: missingTypes.length === 0,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error calculating weighted total score',
+      );
+    }
+  }
+
   async findEnrollmentSessionIdByStudentId(
     studentId: number,
   ): Promise<number | null> {
