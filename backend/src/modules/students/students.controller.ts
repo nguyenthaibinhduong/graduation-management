@@ -101,7 +101,7 @@ export class StudentsController {
   async update(
     @DecodedId(['params', 'id']) id: string,
     @Body(new ValidationPipe()) body: UpdateStudentDto,
-    @DecodedId(['body', 'department_id']) department_id?: string,
+    @DecodedId(['body', '                                                                                                                                                                                                                                     ']) department_id?: string,
     @DecodedId(['body', 'major_id']) major_id?: string,
   ): Promise<Response<Student>> {
     try {
