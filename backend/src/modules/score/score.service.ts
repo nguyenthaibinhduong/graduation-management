@@ -207,35 +207,35 @@ export class ScoreService extends BaseService<Score> {
       teacherType,
       ...data
     } = scoreDetail;
-    const queryRunner = this.dataSource.createQueryRunner();
-    try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
 
+    try {
       // validate score_id
-      const score = await queryRunner.manager.findOne(Score, {
+      const score = await this.repository.manager.findOne(Score, {
         where: { id: score_id },
       });
       if (!score) {
         throw new NotFoundException('Score not found');
       }
+
       // validate teacher_id
-      const teacher = await queryRunner.manager.findOne(Teacher, {
+      const teacher = await this.repository.manager.findOne(Teacher, {
         where: { id: teacher_id },
       });
       if (!teacher) {
         throw new NotFoundException('Teacher not found');
       }
+
       // validate student_id and get student with group relation
-      const student = await queryRunner.manager.findOne(Student, {
+      const student = await this.repository.manager.findOne(Student, {
         where: { id: student_id },
         relations: ['group'],
       });
       if (!student) {
         throw new NotFoundException('Student not found');
       }
+
       // validate criteria_id
-      const criteria = await queryRunner.manager.findOne(Criteria, {
+      const criteria = await this.repository.manager.findOne(Criteria, {
         where: { id: criteria_id },
       });
       if (!criteria) {
@@ -245,10 +245,29 @@ export class ScoreService extends BaseService<Score> {
       // Get group id from student and determine teacher type
       let teacherRole = teacherType; // Use provided type as default
 
-      if (student.group) {
+      if (student.group && !teacherRole) {
         teacherRole = await this.determineTeacherType(
           student.group.id,
           teacher_id,
+        );
+      }
+
+      // Check for existing score detail to avoid duplicates
+      const existingDetail = await this.repository.manager.findOne(
+        ScoreDetail,
+        {
+          where: {
+            score: { id: score_id },
+            teacher: { id: teacher_id },
+            student: { id: student_id },
+            criteria: { id: criteria_id },
+          },
+        },
+      );
+
+      if (existingDetail) {
+        throw new ConflictException(
+          'Score detail already exists for this combination of score, teacher, student, and criteria',
         );
       }
 
@@ -256,30 +275,26 @@ export class ScoreService extends BaseService<Score> {
       const scoreDetailEntity = new ScoreDetail();
       Object.assign(scoreDetailEntity, {
         ...data,
-        score: score,
-        teacher: teacher,
-        student: student,
-        criteria: criteria,
+        score,
+        teacher,
+        student,
+        criteria,
         teacherType: teacherRole,
       });
 
       // save score detail
-      await queryRunner.manager.save(scoreDetailEntity);
-      // commit transaction
-      await queryRunner.commitTransaction();
+      await this.repository.manager.save(scoreDetailEntity);
     } catch (error) {
-      // rollback transaction
-      await queryRunner.rollbackTransaction();
       if (error instanceof QueryFailedError) {
         throw new ConflictException('Score detail already exists');
       }
-      if (error instanceof NotFoundException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException('Error creating score detail');
-    } finally {
-      // Always release the query runner
-      await queryRunner.release();
     }
   }
 
@@ -500,17 +515,21 @@ export class ScoreService extends BaseService<Score> {
   }
 
   /**
-   * Get all groups where the specified teacher has a specific role
+   * Get all groups where the specified teacher has specific roles, organized by teacher type
    * @param teacherId The teacher ID to find groups for
    * @param teacherType Optional filter by specific teacher type (advisor, reviewer, committee)
-   * @returns Array of groups with relevant data
+   * @returns Object with groups organized by teacher role
    */
   async getGroupsByTeacherRole(
     teacherId: number,
     teacherType?: 'advisor' | 'reviewer' | 'committee',
-  ): Promise<Group[]> {
+  ): Promise<{ advisor?: Group[]; reviewer?: Group[]; committee?: Group[] }> {
     try {
-      let groups: Group[] = [];
+      const result: {
+        advisor?: Group[];
+        reviewer?: Group[];
+        committee?: Group[];
+      } = {};
 
       // If no specific teacher type is requested, or if specifically requesting advisor groups
       if (!teacherType || teacherType === 'advisor') {
@@ -520,15 +539,15 @@ export class ScoreService extends BaseService<Score> {
         });
 
         if (advisorGroups.length > 0) {
-          // Add a custom field to identify the role if needed
+          // Add a custom field to identify the role
           advisorGroups.forEach((group) => {
             (group as any).teacherRole = 'advisor';
           });
-          groups = [...groups, ...advisorGroups];
+          result.advisor = advisorGroups;
         }
 
         // If we only wanted advisor groups, return now
-        if (teacherType === 'advisor') return groups;
+        if (teacherType === 'advisor') return result;
       }
 
       // If no specific teacher type, or if specifically requesting reviewer groups
@@ -551,11 +570,11 @@ export class ScoreService extends BaseService<Score> {
           reviewerGroups.forEach((group) => {
             (group as any).teacherRole = 'reviewer';
           });
-          groups = [...groups, ...reviewerGroups];
+          result.reviewer = reviewerGroups;
         }
 
         // If we only wanted reviewer groups, return now
-        if (teacherType === 'reviewer') return groups;
+        if (teacherType === 'reviewer') return result;
       }
 
       // If no specific teacher type, or if specifically requesting committee groups
@@ -596,15 +615,15 @@ export class ScoreService extends BaseService<Score> {
             committeeGroups.forEach((group) => {
               (group as any).teacherRole = 'committee';
             });
-            groups = [...groups, ...committeeGroups];
+            result.committee = committeeGroups;
           }
         }
 
         // If we only wanted committee groups, return now
-        if (teacherType === 'committee') return groups;
+        if (teacherType === 'committee') return result;
       }
 
-      return groups;
+      return result;
     } catch (error) {
       console.error('Error fetching groups by teacher role:', error);
       throw new InternalServerErrorException(

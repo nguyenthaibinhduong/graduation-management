@@ -10,6 +10,7 @@ import {
   Put,
   UseGuards,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ScoreService } from './score.service';
 import { Response } from 'src/common/globalClass';
@@ -192,21 +193,26 @@ export class ScoreController {
    */
   @Get('teacher-groups/:teacherId')
   async getGroupsByTeacher(
-    @Param('teacherId') teacherId: number,
+    @Param('teacherId', ParseIntPipe) teacherId: number,
     @Query('type') teacherType?: 'advisor' | 'reviewer' | 'committee',
-  ): Promise<Response<Group[] | Group>> {
+  ): Promise<
+    Response<{ advisor?: Group[]; reviewer?: Group[]; committee?: Group[] }>
+  > {
     try {
       const groups = await this.scoreService.getGroupsByTeacherRole(
         teacherId,
         teacherType,
       );
 
+      // Check if any groups were found
+      const hasGroups = Object.values(groups).some(
+        (groupArray) => groupArray && groupArray.length > 0,
+      );
+
       return new Response(
         groups,
         HttpStatus.SUCCESS,
-        groups.length > 0
-          ? Message.SUCCESS
-          : 'No groups found for this teacher',
+        hasGroups ? Message.SUCCESS : 'No groups found for this teacher',
       );
     } catch (error) {
       throw new HttpException(
