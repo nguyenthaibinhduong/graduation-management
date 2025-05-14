@@ -21,6 +21,7 @@ import { EvaluationFormModule } from './modules/evaluation_form/evaluation_form.
 import { ScoreModule } from './modules/score/score.module';
 import { CommitteesModule } from './modules/committees/committees.module';
 import { GroupsModule } from './modules/groups/groups.module';
+import { CriteriaModule } from './modules/criteria/criteria.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { GroupsModule } from './modules/groups/groups.module';
     ScoreModule,
     CommitteesModule,
     GroupsModule,
+    CriteriaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -21,6 +21,8 @@ export const useEnrollmentStore = createBaseStore('enrollment_sessions')
 
 export const useEvaluationStore = createBaseStore('evaluation-forms')
 
+export const useCriteriaStore = createBaseStore('criterias')
+
 export const useGroupStore = createGroupStore('groups')
 
 export const useProjectStore = createProjectStore()
