@@ -82,7 +82,11 @@ onMounted(async () => {
   if (role === 'teacher') {
     items.value.push({
       label: 'Giảng viên',
-      items: [{ label: 'Đề tài', to: '/teacher-project' }],
+      items: [
+        { label: 'Đề tài', to: '/teacher-project' },
+        { label: 'Nhóm hướng dẫn', to: '/teacher-group-advisor' },
+        { label: 'Chấm điểm', to: '/score' }
+      ],
     })
   }
 

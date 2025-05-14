@@ -17,7 +17,7 @@
 
 
           <div class="space-y-1">
-            <label class="font-semibold">👨‍🏫 GV Hướng dẫn:</label>
+            <label class="font-semibold">👨‍🏫 GV tham chiếu:</label>
             <p>{{ project.teacher?.user?.fullname || "Chưa xác định" }}</p>
           </div>
 
@@ -48,6 +48,46 @@
             <span v-html="safeHtml(project?.content) || 'Chưa cập nhật'"></span>
           </div>
         </div>
+
+        <DataTableCustom v-if="authStore.user?.role == 'teacher'" title="Danh sách Nhóm sinh viên đăng ký đề tài"
+          :block="['toolbar', 'selectAll', 'headerBar', 'selectAll', 'action']" :data="project?.groups" :columns="[
+            { field: 'code', header: 'Mã nhóm' },
+            { field: 'name', header: 'Tên nhóm' },
+            {
+              field: 'status',
+              header: 'Trạng thái',
+              type: 'status',
+              statuses: [
+                {
+                  value: 'create',
+                  label: 'Đang lập nhóm',
+                  class: 'bg-blue-100 text-blue-700',
+                },
+                {
+                  value: 'pending',
+                  label: 'Đang chờ duyệt',
+                  class: 'bg-yellow-100 text-yellow-700',
+                },
+                {
+                  value: 'approved',
+                  label: 'Đã duyệt',
+                  class: 'bg-green-100 text-green-700',
+                },
+                { value: 'rejected', label: 'Đã huỷ', class: 'bg-red-100 text-red-700' },
+                {
+                  value: 'finding',
+                  label: 'Đã ghi danh',
+                  class: 'bg-orange-100 text-orange-700',
+                },
+                {
+                  value: 'success',
+                  label: 'Thực hiện đề tài',
+                  class: 'bg-green-600 text-white',
+                },
+              ],
+            }
+
+          ]" :total="project?.groups?.length" :loading="loading" />
       </template>
 
       <!-- Footer với các hành động -->
@@ -104,6 +144,7 @@ import { Button, Card } from "primevue";
 import MyInput from "@/components/form/MyInput.vue";
 import { showToast } from "@/utils/toast";
 import DOMPurify from 'dompurify';
+import DataTableCustom from "@/components/list/DataTableCustom.vue";
 
 
 const safeHtml = (rawHtml) => { return DOMPurify.sanitize(rawHtml) };
