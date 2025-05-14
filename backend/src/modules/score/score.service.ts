@@ -498,4 +498,118 @@ export class ScoreService extends BaseService<Score> {
       await queryRunner.release();
     }
   }
+
+  /**
+   * Get all groups where the specified teacher has a specific role
+   * @param teacherId The teacher ID to find groups for
+   * @param teacherType Optional filter by specific teacher type (advisor, reviewer, committee)
+   * @returns Array of groups with relevant data
+   */
+  async getGroupsByTeacherRole(
+    teacherId: number,
+    teacherType?: 'advisor' | 'reviewer' | 'committee',
+  ): Promise<Group[]> {
+    try {
+      let groups: Group[] = [];
+
+      // If no specific teacher type is requested, or if specifically requesting advisor groups
+      if (!teacherType || teacherType === 'advisor') {
+        const advisorGroups = await this.groupRepository.find({
+          where: { teacher: { id: teacherId } },
+          relations: ['project', 'students', 'leader', 'department'],
+        });
+
+        if (advisorGroups.length > 0) {
+          // Add a custom field to identify the role if needed
+          advisorGroups.forEach((group) => {
+            (group as any).teacherRole = 'advisor';
+          });
+          groups = [...groups, ...advisorGroups];
+        }
+
+        // If we only wanted advisor groups, return now
+        if (teacherType === 'advisor') return groups;
+      }
+
+      // If no specific teacher type, or if specifically requesting reviewer groups
+      if (!teacherType || teacherType === 'reviewer') {
+        const reviewerGroups = await this.groupRepository
+          .createQueryBuilder('group')
+          .innerJoinAndSelect(
+            'group.facultyReviewers',
+            'reviewer',
+            'reviewer.id = :teacherId',
+            { teacherId },
+          )
+          .leftJoinAndSelect('group.project', 'project')
+          .leftJoinAndSelect('group.students', 'students')
+          .leftJoinAndSelect('group.leader', 'leader')
+          .leftJoinAndSelect('group.department', 'department')
+          .getMany();
+
+        if (reviewerGroups.length > 0) {
+          reviewerGroups.forEach((group) => {
+            (group as any).teacherRole = 'reviewer';
+          });
+          groups = [...groups, ...reviewerGroups];
+        }
+
+        // If we only wanted reviewer groups, return now
+        if (teacherType === 'reviewer') return groups;
+      }
+
+      // If no specific teacher type, or if specifically requesting committee groups
+      if (!teacherType || teacherType === 'committee') {
+        // First get all committees where this teacher is a member
+        const committees = await this.dataSource
+          .createQueryBuilder()
+          .select('committee')
+          .from(Committee, 'committee')
+          .innerJoin(
+            'committee.teachers',
+            'teacher',
+            'teacher.id = :teacherId',
+            { teacherId },
+          )
+          .getMany();
+
+        if (committees.length > 0) {
+          // Then get all projects associated with these committees
+          const committeeIds = committees.map((committee) => committee.id);
+
+          // Finally get groups associated with these projects where the project has a committee link
+          const committeeGroups = await this.groupRepository
+            .createQueryBuilder('group')
+            .innerJoinAndSelect('group.project', 'project')
+            .innerJoin(
+              'project.committees',
+              'committee',
+              'committee.id IN (:...committeeIds)',
+              { committeeIds },
+            )
+            .leftJoinAndSelect('group.students', 'students')
+            .leftJoinAndSelect('group.leader', 'leader')
+            .leftJoinAndSelect('group.department', 'department')
+            .getMany();
+
+          if (committeeGroups.length > 0) {
+            committeeGroups.forEach((group) => {
+              (group as any).teacherRole = 'committee';
+            });
+            groups = [...groups, ...committeeGroups];
+          }
+        }
+
+        // If we only wanted committee groups, return now
+        if (teacherType === 'committee') return groups;
+      }
+
+      return groups;
+    } catch (error) {
+      console.error('Error fetching groups by teacher role:', error);
+      throw new InternalServerErrorException(
+        'Error retrieving groups for teacher',
+      );
+    }
+  }
 }

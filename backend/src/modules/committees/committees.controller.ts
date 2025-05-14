@@ -56,9 +56,8 @@ export class CommitteesController {
   }
 
   @Get(':id')
-  async findOne(@DecodedId(["params"])  id: string): Promise<Response<any>> {
+  async findOne(@DecodedId(['params']) id: string): Promise<Response<any>> {
     try {
-     
       const committee = await this.committeesService.getCommitteeById(id);
       return new Response(committee, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
@@ -71,14 +70,24 @@ export class CommitteesController {
 
   @Put(':id')
   async update(
-    @DecodedId(["params"]) id: string,
-    @Body(new ValidationPipe()) updateCommitteeDto: UpdateCommitteeDto,
+    @DecodedId(['params']) id: any,
+    @DecodedId(['body', 'course_id']) course_id: any,
+    @DecodedId(['body', 'department_id']) department_id: any,
+    @DecodedId(['body', 'project_ids']) project_ids: any,
+    @DecodedId(['body', 'teacher_ids']) teacher_ids: any,
+    @Body(new ValidationPipe()) body: UpdateCommitteeDto,
   ): Promise<Response<Committee>> {
     try {
-      const decodeId = this.jwtUtilityService.decodeId(id);
+      const committee = {
+        ...body,
+        course_id,
+        department_id,
+        project_ids,
+        teacher_ids,
+      };
       const updatedGroup = await this.committeesService.updateCommittee(
-        decodeId,
-        updateCommitteeDto,
+        id,
+        committee,
       );
       return new Response(updatedGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
@@ -91,27 +100,24 @@ export class CommitteesController {
 
   @Post()
   async create(
-
     @Body(new ValidationPipe()) createCommitteeDto: any,
     @DecodedId(['body', 'evaluation_id']) evaluation_id: any,
     @DecodedId(['body', 'course_id']) course_id: any,
     @DecodedId(['body', 'department_id']) department_id: any,
     @DecodedId(['body', 'project_ids']) project_ids: any,
-    @DecodedId(['body', 'teacher_ids']) teacher_ids: any
+    @DecodedId(['body', 'teacher_ids']) teacher_ids: any,
   ): Promise<Response<Committee>> {
     try {
-      const data:any = {
+      const data: any = {
         ...createCommitteeDto,
-      course_id,
-      department_id,
-      evaluation_id,
-      project_ids,
-      teacher_ids,
-      
-    } 
+        course_id,
+        department_id,
+        evaluation_id,
+        project_ids,
+        teacher_ids,
+      };
       // Await the result of the service method
-      const newCommittee =
-        await this.committeesService.createCommittee(data);
+      const newCommittee = await this.committeesService.createCommittee(data);
       return new Response(newCommittee, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -122,7 +128,7 @@ export class CommitteesController {
   }
 
   @Delete(':id')
-  async remove(@DecodedId(["params"]) id: string): Promise<Response<void>> {
+  async remove(@DecodedId(['params']) id: string): Promise<Response<void>> {
     try {
       const decodeId = this.jwtUtilityService.decodeId(id);
       const deletedCommittee =

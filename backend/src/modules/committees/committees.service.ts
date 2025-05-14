@@ -139,10 +139,7 @@ export class CommitteesService extends BaseService<Committee> {
     }
   }
 
-  async updateCommittee(
-    id: string,
-    updateData: UpdateCommitteeDto,
-  ): Promise<Committee> {
+  async updateCommittee(id: any, updateData: any): Promise<Committee> {
     const {
       course_id,
       department_id,
@@ -151,7 +148,6 @@ export class CommitteesService extends BaseService<Committee> {
       teacher_ids,
       ...data
     } = updateData;
-
     // Start a transaction
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -252,6 +248,7 @@ export class CommitteesService extends BaseService<Committee> {
 
       // Commit the transaction
       await queryRunner.commitTransaction();
+      console.log('savedCommittee', savedCommittee);
       return savedCommittee;
     } catch (error) {
       // Rollback the transaction in case of an error

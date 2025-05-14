@@ -45,24 +45,19 @@ export class CreateCommitteeDto {
   @IsOptional()
   status?: 'inactive' | 'active';
 
-  @IsInt()
   @IsOptional()
   course_id?: number;
 
-  @IsInt()
   @IsOptional()
   department_id?: number;
 
-  @IsInt()
   @IsOptional()
   evaluation_id?: number;
 
-  @IsArray()
   @IsOptional()
   @Type(() => Number)
   project_ids?: number[];
 
-  @IsArray()
   @IsOptional()
   @Type(() => Number)
   teacher_ids?: number[];

@@ -9,6 +9,7 @@ import {
   HttpException,
   Put,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ScoreService } from './score.service';
 import { Response } from 'src/common/globalClass';
@@ -21,13 +22,14 @@ import {
 import { CreateScoreDetailDto } from './dto/score-detail.dto';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 import { ScoreDetail } from 'src/entities/score_detail.entity';
+import { Group } from 'src/entities/group.entity';
 
 @Controller('score')
 @UseGuards(JwtAuthGuard)
 export class ScoreController {
   constructor(private readonly scoreService: ScoreService) {}
 
-  @Post('scores/group')
+  @Post('group')
   async createGroupScore(
     @Body() scoreDto: CreateGroupScoreDto,
   ): Promise<Response<void>> {
@@ -42,7 +44,7 @@ export class ScoreController {
     }
   }
 
-  @Post('scores/student')
+  @Post('student')
   async createIndividualScore(
     @Body() scoreDto: CreateStudentScoreDto,
   ): Promise<Response<void>> {
@@ -56,7 +58,22 @@ export class ScoreController {
       );
     }
   }
-  //Determine teacher type
+
+  @Post('detail')
+  async createScoreDetail(
+    @Body() scoreDetailDto: CreateScoreDetailDto,
+  ): Promise<Response<void>> {
+    try {
+      await this.scoreService.createScoreDetail(scoreDetailDto);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
   @Get('teacher-type/:scoreId/:teacherId')
   async determineTeacherType(
     @Param('scoreId') groupId: number,
@@ -97,7 +114,7 @@ export class ScoreController {
         return 'Không xác định vai trò';
     }
   }
-  @Delete(':id')
+  @Delete('detail/:id')
   async remove(@Param('id') id: number): Promise<Response<void>> {
     try {
       await this.scoreService.deleteScore(id);
@@ -161,6 +178,35 @@ export class ScoreController {
         updatedScoreDetail,
         HttpStatus.SUCCESS,
         'Score detail updated successfully',
+      );
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get all groups for a teacher, optionally filtered by teacher type
+   */
+  @Get('teacher-groups/:teacherId')
+  async getGroupsByTeacher(
+    @Param('teacherId') teacherId: number,
+    @Query('type') teacherType?: 'advisor' | 'reviewer' | 'committee',
+  ): Promise<Response<Group[] | Group>> {
+    try {
+      const groups = await this.scoreService.getGroupsByTeacherRole(
+        teacherId,
+        teacherType,
+      );
+
+      return new Response(
+        groups,
+        HttpStatus.SUCCESS,
+        groups.length > 0
+          ? Message.SUCCESS
+          : 'No groups found for this teacher',
       );
     } catch (error) {
       throw new HttpException(
