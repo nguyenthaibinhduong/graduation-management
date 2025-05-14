@@ -25,6 +25,7 @@ import { Committee } from 'src/entities/committee.entity';
 import { CreateScoreDetailDto } from './dto/score-detail.dto';
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
+import { w } from '@faker-js/faker/dist/airline-D6ksJFwG';
 
 @Injectable()
 export class ScoreService extends BaseService<Score> {
@@ -243,12 +244,18 @@ export class ScoreService extends BaseService<Score> {
       }
 
       // Get group id from student and determine teacher type
-      let teacherRole = teacherType; // Use provided type as default
+      let teacherRole = teacherType;
 
       if (student.group && !teacherRole) {
         teacherRole = await this.determineTeacherType(
           student.group.id,
           teacher_id,
+        );
+      }
+
+      if (!teacherRole) {
+        throw new NotFoundException(
+          `Teacher with ID is not an advisor, reviewer, or committee member for this group`,
         );
       }
 
@@ -318,7 +325,6 @@ export class ScoreService extends BaseService<Score> {
         `Không tìm thấy thông tin dự án cho nhóm này`,
       );
     }
-    console.log('group', group);
     if (group.teacher.id == teacherId) {
       return 'advisor';
     }
@@ -379,7 +385,6 @@ export class ScoreService extends BaseService<Score> {
         const type = detail.teacherType || 'unknown';
         const weight = detail.criteria.weightPercent || 0;
         const score = detail.scoreValue;
-
         // Skip if invalid teacher type
         if (!groupedScores[type] && type !== 'unknown') {
           return;
@@ -625,10 +630,149 @@ export class ScoreService extends BaseService<Score> {
 
       return result;
     } catch (error) {
-      console.error('Error fetching groups by teacher role:', error);
       throw new InternalServerErrorException(
         'Error retrieving groups for teacher',
       );
     }
+  }
+
+  async getScoreDetailByStudentId(studentId: number): Promise<any> {
+    try {
+      // Get overall scores by teacher type
+      const scoresByType = await this.calculateScoresByTeacherType(studentId);
+      const {
+        weightedTotal,
+        missingEvaluations,
+        isComplete,
+        appliedWeights,
+        ...weightedTotalScore
+      } = await this.calculateWeightedTotalScore(studentId);
+
+      // Get score details
+      const scoreDetails = await this.scoreDetailRepository.find({
+        where: { student: { id: studentId } },
+        relations: ['criteria'],
+        select: {
+          id: true,
+          scoreValue: true,
+          teacherType: true,
+          criteria: {
+            name: true,
+            content: true,
+          },
+        },
+      });
+
+      if (!scoreDetails || scoreDetails.length === 0) {
+        throw new NotFoundException('No score details found for this student');
+      }
+
+      // Group score details by teacherType
+      const groupedScoreDetails = scoreDetails.reduce((acc, detail) => {
+        const type = detail.teacherType || 'unknown';
+        if (!acc[type]) {
+          acc[type] = [];
+        }
+
+        // Remove teacherType from the detail to match the expected format
+        const { teacherType, ...detailWithoutType } = detail;
+        acc[type].push(detailWithoutType);
+        return acc;
+      }, {});
+
+      const result = { ...groupedScoreDetails };
+
+      // Add overall score for each teacher type at the beginning of the array
+      if (scoresByType) {
+        Object.keys(result).forEach((type) => {
+          if (scoresByType[type]?.score !== null) {
+            // Add overall score as a property to the group
+            result[`${type}_overall`] = scoresByType[type].score;
+          }
+        });
+      }
+      return {
+        ...result,
+        weightedTotal,
+        appliedWeights,
+        isComplete,
+        missingEvaluations,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('Error retrieving score details:', error);
+      throw new InternalServerErrorException(
+        'Error retrieving score details for student',
+      );
+    }
+  }
+
+  //Calculate group&student score, save to database
+  async publicScore(groupId: any) {
+    //validate groupId
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+      relations: ['students', 'project'],
+    });
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+    const members = group.students;
+    if (!members || members.length === 0) {
+      throw new NotFoundException('No students found in this group');
+    }
+    // Check if group score already exists
+    const existingGroupScore = await this.scoreRepository.findOne({
+      where: { group: { id: groupId } },
+    });
+    if (existingGroupScore) {
+      throw new ConflictException('Group score already exists');
+    }
+    // Check if student score already exists
+    for (const member of members) {
+      const existingStudentScore = await this.scoreRepository.findOne({
+        where: { student: { id: member.id } },
+      });
+      if (existingStudentScore) {
+        throw new ConflictException(
+          `Student score already exists for student ID ${member.id}`,
+        );
+      }
+    }
+
+    var groupScore = 0;
+
+    // Init student score in SCORE table (group_id = null)
+    for (const member of members) {
+      const score = await this.calculateWeightedTotalScore(member.id);
+      if (!score) {
+        throw new NotFoundException(
+          `Score by detail of student has not finished yet`,
+        );
+      }
+      if (score) {
+        const newScore = new Score();
+        newScore.student = member;
+        newScore.group = null;
+        newScore.project = group.project;
+        newScore.total_score = score.weightedTotal;
+        newScore.comment = 'Student score';
+        await this.repository.manager.save(newScore);
+      }
+      groupScore += score.weightedTotal;
+    }
+
+    groupScore = groupScore / members.length;
+
+    // Init group score in SCORE table (student_id = null)
+    const groupScoreEntity = new Score();
+    groupScoreEntity.group = group;
+    groupScoreEntity.project = group.project;
+    groupScoreEntity.total_score = groupScore;
+    groupScoreEntity.comment = 'Group score';
+    groupScoreEntity.student = null;
+    await this.repository.manager.save(groupScoreEntity);
   }
 }

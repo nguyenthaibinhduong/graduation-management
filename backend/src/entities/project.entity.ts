@@ -53,8 +53,8 @@ export class Project {
   @OneToMany(() => Group, (group) => group.project)
   groups: Group[];
 
-  @OneToOne(() => Score, (score) => score.project)
-  score: Score;
+  // @OneToOne(() => Score, (score) => score.project)
+  // score: Score;
 
   @Column({
     type: 'enum',
