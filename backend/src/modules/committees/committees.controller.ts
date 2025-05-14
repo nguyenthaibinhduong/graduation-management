@@ -70,7 +70,7 @@ export class CommitteesController {
 
   @Put(':id')
   async update(
-    @DecodedId(['params']) id: any,
+    @DecodedId(['params']) id: number,
     @DecodedId(['body', 'course_id']) course_id: any,
     @DecodedId(['body', 'department_id']) department_id: any,
     @DecodedId(['body', 'project_ids']) project_ids: any,

@@ -227,6 +227,9 @@ export class CommitteesService extends BaseService<Committee> {
       }
 
       // Update the committee
+      if (data?.id) {
+        delete data.id;
+      }
       const updatedCommittee = queryRunner.manager.merge(
         Committee,
         existingCommittee,
@@ -248,7 +251,6 @@ export class CommitteesService extends BaseService<Committee> {
 
       // Commit the transaction
       await queryRunner.commitTransaction();
-      console.log('savedCommittee', savedCommittee);
       return savedCommittee;
     } catch (error) {
       // Rollback the transaction in case of an error
