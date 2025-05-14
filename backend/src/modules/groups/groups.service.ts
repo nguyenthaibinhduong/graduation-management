@@ -261,14 +261,15 @@ async createGroup(data: any, user_id: any): Promise<Group> {
 async getGroupByUser(userId: number, type: string): Promise<any> {
   const user = await this.check_exist_with_data(User, {
     where: { id: userId },
-    relations: ['student'],
+    relations: ['student','teacher'],
   }, 'Tài khoản không hợp lệ');
 
-  if (!user?.student) {
-    throw new Error("Bạn không phải là sinh viên");
-  }
+ 
 
   if (user?.role == UserRole.STUDENT) {
+    if (!user?.student) {
+      throw new Error("Bạn không phải là sinh viên");
+    }
     const studentId = user.student.id;
     if (type === 'leader') {
       // Lấy group có liên quan tới student (trong students hoặc student_attemp)
@@ -331,7 +332,18 @@ async getGroupByUser(userId: number, type: string): Promise<any> {
       where: {
         id: teacherId,
       }
-    },'Giảng viên không tồn tại')
+    }, 'Giảng viên không tồn tại')
+    const groups = await this.repository.manager.find(Group, {
+      where: {
+        teacher: {
+          id: teacher?.id,
+        },
+        status:'success'
+      },
+      relations:['students', 'students.user', 'leader', 'department','leader.user', 'student_attemp', 'student_attemp.user','project']
+    }) 
+    return groups;
+
   }
 
   return null;

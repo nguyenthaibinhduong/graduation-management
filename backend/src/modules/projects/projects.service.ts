@@ -278,13 +278,29 @@ export class ProjectsService extends BaseService<Project> {
     } else if (user.role == UserRole.TEACHER) {
       if (type === 'teacher' && project.teacher?.id != userProject?.teacher?.id)
         throw new NotFoundException('Không có quyền truy cập đề tài này');
-      if (project.teacher?.user) {
-        project.teacher.user = {
-          id: project.teacher.user.id,
-          fullname: project.teacher.user.fullname,
+      
+      const ProjectData = await this.repository.findOne({
+        where: { id: project.id },
+        relations: {
+          groups: true,
+          student: { user: true },
+          teacher: { user: true },
+          course: true,
+        }
+      })
+      if (ProjectData.teacher?.user) {
+        ProjectData.teacher.user = {
+          id: ProjectData.teacher.user.id,
+          fullname: ProjectData.teacher.user.fullname,
         } as any;
       }
-      return project;
+      if (ProjectData.student?.user) {
+        ProjectData.student.user = {
+          id: ProjectData.student.user.id,
+          fullname: ProjectData.student.user.fullname,
+        } as any;
+      }
+      return ProjectData
       
     } else if (user.role == UserRole.ADMIN) {
       return project;
