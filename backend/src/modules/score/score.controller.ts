@@ -11,6 +11,7 @@ import {
   UseGuards,
   Query,
   ParseIntPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { ScoreService } from './score.service';
 import { Response } from 'src/common/globalClass';
@@ -215,6 +216,30 @@ export class ScoreController {
         hasGroups ? Message.SUCCESS : 'No groups found for this teacher',
       );
     } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get all score details for a student grouped by teacher type
+   */
+  @Get('student/details/:studentId')
+  async getStudentScoreDetails(
+    @Param('studentId', ParseIntPipe) studentId: number,
+  ): Promise<Response<any>> {
+    try {
+      const scoreDetails =
+        await this.scoreService.getScoreDetailByStudentId(studentId);
+
+      return new Response(scoreDetails, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return new Response({ studentId }, HttpStatus.SUCCESS, error.message);
+      }
+
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
         HttpStatus.ERROR,

@@ -25,6 +25,7 @@ import { Committee } from 'src/entities/committee.entity';
 import { CreateScoreDetailDto } from './dto/score-detail.dto';
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
+import { w } from '@faker-js/faker/dist/airline-D6ksJFwG';
 
 @Injectable()
 export class ScoreService extends BaseService<Score> {
@@ -318,7 +319,6 @@ export class ScoreService extends BaseService<Score> {
         `Không tìm thấy thông tin dự án cho nhóm này`,
       );
     }
-    console.log('group', group);
     if (group.teacher.id == teacherId) {
       return 'advisor';
     }
@@ -379,7 +379,6 @@ export class ScoreService extends BaseService<Score> {
         const type = detail.teacherType || 'unknown';
         const weight = detail.criteria.weightPercent || 0;
         const score = detail.scoreValue;
-
         // Skip if invalid teacher type
         if (!groupedScores[type] && type !== 'unknown') {
           return;
@@ -625,9 +624,82 @@ export class ScoreService extends BaseService<Score> {
 
       return result;
     } catch (error) {
-      console.error('Error fetching groups by teacher role:', error);
       throw new InternalServerErrorException(
         'Error retrieving groups for teacher',
+      );
+    }
+  }
+
+  async getScoreDetailByStudentId(studentId: number): Promise<any> {
+    try {
+      // Get overall scores by teacher type
+      const scoresByType = await this.calculateScoresByTeacherType(studentId);
+      const {
+        weightedTotal,
+        missingEvaluations,
+        isComplete,
+        appliedWeights,
+        ...weightedTotalScore
+      } = await this.calculateWeightedTotalScore(studentId);
+
+      // Get score details
+      const scoreDetails = await this.scoreDetailRepository.find({
+        where: { student: { id: studentId } },
+        relations: ['criteria'],
+        select: {
+          id: true,
+          scoreValue: true,
+          teacherType: true,
+          criteria: {
+            name: true,
+            content: true,
+          },
+        },
+      });
+
+      if (!scoreDetails || scoreDetails.length === 0) {
+        throw new NotFoundException('No score details found for this student');
+      }
+
+      // Group score details by teacherType
+      const groupedScoreDetails = scoreDetails.reduce((acc, detail) => {
+        const type = detail.teacherType || 'unknown';
+        if (!acc[type]) {
+          acc[type] = [];
+        }
+
+        // Remove teacherType from the detail to match the expected format
+        const { teacherType, ...detailWithoutType } = detail;
+        acc[type].push(detailWithoutType);
+        return acc;
+      }, {});
+
+      // Add overall scores to the response
+      const result = { ...groupedScoreDetails };
+
+      // Add overall score for each teacher type at the beginning of the array
+      if (scoresByType) {
+        Object.keys(result).forEach((type) => {
+          if (scoresByType[type]?.score !== null) {
+            // Add overall score as a property to the group
+            result[`${type}_overall`] = scoresByType[type].score;
+          }
+        });
+      }
+      return {
+        ...result,
+        weightedTotal,
+        appliedWeights,
+        isComplete,
+        missingEvaluations,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('Error retrieving score details:', error);
+      throw new InternalServerErrorException(
+        'Error retrieving score details for student',
       );
     }
   }
