@@ -64,6 +64,7 @@ async getAllGroup(
 }
 
 
+
 async createGroup(data: any, user_id: any): Promise<Group> {
   if (!data?.student_codes || data.student_codes.length === 0) {
     throw new Error('Không thể tạo nhóm mà không có sinh viên');
@@ -231,7 +232,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
     // }
 
     if (group?.status != "approved" && user?.role == UserRole.STUDENT) {
-      throw new Error('Nhóm khoong trong đợt đăng ký');
+      throw new Error('Nhóm không trong đợt đăng ký');
     }
     if (group?.project && user?.role == UserRole.STUDENT) {
       throw new Error('Nhóm đã đăng ký dự án trước đó');
@@ -250,8 +251,7 @@ async createGroup(data: any, user_id: any): Promise<Group> {
       return this.repository.save(group);
     } else if(user?.role == UserRole.ADMIN){
       return this.repository.update(group?.id, {
-        project,
-        status : 'finding'
+        project
       });
     }
   }
@@ -268,64 +268,70 @@ async getGroupByUser(userId: number, type: string): Promise<any> {
     throw new Error("Bạn không phải là sinh viên");
   }
 
-  const studentId = user.student.id;
-
-  if (type === 'leader') {
-    // Lấy group có liên quan tới student (trong students hoặc student_attemp)
-    const group = await this.repository.manager.findOne(Group, {
-      where: [
-        { students: { id: studentId }, status: In(["create", "pending", "approved","finding","success"]) },
-        { student_attemp: { id: studentId }, status: In(['pending',"finding","success"]) }
-      ],
-      relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user','project'],
-    });
-
-    if (!group) return null;
-
-    const isLeader = group.leader?.id === studentId;
-
-    if (isLeader) {
-      // Nếu là leader thì được xem nhóm ở mọi trạng thái
-      const fullGroup = await this.repository.manager.findOne(Group, {
-        where: { id: group.id },
+  if (user?.role == UserRole.STUDENT) {
+    const studentId = user.student.id;
+    if (type === 'leader') {
+      // Lấy group có liên quan tới student (trong students hoặc student_attemp)
+      const group = await this.repository.manager.findOne(Group, {
+        where: [
+          { students: { id: studentId }, status: In(["create", "pending", "approved","finding","success"]) },
+          { student_attemp: { id: studentId }, status: In(['pending',"finding","success"]) }
+        ],
         relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user','project'],
       });
-      return this.freshData(fullGroup);
-    } else {
-      // Không phải leader nhưng nằm trong group (students hoặc student_attemp) với status pending
-      if (
-        (group.status === 'pending' || group.status === "approved" || group.status === "finding" || group.status === "success") &&
-        (
-          group.students.some(s => s.id === studentId) ||
-          group.student_attemp.some(s => s.id === studentId)
-        )
-      ) {
+  
+      if (!group) return null;
+  
+      const isLeader = group.leader?.id === studentId;
+  
+      if (isLeader) {
+        // Nếu là leader thì được xem nhóm ở mọi trạng thái
         const fullGroup = await this.repository.manager.findOne(Group, {
           where: { id: group.id },
           relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user','project'],
         });
         return this.freshData(fullGroup);
-      }  else {
-        return null;
+      } else {
+        // Không phải leader nhưng nằm trong group (students hoặc student_attemp) với status pending
+        if (
+          (group.status === 'pending' || group.status === "approved" || group.status === "finding" || group.status === "success") &&
+          (
+            group.students.some(s => s.id === studentId) ||
+            group.student_attemp.some(s => s.id === studentId)
+          )
+        ) {
+          const fullGroup = await this.repository.manager.findOne(Group, {
+            where: { id: group.id },
+            relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user','project'],
+          });
+          return this.freshData(fullGroup);
+        }  else {
+          return null;
+        }
       }
     }
-  }
-
-  // -----------------------------
-  else if (type === 'invite') {
-    // Lấy các group mà student nằm trong student_attemp
-    const groups = await this.repository.manager.find(Group, {
+    else if (type === 'invite') {
+      // Lấy các group mà student nằm trong student_attemp
+      const groups = await this.repository.manager.find(Group, {
+        where: {
+          status: 'create',
+          student_attemp: { id: studentId }
+        },
+        relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user'],
+      });
+  
+      // Lọc các group mà student KHÔNG phải là leader
+      const filteredGroups = groups.filter(g => g.leader?.id !== studentId);
+      const result = await Promise.all(filteredGroups.map(g => this.freshData(g)));
+      return result;
+    }
+  } else if (user?.role == UserRole.TEACHER) {
+    const teacherId = user.teacher?.id;
+    const teacher = await this.check_exist_with_data(Teacher, {
       where: {
-        status: 'create',
-        student_attemp: { id: studentId }
-      },
-      relations: ['students', 'students.user', 'leader', 'leader.user', 'student_attemp', 'student_attemp.user'],
-    });
-
-    // Lọc các group mà student KHÔNG phải là leader
-    const filteredGroups = groups.filter(g => g.leader?.id !== studentId);
-    const result = await Promise.all(filteredGroups.map(g => this.freshData(g)));
-    return result;
+        id: teacherId,
+      }
+    },'Giảng viên không tồn tại')
   }
 
   return null;
