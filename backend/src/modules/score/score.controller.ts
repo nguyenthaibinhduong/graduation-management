@@ -246,4 +246,17 @@ export class ScoreController {
       );
     }
   }
+
+  @Post('public-score')
+  async publicScore(@Body('groupId') groupId: number): Promise<Response<void>> {
+    try {
+      await this.scoreService.publicScore(groupId);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
 }

@@ -244,12 +244,18 @@ export class ScoreService extends BaseService<Score> {
       }
 
       // Get group id from student and determine teacher type
-      let teacherRole = teacherType; // Use provided type as default
+      let teacherRole = teacherType;
 
       if (student.group && !teacherRole) {
         teacherRole = await this.determineTeacherType(
           student.group.id,
           teacher_id,
+        );
+      }
+
+      if (!teacherRole) {
+        throw new NotFoundException(
+          `Teacher with ID is not an advisor, reviewer, or committee member for this group`,
         );
       }
 
@@ -674,7 +680,6 @@ export class ScoreService extends BaseService<Score> {
         return acc;
       }, {});
 
-      // Add overall scores to the response
       const result = { ...groupedScoreDetails };
 
       // Add overall score for each teacher type at the beginning of the array
@@ -702,5 +707,72 @@ export class ScoreService extends BaseService<Score> {
         'Error retrieving score details for student',
       );
     }
+  }
+
+  //Calculate group&student score, save to database
+  async publicScore(groupId: any) {
+    //validate groupId
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+      relations: ['students', 'project'],
+    });
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+    const members = group.students;
+    if (!members || members.length === 0) {
+      throw new NotFoundException('No students found in this group');
+    }
+    // Check if group score already exists
+    const existingGroupScore = await this.scoreRepository.findOne({
+      where: { group: { id: groupId } },
+    });
+    if (existingGroupScore) {
+      throw new ConflictException('Group score already exists');
+    }
+    // Check if student score already exists
+    for (const member of members) {
+      const existingStudentScore = await this.scoreRepository.findOne({
+        where: { student: { id: member.id } },
+      });
+      if (existingStudentScore) {
+        throw new ConflictException(
+          `Student score already exists for student ID ${member.id}`,
+        );
+      }
+    }
+
+    var groupScore = 0;
+
+    // Init student score in SCORE table (group_id = null)
+    for (const member of members) {
+      const score = await this.calculateWeightedTotalScore(member.id);
+      if (!score) {
+        throw new NotFoundException(
+          `Score by detail of student has not finished yet`,
+        );
+      }
+      if (score) {
+        const newScore = new Score();
+        newScore.student = member;
+        newScore.group = null;
+        newScore.project = group.project;
+        newScore.total_score = score.weightedTotal;
+        newScore.comment = 'Student score';
+        await this.repository.manager.save(newScore);
+      }
+      groupScore += score.weightedTotal;
+    }
+
+    groupScore = groupScore / members.length;
+
+    // Init group score in SCORE table (student_id = null)
+    const groupScoreEntity = new Score();
+    groupScoreEntity.group = group;
+    groupScoreEntity.project = group.project;
+    groupScoreEntity.total_score = groupScore;
+    groupScoreEntity.comment = 'Group score';
+    groupScoreEntity.student = null;
+    await this.repository.manager.save(groupScoreEntity);
   }
 }
