@@ -17,7 +17,7 @@ import ProjectDetailView from '@/views/project/ProjectDetailView.vue'
 import EvaluationFormView from '@/views/admin/EvaluationFormView.vue'
 import StudentProjectView from '@/views/student/StudentProjectView.vue'
 import StudentGroup from '@/views/student/group/StudentGroup.vue'
-import ScoreView from '@/views/teacher/ScoreView.vue'
+import ScoreView from '@/views/teacher/score/ScoreView.vue'
 import EvaluationFormDetail from '@/views/admin/EvaluationFormDetail.vue'
 import StudentProjectPublic from '@/views/student/StudentProjectPublic.vue'
 import DetailProfileView from '@/views/admin/DetailProfileView.vue'
@@ -27,6 +27,7 @@ import StudentProjectDoing from '@/views/student/StudentProjectDoing.vue'
 import NotFound from '@/views/error/NotFound.vue'
 import CommitteeDetail from '@/views/admin/CommitteeDetail.vue'
 import GroupTeacherView from '@/views/teacher/GroupTeacherView.vue'
+import ScoreEdit from '@/views/teacher/score/ScoreEdit.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 
 const routes = [
@@ -75,6 +76,7 @@ const routes = [
       { path: '/teacher-group-advisor', component: GroupTeacherView, meta: { roles: ['teacher'] } },
       { path: '/teacher-project', component: TeacherProjectView, meta: { roles: ['teacher'] } },
       { path: '/score', component: ScoreView, meta: { roles: ['teacher'] } },
+      { path: '/edit-score/:id',component: ScoreEdit, meta: { roles: ['teacher'] }} ,
       //Trang cho student
       { path: '/group-manangerment', component: StudentGroup, meta: { roles: ['student'] } },
       { path: '/student-project', component: StudentProjectView, meta: { roles: ['student'] } },

@@ -2,6 +2,7 @@ import { createBaseStore } from './base'
 import { createFileStore } from './files'
 import { createGroupStore } from './group'
 import { createProjectStore } from './project'
+import { createScoreStore } from './score'
 
 export const useDepartmentStore = createBaseStore('departments')
 
@@ -28,6 +29,8 @@ export const useGroupStore = createGroupStore('groups')
 export const useProjectStore = createProjectStore()
 
 export const useFileStore = createFileStore()
+
+// export const useScoreStore = createScoreStore()
 
 export const useCommitteeStore = createBaseStore('committees')
 
