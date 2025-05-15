@@ -60,6 +60,8 @@
                 </span>
               </template>
             </span>
+            <span v-html="safeHtml(getNestedValue(data, col.field))" v-else-if="col.type === 'html'">
+            </span>
             <span v-else>
               {{ getNestedValue(data, col.field) }}
             </span>
@@ -128,6 +130,7 @@ import {
   ConfirmDialog,
   useConfirm,
 } from 'primevue'
+import DOMPurify from 'dompurify';
 
 
 const props = defineProps({
@@ -167,7 +170,7 @@ watch(selectedData, (newSelection) => {
   emit('rowSelect', newSelection)
 })
 
-
+const safeHtml = (rawHtml) => { return DOMPurify.sanitize(rawHtml) };
 const blockFuntion = (key) => {
   if (props?.block) {
     return !props.block.includes(key);

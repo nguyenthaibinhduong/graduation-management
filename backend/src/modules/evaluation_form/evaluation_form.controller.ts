@@ -1,3 +1,4 @@
+
 import {
   Controller,
   Get,
@@ -116,7 +117,7 @@ export class EvaluationFormController {
 
   @Post('remove-multi')
   async removeMulti(
-    @Body() ids: number[],
+   @DecodedId(['body', 'ids']) ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
       await this.EvaluationFormService.delete(ids);

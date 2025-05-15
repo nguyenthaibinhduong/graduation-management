@@ -1,35 +1,40 @@
 <template>
-    <section class="space-y-3">
-        <!-- TIÊU ĐỀ & MÔ TẢ ------------------------------------------------------->
-        <h2 class="text-xl font-semibold">{{ form.title }}</h2>
-        <p>
-            <strong>Mô tả:</strong> {{ form.description }}
-            <span :class="form.status === 'active' ? 'text-green-600' : 'text-red-600'" class="ml-2 font-medium">
-                {{ form.status === 'active' ? 'Khả dụng' : 'Đã hủy' }}
-            </span>
-        </p>
+    <section class="space-y-6">
+        <!-- TIÊU ĐỀ & TRẠNG THÁI -->
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">{{ form?.name || 'Phiếu chấm điểm' }}</h2>
+                <p class="text-sm text-gray-500 mt-1">
+                    <strong class="text-gray-700">Mô tả:</strong>
+                    <span v-html="safeHtml(form?.description)" />
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold"
+                    :class="form?.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                    <svg v-if="form?.status === 'active'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    {{ form?.status === 'active' ? 'Khả dụng' : 'Đã hủy' }}
+                </span>
+            </div>
+        </div>
 
-        <!-- BẢNG TIÊU CHÍ ---------------------------------------------------------->
-        <table class="w-full border-collapse">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="border p-2">ID</th>
-                    <th class="border p-2">Tên tiêu chí</th>
-                    <th class="border p-2">Nội dung</th>
-                    <th class="border p-2">Điểm tối đa</th>
-                    <th class="border p-2">Bước điểm</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="c in form.criteria" :key="c.id" class="hover:bg-gray-50">
-                    <td class="border p-2 text-center">{{ c.id }}</td>
-                    <td class="border p-2">{{ c.name }}</td>
-                    <td class="border p-2">{{ c.content }}</td>
-                    <td class="border p-2 text-center">{{ c.max_score }}</td>
-                    <td class="border p-2 text-center">{{ c.step }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- BẢNG TIÊU CHÍ ĐÁNH GIÁ -->
+        <DataTableCustom :block="['toolbar', 'action', 'selectAll']" title="Danh sách tiêu chí đánh giá"
+            :data="form?.criteria" :columns="[
+                { field: 'name', header: 'Tên tiêu chí' },
+                { field: 'content', header: 'Nội dung', type: 'html' },
+                { field: 'max_score', header: 'Điểm tối đa' },
+                { field: 'step', header: 'Bước nhảy' },
+                { field: 'weightPercent', header: 'Trọng số (%)' }
+            ]" :total="form?.criteria?.length" />
     </section>
 </template>
 
@@ -37,17 +42,14 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useEvaluationStore } from '@/stores/store';
+import DOMPurify from 'dompurify';
+import DataTableCustom from '@/components/list/DataTableCustom.vue';
 
-const form = ref({
-    title: '',
-    description: '',
-    status: '',
-    criteria: [],
-});
-
-// Lấy dữ liệu từ store (Pinia)
+const form = ref();
 const evaluationStore = useEvaluationStore();
 const route = useRoute();
+
+const safeHtml = (rawHtml) => DOMPurify.sanitize(rawHtml);
 
 onMounted(async () => {
     const id = route.params.id;
@@ -55,11 +57,3 @@ onMounted(async () => {
     form.value = evaluationStore.item ?? {};
 });
 </script>
-
-<style scoped>
-table th,
-table td {
-    border: 1px solid #e5e7eb;
-    /* màu xám nhạt */
-}
-</style>

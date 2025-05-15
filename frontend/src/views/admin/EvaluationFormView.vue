@@ -2,7 +2,8 @@
     <!-- BẢNG DANH SÁCH --------------------------------------------------------->
     <DataTableCustom title="Danh sách phiếu đánh giá" :data="evaluationForm" :columns="columns"
         :total="evaluationStore?.total" :loading="loading" @fetch="fetchEvaluation" @add="openDrawer"
-        @edit="editEvaluation" @delete="deleteEvaluation" @rowSelect="goDetail" />
+        @edit="editEvaluation" @delete="deleteEvaluation" @rowSelect="goDetail" @selectOne="handleSelectData"
+        @selectAll="handleSelectData" />
 
     <!-- DRAWER ----------------------------------------------------------------->
     <MyDrawer class="w-full" title="Phiếu đánh giá" :isEditing="isEditing" :onCancel="cancelForm"
@@ -25,9 +26,10 @@
                     </div>
                     <div class="flex flex-col">
 
-                        <DataTableCustom :block="['toolbar']" title=" Danh sách tiêu chí đánh giá"
+                        <DataTableCustom :block="['toolbar', 'action']" title=" Danh sách tiêu chí đánh giá"
                             :data="criteriaOptions" :columns="[
                                 { field: 'name', header: 'Tiêu chí' },
+                                { field: 'content', header: 'Tiêu chí', type: 'html' },
                                 { field: 'max_score', header: 'Điểm tối đa' },
                                 { field: 'step', header: 'Bước nhảy' },
                                 { field: 'weightPercent', header: 'Phần trăm' },
@@ -104,7 +106,6 @@ const criteriaStore = useCriteriaStore()
 // ---------- COLUMNS ---------------------------------------------------------
 const columns = [
     { field: 'title', header: 'Tiêu đề' },
-    { field: 'description', header: 'Nội dung' },
     {
         field: 'status',
         header: 'Trạng thái',
@@ -192,6 +193,11 @@ function resetForm() {
     isEditing.value = false;
     editedId.value = null;
 }
+
+const selectedIds = ref([]);
+const handleSelectData = (ids) => {
+    selectedIds.value = ids;
+};
 
 const selectedCriteriaIds = ref([]);
 const selectedCriteria = ref({})
