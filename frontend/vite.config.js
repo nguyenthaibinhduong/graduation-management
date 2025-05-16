@@ -19,7 +19,7 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      'e375-113-185-85-192.ngrok-free.app' // thêm dòng này
+      'quan-ly-khoa-luan-to-nghiep.onrender.com' // thêm dòng này
     ]
   }
 })
