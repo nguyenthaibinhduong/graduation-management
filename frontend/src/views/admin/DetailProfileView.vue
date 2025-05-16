@@ -3,8 +3,8 @@
         <Card class="w-full">
             <template #title>
                 <div class="w-full flex justify-between items-center pb-10">
+                    <GoBack />
                     <h2 class="text-xl font-bold text-blue-800">Thông tin tài khoản</h2>
-
                 </div>
             </template>
             <template #content>
@@ -59,7 +59,7 @@
                         <label class="font-semibold text-gray-700">Ngày sinh:</label>
                         <span>{{
                             dayjs(user?.birth_date).format('MM/DD/YYYY') || 'Chưa cập nhật'
-                        }}</span>
+                            }}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <label class="font-semibold text-gray-700">Địa chỉ:</label>
@@ -107,6 +107,7 @@
 </template>
 
 <script setup>
+import GoBack from '@/components/button/GoBack.vue';
 import { useUserStore } from '@/stores/store';
 import dayjs from 'dayjs';
 import { Card } from 'primevue';

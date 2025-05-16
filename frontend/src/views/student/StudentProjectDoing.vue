@@ -1,7 +1,7 @@
 <template>
-    <div class="space-y-4">
+    <div class="p-4 space-y-4">
         <!-- Tiêu đề -->
-        <div class="text-3xl font-bold text-blue-700">Quản lý đề tài đang thực hiện</div>
+        <div class="text-3xl font-bold text-blue-700 py-2 text-center">Quản lý đề tài đang thực hiện</div>
 
         <!-- Thông tin đề tài -->
         <div class="w-full grid grid-cols-2 gap-x-4">

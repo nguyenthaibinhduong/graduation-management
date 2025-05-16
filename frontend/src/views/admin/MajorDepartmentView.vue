@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="w-full p-4">
         <h1 class="text-2xl font-bold text-blue-800 mb-4">Quản lý chuyên ngành</h1>
         <p class="text-gray-600 mb-6">Danh sách các khoa và chuyên ngành trong hệ thống.</p>
 

@@ -1,11 +1,14 @@
 <template>
     <section class="space-y-6">
         <!-- TIÊU ĐỀ & TRẠNG THÁI -->
-        <div class="flex items-center justify-between">
+        <div class="flex justify-between items-center mb-6 p-4">
+            <GoBack />
+            <h1 class="text-2xl font-bold ">Chi tiết Phiếu chấm</h1>
+        </div>
+        <div class="flex items-center justify-between p-4">
             <div>
-                <h2 class="text-2xl font-bold text-gray-800">{{ form?.name || 'Phiếu chấm điểm' }}</h2>
                 <p class="text-sm text-gray-500 mt-1">
-                    <strong class="text-gray-700">Mô tả:</strong>
+                    <strong class="">Mô tả:</strong>
                     <span v-html="safeHtml(form?.description)" />
                 </p>
             </div>
@@ -44,6 +47,7 @@ import { useRoute } from 'vue-router';
 import { useEvaluationStore } from '@/stores/store';
 import DOMPurify from 'dompurify';
 import DataTableCustom from '@/components/list/DataTableCustom.vue';
+import GoBack from '@/components/button/GoBack.vue';
 
 const form = ref();
 const evaluationStore = useEvaluationStore();

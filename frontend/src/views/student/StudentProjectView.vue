@@ -1,10 +1,9 @@
 <template>
-    <div class="w-full flex gap-x-4 p-2 rounded-lg">
+    <div class="w-full flex gap-x-4 p-4 rounded-lg">
 
         <Button size="small" class="btn-submit" icon="pi pi-list" label="Danh sách đề tài Khoa"
             @click="router.push(`/student-project-public`)" />
-        <Button size="small" class="btn-submit" icon="pi pi-verified" label="Đề tài đã đăng ký" onclick="" />
-        <Button size="small" class="btn-submit" icon="pi pi-clipboard" label="Đề tài đề xuất" onclick="" />
+
 
     </div>
     <DataTableCustom :title="'Danh sách đề tài đề xuất'" :data="projects" :columns="[

@@ -3,8 +3,8 @@
     <Card class="w-full">
       <template #title>
         <div class="w-full flex justify-between items-center pb-10">
+          <GoBack />
           <h2 class="text-xl font-bold text-blue-800">Thông tin tài khoản</h2>
-
         </div>
       </template>
       <template #content>
@@ -66,7 +66,7 @@
             <label class="font-semibold text-gray-700">Ngày sinh:</label>
             <span>{{
               dayjs(authStore.user?.birth_date).format('MM/DD/YYYY') || 'Chưa cập nhật'
-            }}</span>
+              }}</span>
           </div>
           <div class="flex items-center gap-2">
             <label class="font-semibold text-gray-700">Địa chỉ:</label>
@@ -152,8 +152,10 @@ import { useAuthStore } from '@/stores/auth'
 import { Card, Button, FileUpload } from 'primevue'
 import MyDrawer from '@/components/drawer/MyDrawer.vue'
 import MyInput from '@/components/form/MyInput.vue'
+import GoBack from '@/components/button/GoBack.vue'
 import { useFileStore } from '@/stores/store'
 import { useUserStore } from '@/stores/users'
+
 // Stores
 const authStore = useAuthStore()
 const userStore = useUserStore()

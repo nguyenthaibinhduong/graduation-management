@@ -1,13 +1,14 @@
 <template>
+
   <div class="flex min-h-screen py-10 px-4 bg-gray-50 justify-center items-start">
-    <Card class="w-full max-w-5xl bg-white shadow-md rounded-xl">
+    <Card class="w-full bg-white shadow-md rounded-xl">
       <!-- Tiêu đề và trạng thái -->
       <template #title>
-        <div class="flex  items-center border-b pb-4">
+        <div class="flex justify-between  items-center border-b pb-4">
           <h2 class="text-2xl font-bold text-blue-800">
             Đề tài: {{ project.title || "Chưa có tiêu đề" }}
           </h2>
-
+          <GoBack />
         </div>
       </template>
 
@@ -145,6 +146,7 @@ import MyInput from "@/components/form/MyInput.vue";
 import { showToast } from "@/utils/toast";
 import DOMPurify from 'dompurify';
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
+import GoBack from "@/components/button/GoBack.vue";
 
 
 const safeHtml = (rawHtml) => { return DOMPurify.sanitize(rawHtml) };

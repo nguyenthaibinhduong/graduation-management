@@ -1,4 +1,4 @@
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
+// import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import StudentView from '@/views/admin/StudentView.vue'
 import TeacherView from '@/views/admin/TeacherView.vue'
 import UserView from '@/views/admin/UserView.vue'
@@ -28,13 +28,14 @@ import NotFound from '@/views/error/NotFound.vue'
 import CommitteeDetail from '@/views/admin/CommitteeDetail.vue'
 import GroupTeacherView from '@/views/teacher/GroupTeacherView.vue'
 import ScoreEdit from '@/views/teacher/score/ScoreEdit.vue'
+import LayoutSecond from '@/layouts/LayoutSecond.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 
 const routes = [
   { path: '/login', name: 'login', component: LoginView },
   {
     path: '/',
-    component: DefaultLayout,
+    component: LayoutSecond,
     meta: { requiresAuth: true },
     children: [
       //Trang cho tất cả
