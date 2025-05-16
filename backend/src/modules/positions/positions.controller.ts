@@ -21,7 +21,7 @@ import { Response } from 'src/common/globalClass';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('positions')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class PositionsController {
   constructor(private readonly positionService: PositionsService) {}
 

@@ -10,6 +10,7 @@ import {
   ValidationPipe,
   Query,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CommitteesService } from './committees.service';
 import { CreateCommitteeDto } from './dto/create-committee.dto';
@@ -19,8 +20,10 @@ import { HttpStatus, Message } from 'src/common/globalEnum';
 import { Response } from 'src/common/globalClass';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('committees')
+@UseGuards(JwtAuthGuard)
 export class CommitteesController {
   constructor(
     private readonly committeesService: CommitteesService,

@@ -4,7 +4,7 @@ import axios from 'axios'
 import api from '@/api/api'
 import router from '@/router'
 import { showToast } from '@/utils/toast'
-
+const API_URL = import.meta.env.VITE_API_URL
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
           },
           withCredentials: true,
         })
-        const response = await apiAuth.post('http://localhost:3034/api/v1/auth/login', {
+        const response = await apiAuth.post(API_URL+'/auth/login', {
           username,
           password,
           captcha
@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', {
     },
     async refreshAccessToken() {
       const response = await axios.post(
-        'http://localhost:3034/api/v1/auth/refresh-token',
+        API_URL+'/auth/refresh-token',
         {},
         {
           withCredentials: true,
@@ -61,7 +61,7 @@ export const useAuthStore = defineStore('auth', {
         const token = localStorage.getItem('token')
         if (token) {
           await axios.post(
-            'http://localhost:3034/api/v1/auth/logout',
+            API_URL+'/auth/logout',
             {},
             {
               headers: { Authorization: `Bearer ${token}` },

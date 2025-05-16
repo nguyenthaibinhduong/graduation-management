@@ -23,10 +23,10 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly userService: UsersService,
   ) {}
-  @Post('/register')
-  register(@Body() userData: any) {
-    return this.userService.register(userData);
-  }
+  // @Post('/register')
+  // register(@Body() userData: any) {
+  //   return this.userService.register(userData);
+  // }
   // @UseGuards(LocalAuthGuard)
   @Post('/login')
   async login(@Body() body: { username: string; password: string ,captcha: string }, @Req() req: Require, @Res() res: Response) {

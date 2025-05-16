@@ -30,7 +30,7 @@ import GroupTeacherView from '@/views/teacher/GroupTeacherView.vue'
 import ScoreEdit from '@/views/teacher/score/ScoreEdit.vue'
 import LayoutSecond from '@/layouts/LayoutSecond.vue'
 // Tự động import các component khi cần thiết (lazy-load)
-
+const API_URL = import.meta.env.VITE_API_URL
 const routes = [
   { path: '/login', name: 'login', component: LoginView },
   {
@@ -120,7 +120,7 @@ router.beforeEach(async (to, from, next) => {
   }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     try {
-      const res = await axios.post('http://localhost:3034/api/v1/auth/verify-token', { token })
+      const res = await axios.post(API_URL+'/auth/verify-token', { token })
       if (res.status === 201) {
         authStore.setAuth(true)
         return next()
@@ -130,7 +130,7 @@ router.beforeEach(async (to, from, next) => {
       if (error.response && error.response.status === 409) {
         try {
           const refreshRes = await axios.post(
-            'http://localhost:3034/api/v1/auth/refresh-token',
+            API_URL+'/auth/refresh-token',
             {},
             {
               withCredentials: true,

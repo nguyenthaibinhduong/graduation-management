@@ -8,14 +8,14 @@ import { EncryptIdInterceptor } from './common/intercepters/encrypt-id.intercept
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.use(cookieParser());
-  app.enableCors({ origin: 'http://localhost:5173', credentials: true });
   const configService = app.get(ConfigService);
+  const port = configService.get('APP_PORT');
+  app.use(cookieParser());
+  app.enableCors({ origin: configService.get('APP_FRONTEND_URL'), credentials: true });
   const jwtUtilityService = app.get(JwtUtilityService); // Lấy từ DI container
   app.useGlobalInterceptors(new EncryptIdInterceptor(jwtUtilityService));
-  const port = configService.get('APP_PORT');
   app.setGlobalPrefix('api/v1', { exclude: [''] });
   await app.listen(port);
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on Port :${port}`);
 }
 bootstrap();

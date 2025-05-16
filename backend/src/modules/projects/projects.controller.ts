@@ -20,7 +20,6 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from 'src/entities/project.entity';
 import { Response } from 'src/common/globalClass';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
-import { Student } from 'src/entities/student.entity';
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard)

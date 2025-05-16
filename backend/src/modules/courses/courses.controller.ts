@@ -4,7 +4,6 @@ import {
   Get,
   Post,
   Body,
-  Param,
   Delete,
   Query,
   Put,
@@ -22,7 +21,7 @@ import { Response } from 'src/common/globalClass';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('courses')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class CoursesController {
   constructor(private readonly courseService: CoursesService) {}
 

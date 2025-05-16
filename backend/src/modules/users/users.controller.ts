@@ -24,7 +24,7 @@ import { JwtUtilityService } from 'src/common/jwtUtility.service';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
 
 @Controller('users')
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(
     private readonly userService: UsersService,
