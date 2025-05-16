@@ -15,7 +15,7 @@ async function bootstrap() {
   const jwtUtilityService = app.get(JwtUtilityService); // Lấy từ DI container
   app.useGlobalInterceptors(new EncryptIdInterceptor(jwtUtilityService));
   app.setGlobalPrefix('api/v1', { exclude: [''] });
-  await app.listen(port);
+  await app.listen(port || 3000);
   console.log(`Server is running on Port :${port}`);
 }
 bootstrap();
