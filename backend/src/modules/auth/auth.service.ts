@@ -31,8 +31,8 @@ export class AuthService {
     this.userService.saveRefreshToken(refreshToken, user.id, 604800);
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: false,
-      // sameSite: 'strict',
+      secure: true,
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.json({ access_token: accessToken, user: payload });
