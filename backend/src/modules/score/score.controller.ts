@@ -76,9 +76,9 @@ export class ScoreController {
     }
   }
 
-  @Get('teacher-type/:scoreId/:teacherId')
+  @Get('teacher-type/:groupId/:teacherId')
   async determineTeacherType(
-    @Param('scoreId') groupId: number,
+    @Param('groupId') groupId: number,
     @Param('teacherId') teacherId: number | string,
   ): Promise<Response<any>> {
     try {
@@ -194,26 +194,21 @@ export class ScoreController {
    */
   @Get('teacher-groups/:teacherId')
   async getGroupsByTeacher(
-    @Param('teacherId', ParseIntPipe) teacherId: number,
+    @DecodedId(['params', 'teacherId']) teacherId: number,
     @Query('type') teacherType?: 'advisor' | 'reviewer' | 'committee',
-  ): Promise<
-    Response<{ advisor?: Group[]; reviewer?: Group[]; committee?: Group[] }>
-  > {
+  ): Promise<Response<Group[] | Group>> {
     try {
       const groups = await this.scoreService.getGroupsByTeacherRole(
         teacherId,
         teacherType,
       );
 
-      // Check if any groups were found
-      const hasGroups = Object.values(groups).some(
-        (groupArray) => groupArray && groupArray.length > 0,
-      );
-
       return new Response(
         groups,
         HttpStatus.SUCCESS,
-        hasGroups ? Message.SUCCESS : 'No groups found for this teacher',
+        groups.length > 0
+          ? Message.SUCCESS
+          : 'No groups found for this teacher',
       );
     } catch (error) {
       throw new HttpException(

@@ -321,9 +321,7 @@ export class ScoreService extends BaseService<Score> {
     }
 
     if (!group.project) {
-      throw new NotFoundException(
-        `Không tìm thấy thông tin dự án cho nhóm này`,
-      );
+      throw new NotFoundException(`Nhóm chưa có đề tài`);
     }
     if (group.teacher.id == teacherId) {
       return 'advisor';
@@ -520,39 +518,43 @@ export class ScoreService extends BaseService<Score> {
   }
 
   /**
-   * Get all groups where the specified teacher has specific roles, organized by teacher type
+   * Get all groups where the specified teacher has specific roles
    * @param teacherId The teacher ID to find groups for
    * @param teacherType Optional filter by specific teacher type (advisor, reviewer, committee)
-   * @returns Object with groups organized by teacher role
+   * @returns Array of groups with added teacherRole property
    */
   async getGroupsByTeacherRole(
     teacherId: number,
     teacherType?: 'advisor' | 'reviewer' | 'committee',
-  ): Promise<{ advisor?: Group[]; reviewer?: Group[]; committee?: Group[] }> {
+  ): Promise<Group[]> {
     try {
-      const result: {
-        advisor?: Group[];
-        reviewer?: Group[];
-        committee?: Group[];
-      } = {};
+      let allGroups: Group[] = [];
 
       // If no specific teacher type is requested, or if specifically requesting advisor groups
       if (!teacherType || teacherType === 'advisor') {
         const advisorGroups = await this.groupRepository.find({
           where: { teacher: { id: teacherId } },
-          relations: ['project', 'students', 'leader', 'department'],
+          relations: [
+            'project',
+            'students',
+            'students.user',
+            'leader',
+            'leader.user',
+            'department',
+            'teacher',
+            'teacher.user',
+          ],
         });
 
-        if (advisorGroups.length > 0) {
-          // Add a custom field to identify the role
-          advisorGroups.forEach((group) => {
-            (group as any).teacherRole = 'advisor';
-          });
-          result.advisor = advisorGroups;
-        }
+        // Add a custom field to identify the role
+        advisorGroups.forEach((group) => {
+          (group as any).teacherRole = 'advisor';
+        });
+
+        allGroups = [...allGroups, ...advisorGroups];
 
         // If we only wanted advisor groups, return now
-        if (teacherType === 'advisor') return result;
+        if (teacherType === 'advisor') return allGroups;
       }
 
       // If no specific teacher type, or if specifically requesting reviewer groups
@@ -567,19 +569,22 @@ export class ScoreService extends BaseService<Score> {
           )
           .leftJoinAndSelect('group.project', 'project')
           .leftJoinAndSelect('group.students', 'students')
+          .leftJoinAndSelect('students.user', 'studentUser')
           .leftJoinAndSelect('group.leader', 'leader')
+          .leftJoinAndSelect('leader.user', 'leaderUser')
           .leftJoinAndSelect('group.department', 'department')
+          .leftJoinAndSelect('group.teacher', 'teacher')
+          .leftJoinAndSelect('teacher.user', 'teacherUser')
           .getMany();
 
-        if (reviewerGroups.length > 0) {
-          reviewerGroups.forEach((group) => {
-            (group as any).teacherRole = 'reviewer';
-          });
-          result.reviewer = reviewerGroups;
-        }
+        reviewerGroups.forEach((group) => {
+          (group as any).teacherRole = 'reviewer';
+        });
+
+        allGroups = [...allGroups, ...reviewerGroups];
 
         // If we only wanted reviewer groups, return now
-        if (teacherType === 'reviewer') return result;
+        if (teacherType === 'reviewer') return allGroups;
       }
 
       // If no specific teacher type, or if specifically requesting committee groups
@@ -612,23 +617,26 @@ export class ScoreService extends BaseService<Score> {
               { committeeIds },
             )
             .leftJoinAndSelect('group.students', 'students')
+            .leftJoinAndSelect('students.user', 'studentUser')
             .leftJoinAndSelect('group.leader', 'leader')
+            .leftJoinAndSelect('leader.user', 'leaderUser')
             .leftJoinAndSelect('group.department', 'department')
+            .leftJoinAndSelect('group.teacher', 'teacher')
+            .leftJoinAndSelect('teacher.user', 'teacherUser')
             .getMany();
 
-          if (committeeGroups.length > 0) {
-            committeeGroups.forEach((group) => {
-              (group as any).teacherRole = 'committee';
-            });
-            result.committee = committeeGroups;
-          }
+          committeeGroups.forEach((group) => {
+            (group as any).teacherRole = 'committee';
+          });
+
+          allGroups = [...allGroups, ...committeeGroups];
         }
 
         // If we only wanted committee groups, return now
-        if (teacherType === 'committee') return result;
+        if (teacherType === 'committee') return allGroups;
       }
 
-      return result;
+      return allGroups;
     } catch (error) {
       throw new InternalServerErrorException(
         'Error retrieving groups for teacher',

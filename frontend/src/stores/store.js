@@ -30,8 +30,6 @@ export const useProjectStore = createProjectStore()
 
 export const useFileStore = createFileStore()
 
-// export const useScoreStore = createScoreStore()
+export const useScoreStore = createScoreStore()
 
 export const useCommitteeStore = createBaseStore('committees')
-
-

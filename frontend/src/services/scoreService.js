@@ -22,6 +22,11 @@ const scoreService = {
   deleteScoreDetail: async (scoreDetailId) => {
     return await api.delete(`/score/detail/${scoreDetailId}`)
   },
+
+  getGroupsByTeacher: async (teacherId, teacherType) => {
+    const { data } = await api.get(`/score/teacher-groups/${teacherId}?type=${teacherType}`)
+    return data.data
+  },
 }
 
 export default scoreService
