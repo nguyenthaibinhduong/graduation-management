@@ -2,40 +2,18 @@
   <div class="w-full space-y-4">
     <!-- Nút chức năng -->
     <div class="flex gap-x-4 p-2 rounded-lg">
-      <Button
-        size="small"
-        label="Tất cả"
-        :class="{ 'p-button-outlined': activeRole !== 'all' }"
-        @click="filterByRole('all')"
-      />
-      <Button
-        size="small"
-        label="Chấm điểm Hướng dẫn"
-        :class="{ 'p-button-outlined': activeRole !== 'advisor' }"
-        @click="filterByRole('advisor')"
-      />
-      <Button
-        size="small"
-        label="Chấm điểm phản biện"
-        :class="{ 'p-button-outlined': activeRole !== 'reviewer' }"
-        @click="filterByRole('reviewer')"
-      />
-      <Button
-        size="small"
-        label="Chấm điểm hội đồng"
-        :class="{ 'p-button-outlined': activeRole !== 'committee' }"
-        @click="filterByRole('committee')"
-      />
+      <Button size="small" label="Tất cả" :class="{ 'p-button-outlined': activeRole !== 'all' }"
+        @click="filterByRole('all')" />
+      <Button size="small" label="Chấm điểm Hướng dẫn" :class="{ 'p-button-outlined': activeRole !== 'advisor' }"
+        @click="filterByRole('advisor')" />
+      <Button size="small" label="Chấm điểm phản biện" :class="{ 'p-button-outlined': activeRole !== 'reviewer' }"
+        @click="filterByRole('reviewer')" />
+      <Button size="small" label="Chấm điểm hội đồng" :class="{ 'p-button-outlined': activeRole !== 'committee' }"
+        @click="filterByRole('committee')" />
     </div>
     <!-- Bảng dữ liệu nhóm -->
-    <DataTableCustom
-      title="Danh sách nhóm"
-      :block="['toolbar', 'headerBar', 'selectAll', 'action']"
-      :data="groups"
-      :total="groups.length"
-      :columns="dataColumns"
-      @rowSelect="onSelectGroup"
-    />
+    <DataTableCustom title="Danh sách nhóm" :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="groups"
+      :total="groups.length" :columns="dataColumns" @rowSelect="onSelectGroup" />
     <!-- Drawer hiển thị chi tiết nhóm -->
     <Drawer v-model:visible="drawerVisible" position="right" class="w-1/3" @close="onCancel">
       <template #header>
@@ -57,21 +35,13 @@
 
         <h3 class="font-semibold text-base mt-4">Danh sách thành viên</h3>
         <ul class="space-y-3">
-          <li
-            v-for="member in members"
-            :key="member.student?.id"
-            class="p-3 border rounded-md flex justify-between items-center"
-          >
+          <li v-for="member in selectedGroup?.students" :key="member?.id"
+            class="p-3 border rounded-md flex justify-between items-center">
             <div>
               <p class="font-medium">{{ member.user.fullname }}</p>
               <p class="text-sm text-gray-500">MSSV: {{ member.code }}</p>
             </div>
-            <Button
-              label="Chấm điểm"
-              size="small"
-              icon="pi pi-pencil"
-              @click="scoreStudent(member)"
-            />
+            <Button label="Chấm điểm" size="small" icon="pi pi-pencil" @click="scoreStudent(member)" />
           </li>
         </ul>
       </div>
@@ -97,7 +67,6 @@ const teacherId = authStore.user?.teacher?.id
 
 const drawerVisible = ref(false)
 const selectedGroup = ref(null)
-const members = ref([])
 const activeRole = ref('all')
 
 const dataColumns = ref([
@@ -124,14 +93,15 @@ const filterByRole = (role) => {
 const router = useRouter()
 
 const onSelectGroup = (group) => {
+  if (group != null) {
+    selectedGroup.value = group
+  }
   drawerVisible.value = true
-  selectedGroup.value = group
-  members.value = group.students
+
 }
 
 const onCancel = () => {
   drawerVisible.value = false
-  selectedGroup.value = null
 }
 
 const scoreStudent = (student) => {
