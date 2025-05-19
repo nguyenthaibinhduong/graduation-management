@@ -63,10 +63,19 @@ export class ScoreController {
 
   @Post('detail')
   async createScoreDetail(
+    @DecodedId(['body', 'student_id']) student_id: number,
+    @DecodedId(['body', 'teacher_id']) teacher_id: number,
+    @DecodedId(['body', 'criteria_id']) criteria_id: number,
     @Body() scoreDetailDto: CreateScoreDetailDto,
   ): Promise<Response<void>> {
     try {
-      await this.scoreService.createScoreDetail(scoreDetailDto);
+      const scoreDetail = {
+        ...scoreDetailDto,
+        student_id,
+        teacher_id,
+        criteria_id,
+      };
+      await this.scoreService.createScoreDetail(scoreDetail);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -78,8 +87,8 @@ export class ScoreController {
 
   @Get('teacher-type/:groupId/:teacherId')
   async determineTeacherType(
-    @Param('groupId') groupId: number,
-    @Param('teacherId') teacherId: number | string,
+    @DecodedId(['params', 'groupId']) groupId: number,
+    @DecodedId(['params', 'teacherId']) teacherId: number,
   ): Promise<Response<any>> {
     try {
       const teacherType = await this.scoreService.determineTeacherType(

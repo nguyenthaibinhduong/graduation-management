@@ -28,6 +28,8 @@ import NotFound from '@/views/error/NotFound.vue'
 import CommitteeDetail from '@/views/admin/CommitteeDetail.vue'
 import GroupTeacherView from '@/views/teacher/GroupTeacherView.vue'
 import ScoreEdit from '@/views/teacher/score/ScoreEdit.vue'
+// Add this import at the top with your other imports
+import ScoreDetailCreate from '@/views/teacher/score/ScoreDetailCreate.vue'
 import LayoutSecond from '@/layouts/LayoutSecond.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 const API_URL = import.meta.env.VITE_API_URL
@@ -77,7 +79,12 @@ const routes = [
       { path: '/teacher-group-advisor', component: GroupTeacherView, meta: { roles: ['teacher'] } },
       { path: '/teacher-project', component: TeacherProjectView, meta: { roles: ['teacher'] } },
       { path: '/score', component: ScoreView, meta: { roles: ['teacher'] } },
-      { path: '/edit-score/:id',component: ScoreEdit, meta: { roles: ['teacher'] }} ,
+      { path: '/edit-score/:id', component: ScoreEdit, meta: { roles: ['teacher'] } },
+      {
+        path: 'create-score-detail/:id',
+        component: ScoreDetailCreate,
+        meta: { roles: ['teacher'] },
+      },
       //Trang cho student
       { path: '/group-manangerment', component: StudentGroup, meta: { roles: ['student'] } },
       { path: '/student-project', component: StudentProjectView, meta: { roles: ['student'] } },
@@ -120,7 +127,7 @@ router.beforeEach(async (to, from, next) => {
   }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     try {
-      const res = await axios.post(API_URL+'/auth/verify-token', { token })
+      const res = await axios.post(API_URL + '/auth/verify-token', { token })
       if (res.status === 201) {
         authStore.setAuth(true)
         return next()
@@ -130,7 +137,7 @@ router.beforeEach(async (to, from, next) => {
       if (error.response && error.response.status === 409) {
         try {
           const refreshRes = await axios.post(
-            API_URL+'/auth/refresh-token',
+            API_URL + '/auth/refresh-token',
             {},
             {
               withCredentials: true,

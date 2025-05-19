@@ -37,7 +37,14 @@
       @rowSelect="onSelectGroup"
     />
     <!-- Drawer hiển thị chi tiết nhóm -->
-    <Drawer v-model:visible="drawerVisible" position="right" class="w-1/3" @close="onCancel">
+    <Drawer
+      v-model:visible="drawerVisible"
+      position="right"
+      class="w-1/3"
+      @close="onCancel"
+      :dismissable="true"
+      :closeOnEscape="true"
+    >
       <template #header>
         <div class="flex justify-between items-center w-full">
           <div class="flex items-center gap-4">
@@ -51,20 +58,20 @@
       </template>
 
       <div class="mt-5 space-y-4">
-        <p><strong>Người tạo nhóm:</strong> {{ selectedGroup?.leader.user.fullname }}</p>
-        <p><strong>GVHD:</strong> {{ selectedGroup?.teacher.user.fullname }}</p>
-        <p><strong>Khoa:</strong> {{ selectedGroup?.department.name }}</p>
+        <p><strong>Người tạo nhóm:</strong> {{ selectedGroup?.leader?.user?.fullname }}</p>
+        <p><strong>GVHD:</strong> {{ selectedGroup?.teacher?.user?.fullname }}</p>
+        <p><strong>Khoa:</strong> {{ selectedGroup?.department?.name }}</p>
 
         <h3 class="font-semibold text-base mt-4">Danh sách thành viên</h3>
         <ul class="space-y-3">
           <li
             v-for="member in members"
-            :key="member.student?.id"
+            :key="member?.student?.id"
             class="p-3 border rounded-md flex justify-between items-center"
           >
             <div>
-              <p class="font-medium">{{ member.user.fullname }}</p>
-              <p class="text-sm text-gray-500">MSSV: {{ member.code }}</p>
+              <p class="font-medium">{{ member?.user?.fullname }}</p>
+              <p class="text-sm text-gray-500">MSSV: {{ member?.code }}</p>
             </div>
             <Button
               label="Chấm điểm"
@@ -82,12 +89,12 @@
 <script setup>
 import { ref } from 'vue'
 import DataTableCustom from '@/components/list/DataTableCustom.vue'
-import { Button, Drawer } from 'primevue' // <-- Đây là Drawer bạn đã đưa
+import { Button, Drawer } from 'primevue'
 import { useRouter } from 'vue-router'
-import { useScoreStore } from '@/stores/store'
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { watchEffect } from 'vue'
+import { useScoreStore } from '@/stores/store'
 
 const scoreStore = useScoreStore()
 const authStore = useAuthStore()
@@ -124,17 +131,24 @@ const filterByRole = (role) => {
 const router = useRouter()
 
 const onSelectGroup = (group) => {
-  drawerVisible.value = true
   selectedGroup.value = group
   members.value = group.students
+  drawerVisible.value = true
 }
 
 const onCancel = () => {
-  drawerVisible.value = false
   selectedGroup.value = null
+  members.value = []
+  drawerVisible.value = false
 }
 
 const scoreStudent = (student) => {
-  if (student?.id) router.push(`/edit-score/${student?.id}`)
+  // Pass both studentId and groupId to ScoreDetailCreate via route params/query
+  if (student?.id && selectedGroup.value?.id) {
+    router.push({
+      path: `/create-score-detail/${student.id}`,
+      query: { groupId: selectedGroup.value.id },
+    })
+  }
 }
 </script>

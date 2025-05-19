@@ -214,9 +214,9 @@ export class ScoreService extends BaseService<Score> {
       const score = await this.repository.manager.findOne(Score, {
         where: { id: score_id },
       });
-      if (!score) {
-        throw new NotFoundException('Score not found');
-      }
+      // if (!score) {
+      //   throw new NotFoundException('Score not found');
+      // }
 
       // validate teacher_id
       const teacher = await this.repository.manager.findOne(Teacher, {
@@ -292,6 +292,7 @@ export class ScoreService extends BaseService<Score> {
       // save score detail
       await this.repository.manager.save(scoreDetailEntity);
     } catch (error) {
+      console.error('Error creating score detail:', error);
       if (error instanceof QueryFailedError) {
         throw new ConflictException('Score detail already exists');
       }
