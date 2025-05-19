@@ -28,8 +28,8 @@ import NotFound from '@/views/error/NotFound.vue'
 import CommitteeDetail from '@/views/admin/CommitteeDetail.vue'
 import GroupTeacherView from '@/views/teacher/GroupTeacherView.vue'
 import ScoreEdit from '@/views/teacher/score/ScoreEdit.vue'
-// Add this import at the top with your other imports
 import ScoreDetailCreate from '@/views/teacher/score/ScoreDetailCreate.vue'
+import StudentScoreView from '@/views/student/StudentScoreView.vue'
 import LayoutSecond from '@/layouts/LayoutSecond.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 const API_URL = import.meta.env.VITE_API_URL
@@ -98,7 +98,7 @@ const routes = [
         component: StudentProjectDoing,
         meta: { roles: ['student'] },
       },
-
+      { path: 'student-score', component: StudentScoreView, meta: { roles: ['student'] } },
       //Nếu sai đuòng dẫn hoặc không đúng role
       { path: '/not-found', component: NotFound },
     ],

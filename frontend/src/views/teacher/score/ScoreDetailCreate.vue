@@ -46,11 +46,30 @@
           label="Lưu điểm"
           icon="pi pi-save"
           class="btn-submit"
-          @click="submitScores"
+          @click="openConfirmModal"
           :loading="loading"
         />
       </div>
     </div>
+    <!-- Confirmation Modal -->
+    <Dialog v-model:visible="confirmVisible" modal header="Xác nhận lưu điểm" :closable="false">
+      <div>
+        <p class="mb-2 font-semibold">Bạn có chắc chắn muốn lưu các điểm sau?</p>
+        <ul class="mb-2">
+          <li v-for="c in criteria.criteria" :key="c.id" class="mb-1">
+            <span class="font-semibold">{{ c.name }}: </span>
+            <span>Điểm: {{ scores[c.id] ?? 'Chưa nhập' }}</span
+            >,
+            <span>Nhận xét: {{ comments[c.id] || '...' }}</span>
+          </li>
+        </ul>
+        <div v-if="errorMessage" class="text-red-500 mb-2">{{ errorMessage }}</div>
+        <div class="flex justify-end gap-2 mt-4">
+          <Button label="Huỷ" @click="confirmVisible = false" severity="secondary" />
+          <Button label="Xác nhận" icon="pi pi-check" @click="submitScores" :loading="loading" />
+        </div>
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -62,6 +81,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputNumber from 'primevue/inputnumber'
 import { Button, InputText } from 'primevue'
+import Dialog from 'primevue/dialog'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -82,6 +102,8 @@ const criteria = ref([])
 const scores = ref({})
 const comments = ref({})
 const loading = ref(false)
+const confirmVisible = ref(false)
+const errorMessage = ref('')
 
 onMounted(async () => {
   await evaluationStore.fetchItems()
@@ -109,24 +131,30 @@ watch(selectedForm, async (val) => {
   }
 })
 
+function openConfirmModal() {
+  confirmVisible.value = true
+}
+
 const submitScores = async () => {
-  if (!studentId.value || !criteria.value || !criteria.value.criteria) return
+  // Validate all scores are filled
+  const missing = criteria.value?.criteria?.some(
+    (c) =>
+      scores.value[c.id] === null || scores.value[c.id] === undefined || scores.value[c.id] === ''
+  )
+  if (missing) {
+    errorMessage.value = 'Vui lòng nhập đầy đủ điểm cho tất cả tiêu chí.'
+    return
+  }
 
   loading.value = true
+  errorMessage.value = ''
   try {
-    // You may need to fetch or determine these IDs/types:
     const teacherId = authStore.user?.teacher?.id
-    // Optionally, get teacherType from API if needed:
     let teacherType = null
     if (groupId.value && teacherId) {
       teacherType = await scoreStore.fetchTeacherType(groupId.value, teacherId)
     }
-
-    // You may need to get or create a score_id for this student/group
-    // For demo, assume you have score_id (fetch or create as needed)
-    // const scoreId = /* fetch or create score_id for this student/group/form */
     const scoreId = null // TODO: Replace with actual logic to fetch or create score_id
-    // Submit each score detail
     for (const c of criteria.value.criteria) {
       const scoreValue = scores.value[c.id]
       const comment = comments.value[c.id]
@@ -137,16 +165,16 @@ const submitScores = async () => {
         teacher_id: teacherId,
         student_id: studentId.value,
         criteria_id: c.id,
-        teacherType: teacherType?.teacherType || teacherType, // e.g. 'advisor'
+        teacherType: teacherType?.teacherType || teacherType,
         scoreValue,
         comment,
       }
       await scoreStore.createScoreDetail(scoreDetailData)
     }
-    // Show success message (handled in store)
+    confirmVisible.value = false
     router.push({ path: '/score' })
   } catch (err) {
-    // Error handled in store, optionally show more feedback here
+    // handle error
   } finally {
     loading.value = false
   }
