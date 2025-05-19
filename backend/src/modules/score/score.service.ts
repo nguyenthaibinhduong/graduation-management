@@ -264,7 +264,6 @@ export class ScoreService extends BaseService<Score> {
         ScoreDetail,
         {
           where: {
-            score: { id: score_id },
             teacher: { id: teacher_id },
             student: { id: student_id },
             criteria: { id: criteria_id },
@@ -273,9 +272,7 @@ export class ScoreService extends BaseService<Score> {
       );
 
       if (existingDetail) {
-        throw new ConflictException(
-          'Score detail already exists for this combination of score, teacher, student, and criteria',
-        );
+        throw new ConflictException('Score detail already exists');
       }
 
       // create score detail
@@ -292,7 +289,6 @@ export class ScoreService extends BaseService<Score> {
       // save score detail
       await this.repository.manager.save(scoreDetailEntity);
     } catch (error) {
-      console.error('Error creating score detail:', error);
       if (error instanceof QueryFailedError) {
         throw new ConflictException('Score detail already exists');
       }

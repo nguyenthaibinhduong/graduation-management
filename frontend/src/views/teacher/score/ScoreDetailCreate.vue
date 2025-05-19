@@ -62,7 +62,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputNumber from 'primevue/inputnumber'
 import { Button, InputText } from 'primevue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const evaluationStore = useEvaluationStore()
@@ -70,6 +70,7 @@ const scoreStore = useScoreStore()
 const authStore = useAuthStore()
 const studentStore = useStudentStore()
 const route = useRoute()
+const router = useRouter()
 
 const studentId = ref(route.params.id)
 const studentInfo = ref(null)
@@ -124,7 +125,7 @@ const submitScores = async () => {
     // You may need to get or create a score_id for this student/group
     // For demo, assume you have score_id (fetch or create as needed)
     // const scoreId = /* fetch or create score_id for this student/group/form */
-    const scoreId = 1 // TODO: Replace with actual logic to fetch or create score_id
+    const scoreId = null // TODO: Replace with actual logic to fetch or create score_id
     // Submit each score detail
     for (const c of criteria.value.criteria) {
       const scoreValue = scores.value[c.id]
@@ -143,6 +144,7 @@ const submitScores = async () => {
       await scoreStore.createScoreDetail(scoreDetailData)
     }
     // Show success message (handled in store)
+    router.push({ path: '/score' })
   } catch (err) {
     // Error handled in store, optionally show more feedback here
   } finally {

@@ -40,7 +40,7 @@
     <Drawer
       v-model:visible="drawerVisible"
       position="right"
-      class="w-1/3"
+      class="w-1/2"
       @close="onCancel"
       :dismissable="true"
       :closeOnEscape="true"
@@ -69,9 +69,102 @@
             :key="member?.id"
             class="p-3 border rounded-md flex justify-between items-center"
           >
-            <div>
+            <div class="w-full">
               <p class="font-medium">{{ member?.user?.fullname }}</p>
               <p class="text-sm text-gray-500">MSSV: {{ member?.code }}</p>
+              <p class="text-sm">
+                Trạng thái:
+                <span
+                  v-if="
+                    memberWeightedScores[member.id] !== undefined &&
+                    memberWeightedScores[member.id] !== null
+                  "
+                >
+                  <span v-if="memberWeightedScores[member.id]?.missingEvaluations">
+                    <span
+                      v-if="
+                        !memberWeightedScores[member.id].missingEvaluations.includes(
+                          selectedGroup?.teacherRole
+                        )
+                      "
+                      class="text-green-500"
+                    >
+                      Đã chấm điểm
+                    </span>
+                    <span v-else class="text-red-500"> Chưa chấm điểm </span>
+                  </span>
+                  <span v-else class="text-red-500"> Chưa chấm điểm </span>
+                </span>
+              </p>
+              <!-- Only show score for current teacherRole -->
+              <p
+                v-if="memberWeightedScores[member.id]?.byType && selectedGroup?.teacherRole"
+                class="text-sm"
+              >
+                Điểm:
+                <span class="font-semibold">
+                  {{
+                    memberWeightedScores[member.id].byType[selectedGroup.teacherRole]?.score !==
+                      null &&
+                    memberWeightedScores[member.id].byType[selectedGroup.teacherRole]?.score !==
+                      undefined
+                      ? memberWeightedScores[member.id].byType[selectedGroup.teacherRole]?.score
+                      : 'Chưa có điểm'
+                  }}
+                </span>
+                (
+                <span>{{
+                  teacherRoleViMap[selectedGroup.teacherRole] || selectedGroup.teacherRole
+                }}</span
+                >)
+              </p>
+
+              <!-- Điểm của SV Accordion -->
+              <Accordion :activeIndex="null" class="mt-2">
+                <AccordionTab header="Xem chi tiết">
+                  <div v-if="memberWeightedScores[member.id]">
+                    <!-- Only show missingEvaluations and isComplete -->
+                    <div v-if="'missingEvaluations' in memberWeightedScores[member.id]">
+                      <span class="font-semibold">Điểm còn thiếu: </span>
+                      <span>
+                        {{
+                          Array.isArray(memberWeightedScores[member.id].missingEvaluations)
+                            ? memberWeightedScores[member.id].missingEvaluations
+                                .map((role) => teacherRoleViMap[role] || role)
+                                .join(', ')
+                            : teacherRoleViMap[
+                                memberWeightedScores[member.id].missingEvaluations
+                              ] || memberWeightedScores[member.id].missingEvaluations
+                        }}
+                      </span>
+                    </div>
+                    <div v-if="'isComplete' in memberWeightedScores[member.id]">
+                      <span class="font-semibold">Tiến độ đánh giá: </span>
+                      <span>{{
+                        memberWeightedScores[member.id].isComplete
+                          ? 'Hoàn thành'
+                          : 'Chưa hoàn thành'
+                      }}</span>
+                    </div>
+                    <div
+                      v-if="
+                        memberWeightedScores[member.id].isComplete &&
+                        'weightedTotal' in memberWeightedScores[member.id]
+                      "
+                    >
+                      <span class="font-semibold">weightedTotal:</span>
+                      <span>{{ memberWeightedScores[member.id].weightedTotal }}</span>
+                    </div>
+                  </div>
+                  <div v-if="!memberWeightedScores[member.id]?.weightedTotal">
+                    <span class="font-semibold">Điểm còn thiếu: </span>
+                    <span> Hướng dẫn, Phản biện, Hội đồng </span>
+                    <br />
+                    <span class="font-semibold">Tiến độ đánh giá: </span>
+                    <span>Chưa hoàn thành</span>
+                  </div>
+                </AccordionTab>
+              </Accordion>
             </div>
             <Button
               label="Chấm điểm"
@@ -87,13 +180,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
 import DataTableCustom from '@/components/list/DataTableCustom.vue'
 import { Button, Drawer } from 'primevue'
+import Accordion from 'primevue/accordion'
+import AccordionTab from 'primevue/accordiontab'
 import { useRouter } from 'vue-router'
-import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { watchEffect } from 'vue'
 import { useScoreStore } from '@/stores/store'
 
 const scoreStore = useScoreStore()
@@ -105,13 +198,20 @@ const teacherId = authStore.user?.teacher?.id
 const drawerVisible = ref(false)
 const selectedGroup = ref(null)
 const activeRole = ref('all')
+const memberWeightedScores = ref({}) // { [studentId]: score }
 
 const dataColumns = ref([
   { field: 'name', header: 'Tên nhóm' },
   { field: 'project.title', header: 'Tên đề tài' },
   { field: 'department.name', header: 'Khoa' },
-  { field: 'teacherRole', header: 'Vai trò' },
+  { field: 'teacherRoleVi', header: 'Vai trò' },
 ])
+
+const teacherRoleViMap = {
+  advisor: 'Hướng dẫn',
+  reviewer: 'Phản biện',
+  committee: 'Hội đồng',
+}
 
 onMounted(async () => {
   await authStore.fetchUser()
@@ -119,8 +219,12 @@ onMounted(async () => {
 })
 
 watchEffect(() => {
-  groups.value = scoreStore.teacherGroups
+  groups.value = scoreStore.teacherGroups.map((g) => ({
+    ...g,
+    teacherRoleVi: teacherRoleViMap[g.teacherRole] || g.teacherRole,
+  }))
 })
+
 const filterByRole = (role) => {
   activeRole.value = role
   const queryType = role === 'all' ? null : role
@@ -129,21 +233,35 @@ const filterByRole = (role) => {
 
 const router = useRouter()
 
-const onSelectGroup = (group) => {
+const onSelectGroup = async (group) => {
   if (group != null) {
     selectedGroup.value = group
+    // Fetch weighted scores for all members
+    memberWeightedScores.value = {}
+    if (group.students && group.students.length) {
+      for (const member of group.students) {
+        // Handle promise and store result
+        memberWeightedScores.value[member.id] = null
+        scoreStore
+          .fetchWeightedTotalScore(member.id)
+          .then((score) => {
+            memberWeightedScores.value[member.id] = score
+          })
+          .catch(() => {
+            memberWeightedScores.value[member.id] = 'Lỗi'
+          })
+      }
+    }
   }
   drawerVisible.value = true
 }
 
 const onCancel = () => {
   selectedGroup.value = null
-  members.value = []
   drawerVisible.value = false
 }
 
 const scoreStudent = (student) => {
-  // Pass both studentId and groupId to ScoreDetailCreate via route params/query
   if (student?.id && selectedGroup.value?.id) {
     router.push({
       path: `/create-score-detail/${student.id}`,
