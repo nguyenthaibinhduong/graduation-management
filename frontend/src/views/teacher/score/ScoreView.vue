@@ -65,8 +65,8 @@
         <h3 class="font-semibold text-base mt-4">Danh sách thành viên</h3>
         <ul class="space-y-3">
           <li
-            v-for="member in members"
-            :key="member?.student?.id"
+            v-for="member in selectedGroup?.students"
+            :key="member?.id"
             class="p-3 border rounded-md flex justify-between items-center"
           >
             <div>
@@ -104,7 +104,6 @@ const teacherId = authStore.user?.teacher?.id
 
 const drawerVisible = ref(false)
 const selectedGroup = ref(null)
-const members = ref([])
 const activeRole = ref('all')
 
 const dataColumns = ref([
@@ -131,8 +130,9 @@ const filterByRole = (role) => {
 const router = useRouter()
 
 const onSelectGroup = (group) => {
-  selectedGroup.value = group
-  members.value = group.students
+  if (group != null) {
+    selectedGroup.value = group
+  }
   drawerVisible.value = true
 }
 
