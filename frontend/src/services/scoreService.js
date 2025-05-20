@@ -27,6 +27,11 @@ const scoreService = {
     const { data } = await api.get(`/score/teacher-groups/${teacherId}?type=${teacherType}`)
     return data.data
   },
+
+  getStudentScoreDetails: async (studentId) => {
+    const { data } = await api.get(`/score/student/details/${studentId}`)
+    return data.data
+  },
 }
 
 export default scoreService

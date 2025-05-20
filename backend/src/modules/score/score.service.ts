@@ -661,9 +661,13 @@ export class ScoreService extends BaseService<Score> {
           id: true,
           scoreValue: true,
           teacherType: true,
+          comment: true,
           criteria: {
             name: true,
             content: true,
+            max_score: true,
+            weightPercent: true,
+            step: true,
           },
         },
       });

@@ -117,6 +117,23 @@ export function createScoreStore() {
       }
     }
 
+    const fetchStudentScoreDetails = async (studentId) => {
+      loading.value = true
+      error.value = null
+
+      try {
+        const data = await scoreService.getStudentScoreDetails(studentId)
+        scoreDetails.value = data
+        return data
+      } catch (err) {
+        error.value = err.message || 'Failed to fetch student score details'
+        showToast(error.value, 'error')
+        throw err
+      } finally {
+        loading.value = false
+      }
+    }
+
     return {
       // State
       scoreDetails,
@@ -133,6 +150,7 @@ export function createScoreStore() {
       fetchWeightedTotalScore,
       fetchTeacherType,
       fetchGroupsByTeacher,
+      fetchStudentScoreDetails,
     }
   })
 }

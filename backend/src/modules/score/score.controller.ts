@@ -177,7 +177,7 @@ export class ScoreController {
 
   @Put('detail/:id')
   async updateScoreDetail(
-    @Param() scoreDetailId: number,
+    @DecodedId(['params', 'id']) scoreDetailId: number,
     @Body() updateData: Partial<ScoreDetail>,
   ): Promise<Response<ScoreDetail>> {
     try {
@@ -232,7 +232,7 @@ export class ScoreController {
    */
   @Get('student/details/:studentId')
   async getStudentScoreDetails(
-    @Param('studentId', ParseIntPipe) studentId: number,
+    @DecodedId(['params', 'studentId']) studentId: number,
   ): Promise<Response<any>> {
     try {
       const scoreDetails =
