@@ -22,7 +22,7 @@
     </Toolbar>
     <div class="mx-auto  text-sm">
       <DataTable showGridlines :value="data" stripedRows :loading="loading" class="p-datatable-sm" dataKey="id"
-        v-model:selection="selectedData" selectionMode="single">
+        v-model:selection="selectedData" selectionMode="single" @row-unselect="onRowUnselect">
         <template v-if="blockFuntion('headerBar')" #header>
           <div class="flex flex-wrap gap-2 items-center justify-between">
             <div v-if="blockFuntion('selectAll')" class="flex items-center">
@@ -179,7 +179,10 @@ const blockFuntion = (key) => {
   }
 
 }
-
+const onRowUnselect = (event) => {
+  // Ngăn việc unselect khi click lại dòng đã chọn
+  selectedData.value = event.data
+}
 
 const getNestedValue = (obj, field) => {
   return field.split('.').reduce((acc, key) => acc?.[key], obj) || 'N/A'

@@ -31,6 +31,9 @@ import ScoreEdit from '@/views/teacher/score/ScoreEdit.vue'
 import ScoreDetailCreate from '@/views/teacher/score/ScoreDetailCreate.vue'
 import StudentScoreView from '@/views/student/StudentScoreView.vue'
 import LayoutSecond from '@/layouts/LayoutSecond.vue'
+import DashBoardAdmin from '@/views/dashboard/DashBoardAdmin.vue'
+import DashBoardTeacher from '@/views/dashboard/DashBoardTeacher.vue'
+import DashBoardStudent from '@/views/dashboard/DashBoardStudent.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 const API_URL = import.meta.env.VITE_API_URL
 const routes = [
@@ -46,6 +49,7 @@ const routes = [
       { path: '/project-detail/:id', component: ProjectDetailView },
       { path: '/profile', component: ProfileView },
       // Trang cho admin
+      { path: '/admin-dashboard', component: DashBoardAdmin, meta: { roles: ['admin'] } },
       { path: '/student-manangerment', component: StudentView, meta: { roles: ['admin'] } },
       { path: '/group-manangerment-admin', component: GroupView, meta: { roles: ['admin'] } },
       { path: '/teacher-manangerment', component: TeacherView, meta: { roles: ['admin'] } },
@@ -76,6 +80,7 @@ const routes = [
       { path: '/score/:id', component: ScoreView, meta: { roles: ['admin'] } },
       { path: '/committee-management/:id', component: CommitteeDetail, meta: { roles: ['admin'] } },
       //Trang cho teacher
+      { path: '/teacher-dashboard', component: DashBoardTeacher, meta: { roles: ['teacher'] } },
       { path: '/teacher-group-advisor', component: GroupTeacherView, meta: { roles: ['teacher'] } },
       { path: '/teacher-project', component: TeacherProjectView, meta: { roles: ['teacher'] } },
       { path: '/score', component: ScoreView, meta: { roles: ['teacher'] } },
@@ -86,6 +91,7 @@ const routes = [
         meta: { roles: ['teacher'] },
       },
       //Trang cho student
+      { path: '/student-dashboard', component: DashBoardStudent, meta: { roles: ['student'] } },
       { path: '/group-manangerment', component: StudentGroup, meta: { roles: ['student'] } },
       { path: '/student-project', component: StudentProjectView, meta: { roles: ['student'] } },
       {

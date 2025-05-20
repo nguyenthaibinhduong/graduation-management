@@ -1,37 +1,25 @@
 <template>
   <div class="p-4">
     <h2 class="text-xl font-bold mb-4">Chọn phiếu đánh giá</h2>
-    <Dropdown
-      v-model="selectedForm"
-      :options="form"
-      optionLabel="title"
-      placeholder="Chọn phiếu"
-      class="w-full mb-4"
-    />
-    <div v-if="selectedForm">
-      <h3 class="text-lg font-semibold mt-4">Bạn đã chọn: {{ selectedForm.title }}</h3>
+    <Dropdown v-model="selectedForm" :options="form" optionLabel="title" placeholder="Chọn phiếu" class="w-1/4 mb-4" />
+
+    <div v-if="selectedForm" class="w-full bg-white p-4 rounded-xl">
+      <h3 class="text-lg font-semibold my-4">Bạn đã chọn: {{ selectedForm.title }}</h3>
       <div v-if="criteria && criteria.criteria && criteria.criteria.length">
         <DataTable :value="criteria.criteria" class="mb-4 w-full" responsiveLayout="stack">
           <Column field="name" header="Tên tiêu chí" style="width: 18%" />
-          <Column field="content" header="Mô tả" style="width: 28%" />
-          <Column
-            field="weightPercent"
-            header="Trọng số (%)"
-            style="width: 12%; text-align: center"
-          />
-          <Column header="Điểm" style="width: 10%">
+          <Column field="content" header="Mô tả" style="width: 28%">
             <template #body="{ data }">
-              <InputNumber
-                v-model="scores[data.id]"
-                :min="0"
-                :max="data.max_score"
-                :step="data.step"
-                class="w-full"
-                showButtons
-                buttonLayout="horizontal"
-                incrementButtonIcon="pi pi-plus"
-                decrementButtonIcon="pi pi-minus"
-              />
+              <span v-html="safeHtml(data?.content)" />
+            </template>
+
+          </Column>
+          <Column field="weightPercent" header="Trọng số (%)" style="width: 12%; text-align: center" />
+          <Column field="max_score" header="Điểm tối đa" style="width: 12%; text-align: center" />
+          <Column header="Điểm">
+            <template #body="{ data }">
+              <InputNumber v-model="scores[data.id]" :min="0" :max="data.max_score" :step="data.step" showButtons
+                buttonLayout="horizontal" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
             </template>
           </Column>
           <Column header="Nhận xét" style="width: 32%">
@@ -42,35 +30,29 @@
         </DataTable>
       </div>
       <div class="text-right">
-        <Button
-          label="Lưu điểm"
-          icon="pi pi-save"
-          class="btn-submit"
-          @click="openConfirmModal"
-          :loading="loading"
-        />
+        <Button label="Lưu điểm" icon="pi pi-save" class="btn-submit" @click="openConfirmModal" :loading="loading" />
       </div>
     </div>
     <!-- Confirmation Modal -->
-    <Dialog v-model:visible="confirmVisible" modal header="Xác nhận lưu điểm" :closable="false">
-      <div>
-        <p class="mb-2 font-semibold">Bạn có chắc chắn muốn lưu các điểm sau?</p>
-        <ul class="mb-2">
-          <li v-for="c in criteria.criteria" :key="c.id" class="mb-1">
-            <span class="font-semibold">{{ c.name }}: </span>
-            <span>Điểm: {{ scores[c.id] ?? 'Chưa nhập' }}</span
-            >,
-            <span>Nhận xét: {{ comments[c.id] || '...' }}</span>
-          </li>
-        </ul>
-        <div v-if="errorMessage" class="text-red-500 mb-2">{{ errorMessage }}</div>
-        <div class="flex justify-end gap-2 mt-4">
-          <Button label="Huỷ" @click="confirmVisible = false" severity="secondary" />
-          <Button label="Xác nhận" icon="pi pi-check" @click="submitScores" :loading="loading" />
-        </div>
-      </div>
-    </Dialog>
+
   </div>
+  <Dialog v-model:visible="confirmVisible" modal header="Xác nhận lưu điểm" :closable="false">
+    <div>
+      <p class="mb-2 font-semibold">Bạn có chắc chắn muốn lưu các điểm sau?</p>
+      <ul class="mb-2">
+        <li v-for="c in criteria.criteria" :key="c.id" class="mb-1">
+          <span class="font-semibold">{{ c.name }}: </span>
+          <span>Điểm: {{ scores[c.id] ?? 'Chưa nhập' }}</span>,
+          <span>Nhận xét: {{ comments[c.id] || '...' }}</span>
+        </li>
+      </ul>
+      <div v-if="errorMessage" class="text-red-500 mb-2">{{ errorMessage }}</div>
+      <div class="flex justify-end gap-2 mt-4">
+        <Button label="Huỷ" @click="confirmVisible = false" severity="secondary" />
+        <Button label="Xác nhận" icon="pi pi-check" @click="submitScores" :loading="loading" />
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <script setup>
@@ -84,6 +66,7 @@ import { Button, InputText } from 'primevue'
 import Dialog from 'primevue/dialog'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import DOMPurify from 'dompurify';
 
 const evaluationStore = useEvaluationStore()
 const scoreStore = useScoreStore()
@@ -131,9 +114,15 @@ watch(selectedForm, async (val) => {
   }
 })
 
+const getNestedValue = (obj, field) => {
+  return field.split('.').reduce((acc, key) => acc?.[key], obj) || 'N/A'
+}
+
 function openConfirmModal() {
   confirmVisible.value = true
 }
+
+const safeHtml = (rawHtml) => { return DOMPurify.sanitize(rawHtml) };
 
 const submitScores = async () => {
   // Validate all scores are filled
@@ -180,26 +169,3 @@ const submitScores = async () => {
   }
 }
 </script>
-
-<style scoped>
-/* Make table fit screen and stack on small screens */
-:deep(.p-datatable) {
-  width: 100%;
-  min-width: unset;
-}
-:deep(.p-datatable-thead > tr > th),
-:deep(.p-datatable-tbody > tr > td) {
-  white-space: pre-line;
-  vertical-align: middle;
-  padding: 0.5rem 0.75rem;
-}
-@media (max-width: 900px) {
-  :deep(.p-datatable) {
-    font-size: 0.95rem;
-  }
-  :deep(.p-datatable-thead > tr > th),
-  :deep(.p-datatable-tbody > tr > td) {
-    padding: 0.4rem 0.5rem;
-  }
-}
-</style>

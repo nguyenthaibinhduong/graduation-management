@@ -1,46 +1,48 @@
 <template>
-  <!-- Hiển thị điểm hoặc trạng thái tải/lỗi -->
-  <div v-if="scoreLoading">Đang tải điểm...</div>
-  <div v-else-if="scoreError" class="text-red-500">{{ scoreError }}</div>
-  <div v-else-if="score">
-    <DataTable :value="[score]" class="w-full mt-4">
-      <Column header="Điểm GVHD">
-        <template #body="{ data }">
-          {{
-            data?.byType?.advisor?.score !== null && data?.byType?.advisor?.score !== undefined
-              ? data.byType.advisor.score
-              : 'Chưa có điểm'
-          }}
-        </template>
-      </Column>
-      <Column header="Điểm phản biện">
-        <template #body="{ data }">
-          {{
-            data?.byType?.reviewer?.score !== null && data?.byType?.reviewer?.score !== undefined
-              ? data.byType.reviewer.score
-              : 'Chưa có điểm'
-          }}
-        </template>
-      </Column>
-      <Column header="Điểm hội đồng">
-        <template #body="{ data }">
-          {{
-            data?.byType?.committee?.score !== null && data?.byType?.committee?.score !== undefined
-              ? data.byType.committee.score
-              : 'Chưa có điểm'
-          }}
-        </template>
-      </Column>
-      <Column field="weightedTotal" header="Tổng điểm (trọng số)" />
-      <Column field="isComplete" header="Trạng thái">
-        <template #body="{ data }">
-          <span :class="data.isComplete ? 'text-green-600' : 'text-red-600'">
-            {{ data.isComplete ? 'Hoàn thành' : 'Chưa hoàn thành' }}
-          </span>
-        </template>
-      </Column>
-    </DataTable>
+  <div class="w-full p-4">
+    <div v-if="scoreLoading">Đang tải điểm...</div>
+    <div v-else-if="scoreError" class="text-red-500">{{ scoreError }}</div>
+    <div v-else-if="score">
+      <DataTable showGridlines :value="[score]" class="w-full mt-4 p-datatable-sm" stripedRows>
+        <Column header="Điểm GVHD">
+          <template #body="{ data }">
+            {{
+              data?.byType?.advisor?.score !== null && data?.byType?.advisor?.score !== undefined
+                ? data.byType.advisor.score
+                : 'Chưa có điểm'
+            }}
+          </template>
+        </Column>
+        <Column header="Điểm phản biện">
+          <template #body="{ data }">
+            {{
+              data?.byType?.reviewer?.score !== null && data?.byType?.reviewer?.score !== undefined
+                ? data.byType.reviewer.score
+                : 'Chưa có điểm'
+            }}
+          </template>
+        </Column>
+        <Column header="Điểm hội đồng">
+          <template #body="{ data }">
+            {{
+              data?.byType?.committee?.score !== null && data?.byType?.committee?.score !== undefined
+                ? data.byType.committee.score
+                : 'Chưa có điểm'
+            }}
+          </template>
+        </Column>
+        <Column field="weightedTotal" header="Tổng điểm (trọng số)" />
+        <Column field="isComplete" header="Trạng thái">
+          <template #body="{ data }">
+            <span :class="data.isComplete ? 'text-green-600' : 'text-red-600'">
+              {{ data.isComplete ? 'Hoàn thành' : 'Chưa hoàn thành' }}
+            </span>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </div>
+
 </template>
 
 <script setup>
