@@ -260,20 +260,20 @@ export class ScoreService extends BaseService<Score> {
       }
 
       // Check for existing score detail to avoid duplicates
-      const existingDetail = await this.repository.manager.findOne(
-        ScoreDetail,
-        {
-          where: {
-            teacher: { id: teacher_id },
-            student: { id: student_id },
-            criteria: { id: criteria_id },
-          },
-        },
-      );
+      // const existingDetail = await this.repository.manager.findOne(
+      //   ScoreDetail,
+      //   {
+      //     where: {
+      //       teacher: { id: teacher_id },
+      //       student: { id: student_id },
+      //       criteria: { id: criteria_id },
+      //     },
+      //   },
+      // );
 
-      if (existingDetail) {
-        throw new ConflictException('Score detail already exists');
-      }
+      // if (existingDetail) {
+      //   throw new ConflictException('Score detail already exists');
+      // }
 
       // create score detail
       const scoreDetailEntity = new ScoreDetail();
