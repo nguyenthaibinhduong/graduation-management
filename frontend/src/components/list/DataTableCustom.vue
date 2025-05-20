@@ -180,10 +180,8 @@ const blockFuntion = (key) => {
 
 }
 const onRowUnselect = (event) => {
-  // Ngăn việc unselect khi click lại dòng đã chọn
-  selectedData.value = event.data
+  emit('rowSelect', event.data)
 }
-
 const getNestedValue = (obj, field) => {
   return field.split('.').reduce((acc, key) => acc?.[key], obj) || 'N/A'
 }
