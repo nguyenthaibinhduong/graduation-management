@@ -15,6 +15,7 @@ import { Project } from './project.entity';
 import { Score } from './score.entity';
 import { Department } from './department.entity';
 import { Teacher } from './teacher.entity';
+import { Committee } from './committee.entity';
 
 @Entity('groups')
 export class Group {
@@ -54,6 +55,12 @@ export class Group {
   })
   @JoinColumn({ name: 'project_id' })
   project: Project;
+
+  @ManyToOne(() => Committee, (committee) => committee.id, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'comittee_id' })
+  committee: Committee;
 
   @ManyToOne(() => Department, (department) => department.group, {
     onDelete: 'CASCADE',

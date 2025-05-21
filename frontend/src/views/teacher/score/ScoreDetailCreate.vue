@@ -180,7 +180,7 @@ const submitScores = async () => {
         teacher_id: teacherId,
         student_id: studentId.value,
         criteria_id: c.id,
-        teacherType: teacherType?.teacherType || teacherType,
+        // teacherType: teacherType?.teacherType || teacherType,
         scoreValue,
         comment,
       }

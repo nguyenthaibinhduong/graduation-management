@@ -35,7 +35,7 @@ export class GroupsController {
         createGroupDto,
         request.user?.id,
       );
-      return new Response( newGroup, HttpStatus.SUCCESS, Message.SUCCESS);
+      return new Response(newGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
@@ -47,16 +47,23 @@ export class GroupsController {
   @Get()
   async findAll(
     @Query('status') status?: string,
-    @DecodedId(['query','department_id']) department_id?: number | string,
-   @Query('search') search?: string,
-  @Query('limit') limit?: number,
-  @Query('page') page?: number,
-  @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc',
+    @DecodedId(['query', 'department_id']) department_id?: number | string,
+    @Query('search') search?: string,
+    @Query('limit') limit?: number,
+    @Query('page') page?: number,
+    @Query('orderBy') orderBy: 'asc' | 'desc' = 'asc',
   ): Promise<
     Response<{ items: Group[]; total: number; limit?: number; page?: number }>
   > {
     try {
-     const groups = await this.groupsService.getAllGroup(status,department_id,search,limit,page,orderBy);
+      const groups = await this.groupsService.getAllGroup(
+        status,
+        department_id,
+        search,
+        limit,
+        page,
+        orderBy,
+      );
       return new Response(groups, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -67,7 +74,7 @@ export class GroupsController {
   }
 
   @Get(':id')
-  async findOne(@DecodedId(["params"]) id: number): Promise<Response<Group>> {
+  async findOne(@DecodedId(['params']) id: number): Promise<Response<Group>> {
     try {
       const group = await this.groupsService.getById({ where: { id } });
       return group
@@ -80,7 +87,7 @@ export class GroupsController {
 
   @Put(':id')
   async update(
-    @DecodedId(["params"]) id: number,
+    @DecodedId(['params']) id: number,
     @Body(new ValidationPipe()) updateGroupDto: UpdateGroupDto,
   ): Promise<Response<Group>> {
     try {
@@ -99,7 +106,7 @@ export class GroupsController {
   }
 
   @Delete(':id')
-  async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
+  async remove(@DecodedId(['params']) id: number): Promise<Response<void>> {
     try {
       const deletedGroup = await this.groupsService.delete(id);
       return new Response(deletedGroup, HttpStatus.SUCCESS, Message.SUCCESS);
@@ -128,20 +135,24 @@ export class GroupsController {
 
   @Post('register-project')
   async registerProject(
-    @DecodedId(["body","group_id"]) groupId: number,
-    @DecodedId(["body", "project_id"]) projectId: number,
-    @Request() request: any
+    @DecodedId(['body', 'group_id']) groupId: number,
+    @DecodedId(['body', 'project_id']) projectId: number,
+    @Request() request: any,
   ): Promise<Response<void>> {
     try {
       const userId = request.user?.id;
 
-    if (!userId || !groupId) {
-      throw new HttpException(
-        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin' },
-        HttpStatus.ERROR,
+      if (!userId || !groupId) {
+        throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin' },
+          HttpStatus.ERROR,
+        );
+      }
+      const registeredGroup = await this.groupsService.registerProject(
+        groupId,
+        projectId,
+        userId,
       );
-    }
-      const registeredGroup = await this.groupsService.registerProject(groupId,projectId,userId);
       return new Response(registeredGroup, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -152,12 +163,10 @@ export class GroupsController {
   }
 
   @Post('get-my-group')
-  async getMyGroup(
-     @Request() request: any,
-  ): Promise<Response<any>> {
+  async getMyGroup(@Request() request: any): Promise<Response<any>> {
     try {
-      const id = request.user?.id
-      const group = await this.groupsService.getGroupByUser(id,'leader');
+      const id = request.user?.id;
+      const group = await this.groupsService.getGroupByUser(id, 'leader');
       return new Response(group, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -168,12 +177,10 @@ export class GroupsController {
   }
 
   @Post('get-my-invite')
-  async getMyInvite(
-     @Request() request: any,
-  ): Promise<Response<any>> {
+  async getMyInvite(@Request() request: any): Promise<Response<any>> {
     try {
-      const id = request.user?.id
-      const group = await this.groupsService.getGroupByUser(id,'invite');
+      const id = request.user?.id;
+      const group = await this.groupsService.getGroupByUser(id, 'invite');
       return new Response(group, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -185,21 +192,25 @@ export class GroupsController {
 
   @Post('invite-response/:type')
   async respondToInvite(
-  @Param('type') type: 'accept' | 'reject',
-  @DecodedId(["body","group_id"]) groupId: number,
-  @Request() request: any,
-): Promise<Response<any>> {
-  try {
-    const userId = request.user?.id;
+    @Param('type') type: 'accept' | 'reject',
+    @DecodedId(['body', 'group_id']) groupId: number,
+    @Request() request: any,
+  ): Promise<Response<any>> {
+    try {
+      const userId = request.user?.id;
 
-    if (!userId || !groupId) {
-      throw new HttpException(
-        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin' },
-        HttpStatus.ERROR,
+      if (!userId || !groupId) {
+        throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin' },
+          HttpStatus.ERROR,
+        );
+      }
+
+      const result = await this.groupsService.handleInviteResponse(
+        userId,
+        groupId,
+        type,
       );
-    }
-
-    const result = await this.groupsService.handleInviteResponse(userId, groupId, type);
       return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -211,21 +222,25 @@ export class GroupsController {
 
   @Post('update-status/:groupId')
   async updateStatusGroup(
-    @DecodedId(["params","groupId"]) groupId: string | number,
+    @DecodedId(['params', 'groupId']) groupId: string | number,
     @Body('status') status: number,
     @Request() request: any,
-): Promise<Response<any>> {
-  try {
-    const userId = request.user?.id;
+  ): Promise<Response<any>> {
+    try {
+      const userId = request.user?.id;
 
-    if (!userId || !groupId) {
-      throw new HttpException(
-        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
-        HttpStatus.ERROR,
+      if (!userId || !groupId) {
+        throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+          HttpStatus.ERROR,
+        );
+      }
+
+      const result = await this.groupsService.updateStatusGroup(
+        userId,
+        groupId,
+        status,
       );
-    }
-
-    const result = await this.groupsService.updateStatusGroup(userId, groupId, status);
       return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -237,20 +252,20 @@ export class GroupsController {
 
   @Post('lock-group')
   async lockGroup(
-    @DecodedId(["body","department_id"]) department_id: number,
+    @DecodedId(['body', 'department_id']) department_id: number,
     @Request() request: any,
-): Promise<Response<any>> {
-  try {
-    const userId = request.user?.id;
+  ): Promise<Response<any>> {
+    try {
+      const userId = request.user?.id;
 
-    if (!userId) {
-      throw new HttpException(
-        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
-        HttpStatus.ERROR,
-      );
-    }
+      if (!userId) {
+        throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+          HttpStatus.ERROR,
+        );
+      }
 
-    const result = await this.groupsService.lockGroup(department_id,userId);
+      const result = await this.groupsService.lockGroup(department_id, userId);
       return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -262,21 +277,24 @@ export class GroupsController {
 
   @Post('change-teacher')
   async changeTeacher(
-    @DecodedId(["body", "groupId"]) groupId: number,
-    @Body("teacher_code") teacher_code: number,
+    @DecodedId(['body', 'groupId']) groupId: number,
+    @Body('teacher_code') teacher_code: number,
     @Request() request: any,
-): Promise<Response<any>> {
-  try {
-    const userId = request.user?.id;
+  ): Promise<Response<any>> {
+    try {
+      const userId = request.user?.id;
 
-    if (!userId) {
-      throw new HttpException(
-        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
-        HttpStatus.ERROR,
+      if (!userId) {
+        throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+          HttpStatus.ERROR,
+        );
+      }
+
+      const result = await this.groupsService.changeTeacher(
+        teacher_code,
+        groupId,
       );
-    }
-
-    const result = await this.groupsService.changeTeacher(teacher_code, groupId);
       return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -288,21 +306,62 @@ export class GroupsController {
 
   @Post('stop-project')
   async stopProject(
-    @DecodedId(["body", "groupId"]) groupId: number,
-    @DecodedId(["body", "projectId"]) projectId: number,
+    @DecodedId(['body', 'groupId']) groupId: number,
+    @DecodedId(['body', 'projectId']) projectId: number,
     @Request() request: any,
-): Promise<Response<any>> {
-  try {
-    const userId = request.user?.id;
+  ): Promise<Response<any>> {
+    try {
+      const userId = request.user?.id;
 
-    if (!userId) {
+      if (!userId) {
+        throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+          HttpStatus.ERROR,
+        );
+      }
+
+      const result = await this.groupsService.stopProject(groupId, projectId);
+      return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
       throw new HttpException(
-        { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin ' },
+        { statusCode: HttpStatus.ERROR, message: error.message },
         HttpStatus.ERROR,
       );
     }
+  }
 
-    const result = await this.groupsService.stopProject(groupId,projectId);
+  //Assign teacher to group
+  @Post('assign-reviewer')
+  async assignReviewer(
+    @DecodedId(['body', 'groupId']) groupId: number,
+    @DecodedId(['body', 'teacherId']) teacherId: number,
+  ): Promise<Response<any>> {
+    try {
+      const result = await this.groupsService.assignReviewer(
+        groupId,
+        teacherId,
+      );
+      return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Post('assign-committee')
+  async assignCommittee(
+    // @Body('groupId') groupId: number,
+    // @Body('committeeId') committeeId: number,
+    @DecodedId(['body', 'groupId']) groupId: number,
+    @DecodedId(['body', 'committeeId']) committeeId: number,
+  ): Promise<Response<any>> {
+    try {
+      const result = await this.groupsService.assignCommittee(
+        groupId,
+        committeeId,
+      );
       return new Response(result, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

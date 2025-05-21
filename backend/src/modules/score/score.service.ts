@@ -243,37 +243,33 @@ export class ScoreService extends BaseService<Score> {
         throw new NotFoundException('Criteria not found');
       }
 
-      // Get group id from student and determine teacher type
-      let teacherRole = teacherType;
-
-      if (student.group && !teacherRole) {
-        teacherRole = await this.determineTeacherType(
-          student.group.id,
-          teacher_id,
-        );
-      }
+      const teacherRole = await this.determineTeacherType(
+        student.group.id,
+        teacher_id,
+      );
 
       if (!teacherRole) {
         throw new NotFoundException(
-          `Teacher with ID is not an advisor, reviewer, or committee member for this group`,
+          `Teacher is not an advisor, reviewer, or committee member for this group`,
         );
       }
 
       // Check for existing score detail to avoid duplicates
-      // const existingDetail = await this.repository.manager.findOne(
-      //   ScoreDetail,
-      //   {
-      //     where: {
-      //       teacher: { id: teacher_id },
-      //       student: { id: student_id },
-      //       criteria: { id: criteria_id },
-      //     },
-      //   },
-      // );
+      const existingDetail = await this.repository.manager.findOne(
+        ScoreDetail,
+        {
+          where: {
+            teacher: { id: teacher_id },
+            student: { id: student_id },
+            criteria: { id: criteria_id },
+            teacherType: teacherRole,
+          },
+        },
+      );
 
-      // if (existingDetail) {
-      //   throw new ConflictException('Score detail already exists');
-      // }
+      if (existingDetail) {
+        throw new ConflictException('Score detail already exists');
+      }
 
       // create score detail
       const scoreDetailEntity = new ScoreDetail();
@@ -308,7 +304,7 @@ export class ScoreService extends BaseService<Score> {
   ): Promise<'advisor' | 'reviewer' | 'committee' | null> {
     const group = await this.repository.manager.findOne(Group, {
       where: { id: groupId },
-      relations: ['project', 'teacher', 'facultyReviewers'],
+      relations: ['project', 'teacher', 'facultyReviewers', 'committee'],
     });
 
     if (!group) {
@@ -320,9 +316,13 @@ export class ScoreService extends BaseService<Score> {
     if (!group.project) {
       throw new NotFoundException(`Nhóm chưa có đề tài`);
     }
-    if (group.teacher.id == teacherId) {
+
+    // Advisor
+    if (group.teacher && group.teacher.id == teacherId) {
       return 'advisor';
     }
+
+    // Reviewer
     if (group.facultyReviewers) {
       const isReviewer = group.facultyReviewers.some(
         (reviewer) => reviewer.id == teacherId,
@@ -332,20 +332,19 @@ export class ScoreService extends BaseService<Score> {
       }
     }
 
-    const committeeCount = await this.dataSource
-      .createQueryBuilder()
-      .select('committee.id')
-      .from(Committee, 'committee')
-      .innerJoin('committee.teachers', 'teacher', 'teacher.id = :teacherId', {
-        teacherId,
-      })
-      .innerJoin('committee.projects', 'project', 'project.id = :projectId', {
-        projectId: group.project.id,
-      })
-      .getCount();
-
-    if (committeeCount > 0) {
-      return 'committee';
+    // Committee: Nếu group có committee và giáo viên là thành viên của committee đó
+    if (group.committee && group.committee.id) {
+      const committee = await this.repository.manager.findOne(Committee, {
+        where: { id: group.committee.id },
+        relations: ['teachers'],
+      });
+      if (
+        committee &&
+        committee.teachers &&
+        committee.teachers.some((t: any) => t.id == teacherId)
+      ) {
+        return 'committee';
+      }
     }
 
     return null;
