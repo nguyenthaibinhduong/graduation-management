@@ -5,8 +5,8 @@ const scoreService = {
     return await api.post('/score/detail', scoreDetailData)
   },
 
-  getTeacherType: async (groupId, teacherId) => {
-    const { data } = await api.get(`/score/teacher-type/${groupId}/${teacherId}`)
+  getTeacherType: async (groupId, teacherId,type) => {
+    const { data } = await api.get(`/score/teacher-type/${groupId}/${teacherId}/${type}`)
     return data.data
   },
 

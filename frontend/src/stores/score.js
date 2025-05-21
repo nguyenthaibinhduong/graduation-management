@@ -81,12 +81,12 @@ export function createScoreStore() {
       }
     }
 
-    const fetchTeacherType = async (groupId, teacherId) => {
+    const fetchTeacherType = async (groupId, teacherId,type) => {
       loading.value = true
       error.value = null
 
       try {
-        const data = await scoreService.getTeacherType(groupId, teacherId)
+        const data = await scoreService.getTeacherType(groupId, teacherId,type)
         teacherType.value = data
         return data
       } catch (err) {

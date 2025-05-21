@@ -246,6 +246,7 @@ export class ScoreService extends BaseService<Score> {
       const teacherRole = await this.determineTeacherType(
         student.group.id,
         teacher_id,
+        teacherType
       );
 
       if (!teacherRole) {
@@ -262,7 +263,7 @@ export class ScoreService extends BaseService<Score> {
             teacher: { id: teacher_id },
             student: { id: student_id },
             criteria: { id: criteria_id },
-            teacherType: teacherRole,
+            teacherType: teacherType,
           },
         },
       );
@@ -281,7 +282,8 @@ export class ScoreService extends BaseService<Score> {
         criteria,
         teacherType: teacherRole,
       });
-
+      // console.log(scoreDetailEntity);
+      
       // save score detail
       await this.repository.manager.save(scoreDetailEntity);
     } catch (error) {
@@ -301,6 +303,8 @@ export class ScoreService extends BaseService<Score> {
   async determineTeacherType(
     groupId: number,
     teacherId: number | string,
+    typeCheck:string,
+
   ): Promise<'advisor' | 'reviewer' | 'committee' | null> {
     const group = await this.repository.manager.findOne(Group, {
       where: { id: groupId },
@@ -318,12 +322,13 @@ export class ScoreService extends BaseService<Score> {
     }
 
     // Advisor
-    if (group.teacher && group.teacher.id == teacherId) {
+    if (typeCheck=='advisor' && group.teacher && group.teacher.id == teacherId) {
+      
       return 'advisor';
     }
 
     // Reviewer
-    if (group.facultyReviewers) {
+    if (typeCheck=='reviewer' && group.facultyReviewers) {
       const isReviewer = group.facultyReviewers.some(
         (reviewer) => reviewer.id == teacherId,
       );
@@ -333,15 +338,14 @@ export class ScoreService extends BaseService<Score> {
     }
 
     // Committee: Nếu group có committee và giáo viên là thành viên của committee đó
-    if (group.committee && group.committee.id) {
+    if (typeCheck=='committee' && group.committee && group.committee.id) {
       const committee = await this.repository.manager.findOne(Committee, {
         where: { id: group.committee.id },
         relations: ['teachers'],
       });
       if (
-        committee &&
-        committee.teachers &&
-        committee.teachers.some((t: any) => t.id == teacherId)
+
+        committee?.teachers.some((t: any) => t.id == teacherId)
       ) {
         return 'committee';
       }

@@ -84,9 +84,9 @@ const routes = [
       { path: '/teacher-group-advisor', component: GroupTeacherView, meta: { roles: ['teacher'] } },
       { path: '/teacher-project', component: TeacherProjectView, meta: { roles: ['teacher'] } },
       { path: '/score', component: ScoreView, meta: { roles: ['teacher'] } },
-      { path: '/edit-score/:id', component: ScoreEdit, meta: { roles: ['teacher'] } },
+      { path: '/edit-score/:type/:id', component: ScoreEdit, meta: { roles: ['teacher'] } },
       {
-        path: 'create-score-detail/:id',
+        path: 'create-score-detail/:type/:id',
         component: ScoreDetailCreate,
         meta: { roles: ['teacher'] },
       },

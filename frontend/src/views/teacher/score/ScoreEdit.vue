@@ -6,25 +6,14 @@
     <div v-else>
       <p><strong>ID Sinh Viên:</strong> {{ scoreDetails?.studentId }}</p>
       <p><strong>Tên Sinh Viên:</strong> {{ scoreDetails?.studentName }}</p>
-      <DataTable
-        :value="scoreDetails?.scoreDetails"
-        class="mb-4 w-full"
-        v-if="scoreDetails?.scoreDetails"
-      >
+      <DataTable :value="scoreDetails?.scoreDetails" class="mb-4 w-full" v-if="scoreDetails?.scoreDetails">
         <Column field="criteria.name" header="Tiêu chí" />
         <Column field="criteria.content" header="Mô tả" />
         <Column header="Điểm">
           <template #body="{ data }">
-            <InputNumber
-              v-model="editScores[data.id].scoreValue"
-              :min="0"
-              :max="data.criteria.max_score"
-              :step="data.criteria.step"
-              showButtons
-              buttonLayout="horizontal"
-              incrementButtonIcon="pi pi-plus"
-              decrementButtonIcon="pi pi-minus"
-            />
+            <InputNumber v-model="editScores[data.id].scoreValue" :min="0" :max="data.criteria.max_score"
+              :step="data.criteria.step" showButtons buttonLayout="horizontal" incrementButtonIcon="pi pi-plus"
+              decrementButtonIcon="pi pi-minus" />
           </template>
         </Column>
         <Column header="Nhận xét">
@@ -34,29 +23,17 @@
         </Column>
       </DataTable>
       <div class="flex gap-2 justify-end">
-        <Button
-          label="Cập nhật"
-          icon="pi pi-save"
-          @click="openConfirmModal"
-          :loading="loading"
-          severity="primary"
-        />
+        <Button label="Cập nhật" icon="pi pi-save" @click="openConfirmModal" :loading="loading" severity="primary" />
       </div>
     </div>
     <!-- Confirmation Modal -->
-    <Dialog
-      v-model:visible="confirmVisible"
-      modal
-      header="Xác nhận cập nhật điểm"
-      :closable="false"
-    >
+    <Dialog v-model:visible="confirmVisible" modal header="Xác nhận cập nhật điểm" :closable="false">
       <div>
         <p class="mb-2 font-semibold">Bạn có chắc chắn muốn cập nhật các điểm sau?</p>
         <ul class="mb-2">
           <li v-for="detail in scoreDetails?.scoreDetails" :key="detail.id" class="mb-1">
             <span class="font-semibold">{{ detail.criteria.name }}: </span>
-            <span>Điểm: {{ editScores[detail.id].scoreValue ?? 'Chưa nhập' }}</span
-            >,
+            <span>Điểm: {{ editScores[detail.id].scoreValue ?? 'Chưa nhập' }}</span>,
             <span>Nhận xét: {{ editScores[detail.id].comment || '...' }}</span>
           </li>
         </ul>
@@ -104,7 +81,7 @@ onMounted(async () => {
   error.value = ''
   try {
     const details = await scoreStore.fetchStudentScoreDetails(studentId.value)
-    teacherRole.value = await scoreStore.fetchTeacherType(groupId.value, teacherId.value)
+    teacherRole.value = await scoreStore.fetchTeacherType(groupId.value, teacherId.value, route.params.type)
     // Lấy đúng chi tiết điểm theo vai trò giáo viên
     const roleDetails = details?.[teacherRole.value.teacherType]
     scoreDetails.value = {

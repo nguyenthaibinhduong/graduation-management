@@ -85,10 +85,11 @@ export class ScoreController {
     }
   }
 
-  @Get('teacher-type/:groupId/:teacherId')
+  @Get('teacher-type/:groupId/:teacherId/:typeCheck')
   async determineTeacherType(
     @DecodedId(['params', 'groupId']) groupId: number,
     @DecodedId(['params', 'teacherId']) teacherId: number,
+    @Param ('typeCheck') typeCheck: any
     // @Param('groupId', ParseIntPipe) groupId: number,
     // @Param('teacherId', ParseIntPipe) teacherId: number,
   ): Promise<Response<any>> {
@@ -96,6 +97,7 @@ export class ScoreController {
       const teacherType = await this.scoreService.determineTeacherType(
         groupId,
         teacherId,
+        typeCheck
       );
       const response = {
         groupId,

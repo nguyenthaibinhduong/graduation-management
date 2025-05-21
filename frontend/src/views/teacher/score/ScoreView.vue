@@ -2,49 +2,21 @@
   <div class="w-full space-y-4">
     <!-- Nút chức năng -->
     <div class="flex gap-x-4 p-2 rounded-lg">
-      <Button
-        size="small"
-        label="Tất cả"
-        :class="{ 'p-button-outlined': activeRole !== 'all' }"
-        @click="filterByRole('all')"
-      />
-      <Button
-        size="small"
-        label="Chấm điểm Hướng dẫn"
-        :class="{ 'p-button-outlined': activeRole !== 'advisor' }"
-        @click="filterByRole('advisor')"
-      />
-      <Button
-        size="small"
-        label="Chấm điểm phản biện"
-        :class="{ 'p-button-outlined': activeRole !== 'reviewer' }"
-        @click="filterByRole('reviewer')"
-      />
-      <Button
-        size="small"
-        label="Chấm điểm hội đồng"
-        :class="{ 'p-button-outlined': activeRole !== 'committee' }"
-        @click="filterByRole('committee')"
-      />
+      <Button size="small" label="Tất cả" :class="{ 'p-button-outlined': activeRole !== 'all' }"
+        @click="filterByRole('all')" />
+      <Button size="small" label="Chấm điểm Hướng dẫn" :class="{ 'p-button-outlined': activeRole !== 'advisor' }"
+        @click="filterByRole('advisor')" />
+      <Button size="small" label="Chấm điểm phản biện" :class="{ 'p-button-outlined': activeRole !== 'reviewer' }"
+        @click="filterByRole('reviewer')" />
+      <Button size="small" label="Chấm điểm hội đồng" :class="{ 'p-button-outlined': activeRole !== 'committee' }"
+        @click="filterByRole('committee')" />
     </div>
     <!-- Bảng dữ liệu nhóm -->
-    <DataTableCustom
-      title="Danh sách nhóm"
-      :block="['toolbar', 'headerBar', 'selectAll', 'action']"
-      :data="groups"
-      :total="groups.length"
-      :columns="dataColumns"
-      @rowSelect="onSelectGroup"
-    />
+    <DataTableCustom title="Danh sách nhóm" :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="groups"
+      :total="groups.length" :columns="dataColumns" @rowSelect="onSelectGroup" />
     <!-- Drawer hiển thị chi tiết nhóm -->
-    <Drawer
-      v-model:visible="drawerVisible"
-      position="right"
-      class="w-1/2"
-      @close="onCancel"
-      :dismissable="true"
-      :closeOnEscape="true"
-    >
+    <Drawer v-model:visible="drawerVisible" position="right" class="w-1/2" @close="onCancel" :dismissable="true"
+      :closeOnEscape="true">
       <template #header>
         <div class="flex justify-between items-center w-full">
           <div class="flex items-center gap-4">
@@ -61,57 +33,37 @@
 
         <h3 class="font-semibold text-base mt-4">Danh sách thành viên</h3>
         <ul class="space-y-3">
-          <li
-            v-for="member in selectedGroup?.students"
-            :key="member?.id"
-            class="p-3 border rounded-md flex justify-between items-center"
-          >
+          <li v-for="member in selectedGroup?.students" :key="member?.id"
+            class="p-3 border rounded-md flex justify-between items-center">
             <div class="w-full">
               <div class="w-full flex justify-between">
                 <p class="font-medium">{{ member?.user?.fullname }}</p>
                 <!-- Hiển thị nút Chấm điểm hoặc Chỉnh sửa dựa trên trạng thái -->
-                <Button
-                  v-if="
-                    (memberWeightedScores[member.id] &&
-                      memberWeightedScores[member.id]?.missingEvaluations &&
-                      memberWeightedScores[member.id].missingEvaluations.includes(
-                        selectedGroup?.teacherRole
-                      )) ||
-                    memberWeightedScores[member.id]?.weighted === null
-                  "
-                  label="Chấm điểm"
-                  size="small"
-                  icon="pi pi-pencil"
-                  @click="scoreStudent(member)"
-                />
-                <Button
-                  v-else
-                  label="Chỉnh sửa"
-                  size="small"
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  @click="editScore(member)"
-                />
+                <Button v-if="
+                  (memberWeightedScores[member.id] &&
+                    memberWeightedScores[member.id]?.missingEvaluations &&
+                    memberWeightedScores[member.id].missingEvaluations.includes(
+                      selectedGroup?.teacherRole
+                    )) ||
+                  memberWeightedScores[member.id]?.weighted === null
+                " label="Chấm điểm" size="small" icon="pi pi-pencil" @click="scoreStudent(member)" />
+                <Button v-else label="Chỉnh sửa" size="small" icon="pi pi-pencil" severity="secondary"
+                  @click="editScore(member)" />
               </div>
 
               <p class="text-sm text-gray-500">MSSV: {{ member?.code }}</p>
               <p class="text-sm">
                 Trạng thái:
-                <span
-                  v-if="
-                    memberWeightedScores[member.id] !== undefined &&
-                    memberWeightedScores[member.id] !== null
-                  "
-                >
+                <span v-if="
+                  memberWeightedScores[member.id] !== undefined &&
+                  memberWeightedScores[member.id] !== null
+                ">
                   <span v-if="memberWeightedScores[member.id]?.missingEvaluations">
-                    <span
-                      v-if="
-                        !memberWeightedScores[member.id].missingEvaluations.includes(
-                          selectedGroup?.teacherRole
-                        )
-                      "
-                      class="text-green-500"
-                    >
+                    <span v-if="
+                      !memberWeightedScores[member.id].missingEvaluations.includes(
+                        selectedGroup?.teacherRole
+                      )
+                    " class="text-green-500">
                       Đã chấm điểm
                     </span>
                     <span v-else class="text-red-500"> Chưa chấm điểm </span>
@@ -120,16 +72,13 @@
                 </span>
               </p>
               <!-- Only show score for current teacherRole -->
-              <p
-                v-if="memberWeightedScores[member.id]?.byType && selectedGroup?.teacherRole"
-                class="text-sm"
-              >
+              <p v-if="memberWeightedScores[member.id]?.byType && selectedGroup?.teacherRole" class="text-sm">
                 Điểm:
                 <span class="font-semibold">
                   {{
                     memberWeightedScores[member.id].byType[selectedGroup.teacherRole]?.score !==
                       null &&
-                    memberWeightedScores[member.id].byType[selectedGroup.teacherRole]?.score !==
+                      memberWeightedScores[member.id].byType[selectedGroup.teacherRole]?.score !==
                       undefined
                       ? memberWeightedScores[member.id].byType[selectedGroup.teacherRole]?.score
                       : 'Chưa có điểm'
@@ -138,8 +87,7 @@
                 (
                 <span>{{
                   teacherRoleViMap[selectedGroup.teacherRole] || selectedGroup.teacherRole
-                }}</span
-                >)
+                  }}</span>)
               </p>
 
               <!-- Điểm của SV Accordion -->
@@ -153,11 +101,11 @@
                         {{
                           Array.isArray(memberWeightedScores[member.id].missingEvaluations)
                             ? memberWeightedScores[member.id].missingEvaluations
-                                .map((role) => teacherRoleViMap[role] || role)
-                                .join(', ')
+                              .map((role) => teacherRoleViMap[role] || role)
+                              .join(', ')
                             : teacherRoleViMap[
-                                memberWeightedScores[member.id].missingEvaluations
-                              ] || memberWeightedScores[member.id].missingEvaluations
+                            memberWeightedScores[member.id].missingEvaluations
+                            ] || memberWeightedScores[member.id].missingEvaluations
                         }}
                       </span>
                     </div>
@@ -169,12 +117,10 @@
                           : 'Chưa hoàn thành'
                       }}</span>
                     </div>
-                    <div
-                      v-if="
-                        memberWeightedScores[member.id].isComplete &&
-                        'weightedTotal' in memberWeightedScores[member.id]
-                      "
-                    >
+                    <div v-if="
+                      memberWeightedScores[member.id].isComplete &&
+                      'weightedTotal' in memberWeightedScores[member.id]
+                    ">
                       <span class="font-semibold">weightedTotal:</span>
                       <span>{{ memberWeightedScores[member.id].weightedTotal }}</span>
                     </div>
@@ -278,15 +224,15 @@ const onCancel = () => {
 const scoreStudent = (student) => {
   if (student?.id && selectedGroup.value?.id) {
     router.push({
-      path: `/create-score-detail/${student.id}`,
+      path: `/create-score-detail/${selectedGroup.value?.teacherRole}/${student.id}/`,
       query: { groupId: selectedGroup.value.id },
     })
   }
 }
 
-const editScore = (student) => {
+const editScore = (student, type) => {
   if (student?.id && selectedGroup.value?.id) {
-    router.push({ path: `/edit-score/${student.id}`, query: { groupId: selectedGroup.value.id } })
+    router.push({ path: `/edit-score/${selectedGroup.value?.teacherRole}/${student.id}`, query: { groupId: selectedGroup.value.id } })
   }
 }
 </script>
