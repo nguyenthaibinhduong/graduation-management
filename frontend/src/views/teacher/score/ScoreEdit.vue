@@ -8,7 +8,12 @@
       <p><strong>Tên Sinh Viên:</strong> {{ scoreDetails?.studentName }}</p>
       <DataTable :value="scoreDetails?.scoreDetails" class="mb-4 w-full" v-if="scoreDetails?.scoreDetails">
         <Column field="criteria.name" header="Tiêu chí" />
-        <Column field="criteria.content" header="Mô tả" />
+        <Column field="content" header="Mô tả" style="width: 28%">
+          <template #body="{ data }">
+            <span v-html="safeHtml(data?.criteria?.content)" />
+          </template>
+        </Column>
+
         <Column header="Điểm">
           <template #body="{ data }">
             <InputNumber v-model="editScores[data.id].scoreValue" :min="0" :max="data.criteria.max_score"
@@ -58,6 +63,7 @@ import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import DOMPurify from "dompurify"
 
 const scoreStore = useScoreStore()
 const authStore = useAuthStore()
@@ -67,6 +73,9 @@ const route = useRoute()
 const studentId = ref(route.params?.id)
 const groupId = ref(route.query?.groupId)
 const teacherId = ref(authStore.user?.teacher?.id)
+const safeHtml = (rawHtml) => {
+  return DOMPurify.sanitize(rawHtml);
+};
 
 const scoreDetails = ref({})
 const teacherRole = ref({})
@@ -138,4 +147,5 @@ const onSubmit = async () => {
     loading.value = false
   }
 }
+
 </script>
