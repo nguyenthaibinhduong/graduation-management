@@ -267,9 +267,9 @@ export class ScoreService extends BaseService<Score> {
         },
       );
 
-      if (existingDetail) {
-        throw new ConflictException('Score detail already exists');
-      }
+      // if (existingDetail) {
+      //   throw new ConflictException('Score detail already exists');
+      // }
 
       // create score detail
       const scoreDetailEntity = new ScoreDetail();

@@ -87,10 +87,10 @@ export class ScoreController {
 
   @Get('teacher-type/:groupId/:teacherId')
   async determineTeacherType(
-    // @DecodedId(['params', 'groupId']) groupId: number,
-    // @DecodedId(['params', 'teacherId']) teacherId: number,
-    @Param('groupId', ParseIntPipe) groupId: number,
-    @Param('teacherId', ParseIntPipe) teacherId: number,
+    @DecodedId(['params', 'groupId']) groupId: number,
+    @DecodedId(['params', 'teacherId']) teacherId: number,
+    // @Param('groupId', ParseIntPipe) groupId: number,
+    // @Param('teacherId', ParseIntPipe) teacherId: number,
   ): Promise<Response<any>> {
     try {
       const teacherType = await this.scoreService.determineTeacherType(
