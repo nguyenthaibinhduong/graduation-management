@@ -247,13 +247,11 @@ export class ScoreService extends BaseService<Score> {
       const teacherRole = await this.determineTeacherType(
         student.group.id,
         teacher_id,
-        teacherType
+        teacherType,
       );
 
       if (!teacherRole) {
-        throw new NotFoundException(
-          `Giáo viên không có quyền chấm`,
-        );
+        throw new NotFoundException(`Giáo viên không có quyền chấm`);
       }
 
       // Check for existing score detail to avoid duplicates
@@ -284,7 +282,7 @@ export class ScoreService extends BaseService<Score> {
         teacherType: teacherRole,
       });
       // console.log(scoreDetailEntity);
-      
+
       // save score detail
       await this.repository.manager.save(scoreDetailEntity);
     } catch (error) {
@@ -304,8 +302,7 @@ export class ScoreService extends BaseService<Score> {
   async determineTeacherType(
     groupId: number,
     teacherId: number | string,
-    typeCheck:string,
-
+    typeCheck: string,
   ): Promise<'advisor' | 'reviewer' | 'committee' | null> {
     const group = await this.repository.manager.findOne(Group, {
       where: { id: groupId },
@@ -323,13 +320,16 @@ export class ScoreService extends BaseService<Score> {
     }
 
     // Advisor
-    if (typeCheck=='advisor' && group.teacher && group.teacher.id == teacherId) {
-      
+    if (
+      typeCheck == 'advisor' &&
+      group.teacher &&
+      group.teacher.id == teacherId
+    ) {
       return 'advisor';
     }
 
     // Reviewer
-    if (typeCheck=='reviewer' && group.facultyReviewers) {
+    if (typeCheck == 'reviewer' && group.facultyReviewers) {
       const isReviewer = group.facultyReviewers.some(
         (reviewer) => reviewer.id == teacherId,
       );
@@ -339,15 +339,12 @@ export class ScoreService extends BaseService<Score> {
     }
 
     // Committee: Nếu group có committee và giáo viên là thành viên của committee đó
-    if (typeCheck=='committee' && group.committee && group.committee.id) {
+    if (typeCheck == 'committee' && group.committee && group.committee.id) {
       const committee = await this.repository.manager.findOne(Committee, {
         where: { id: group.committee.id },
         relations: ['teachers'],
       });
-      if (
-
-        committee?.teachers.some((t: any) => t.id == teacherId)
-      ) {
+      if (committee?.teachers.some((t: any) => t.id == teacherId)) {
         return 'committee';
       }
     }
@@ -493,32 +490,37 @@ export class ScoreService extends BaseService<Score> {
     id: number,
     updateData: Partial<ScoreDetail>,
     typeCheck: any,
-    userId:any
+    userId: any,
   ): Promise<ScoreDetail> {
-    const user = await this.check_exist_with_data(User, {
-      where: { id: userId, role: UserRole.TEACHER },
-      relations:['teacher']
-    }, 'Tài khoản không hợp lệ');
-    const scoreDetail = await this.check_exist_with_data(ScoreDetail, {
-      where: { id },
-      relations: {
-        student: {
-          group: true
-        }
-      }
-    }, 'Lỗi');
+    const user = await this.check_exist_with_data(
+      User,
+      {
+        where: { id: userId, role: UserRole.TEACHER },
+        relations: ['teacher'],
+      },
+      'Tài khoản không hợp lệ',
+    );
+    const scoreDetail = await this.check_exist_with_data(
+      ScoreDetail,
+      {
+        where: { id },
+        relations: {
+          student: {
+            group: true,
+          },
+        },
+      },
+      'Lỗi',
+    );
     const teacherRole = await this.determineTeacherType(
       scoreDetail?.student?.group?.id,
       user?.teacher?.id,
-      typeCheck
+      typeCheck,
     );
 
     if (!teacherRole) {
-      throw new NotFoundException(
-        `Giáo viên không có quyền sửa điểm`,
-      );
+      throw new NotFoundException(`Giáo viên không có quyền sửa điểm`);
     }
-    
 
     Object.assign(scoreDetail, updateData);
     const updatedScoreDetail = await this.repository.manager.save(scoreDetail);
@@ -539,7 +541,7 @@ export class ScoreService extends BaseService<Score> {
     try {
       let allGroups: Group[] = [];
 
-      // If no specific teacher type is requested, or if specifically requesting advisor groups
+      // Advisor
       if (!teacherType || teacherType === 'advisor') {
         const advisorGroups = await this.groupRepository.find({
           where: { teacher: { id: teacherId } },
@@ -552,21 +554,20 @@ export class ScoreService extends BaseService<Score> {
             'department',
             'teacher',
             'teacher.user',
+            'committee',
           ],
         });
 
-        // Add a custom field to identify the role
         advisorGroups.forEach((group) => {
           (group as any).teacherRole = 'advisor';
         });
 
         allGroups = [...allGroups, ...advisorGroups];
 
-        // If we only wanted advisor groups, return now
         if (teacherType === 'advisor') return allGroups;
       }
 
-      // If no specific teacher type, or if specifically requesting reviewer groups
+      // Reviewer
       if (!teacherType || teacherType === 'reviewer') {
         const reviewerGroups = await this.groupRepository
           .createQueryBuilder('group')
@@ -584,6 +585,7 @@ export class ScoreService extends BaseService<Score> {
           .leftJoinAndSelect('group.department', 'department')
           .leftJoinAndSelect('group.teacher', 'teacher')
           .leftJoinAndSelect('teacher.user', 'teacherUser')
+          .leftJoinAndSelect('group.committee', 'committee')
           .getMany();
 
         reviewerGroups.forEach((group) => {
@@ -592,56 +594,37 @@ export class ScoreService extends BaseService<Score> {
 
         allGroups = [...allGroups, ...reviewerGroups];
 
-        // If we only wanted reviewer groups, return now
         if (teacherType === 'reviewer') return allGroups;
       }
 
-      // If no specific teacher type, or if specifically requesting committee groups
+      // Committee
       if (!teacherType || teacherType === 'committee') {
-        // First get all committees where this teacher is a member
-        const committees = await this.dataSource
-          .createQueryBuilder()
-          .select('committee')
-          .from(Committee, 'committee')
+        // Get all groups where the group's committee contains this teacher
+        const committeeGroups = await this.groupRepository
+          .createQueryBuilder('group')
+          .innerJoinAndSelect('group.committee', 'committee')
           .innerJoin(
             'committee.teachers',
-            'teacher',
-            'teacher.id = :teacherId',
+            'committeeTeacher',
+            'committeeTeacher.id = :teacherId',
             { teacherId },
           )
+          .leftJoinAndSelect('group.project', 'project')
+          .leftJoinAndSelect('group.students', 'students')
+          .leftJoinAndSelect('students.user', 'studentUser')
+          .leftJoinAndSelect('group.leader', 'leader')
+          .leftJoinAndSelect('leader.user', 'leaderUser')
+          .leftJoinAndSelect('group.department', 'department')
+          .leftJoinAndSelect('group.teacher', 'teacher')
+          .leftJoinAndSelect('teacher.user', 'teacherUser')
           .getMany();
 
-        if (committees.length > 0) {
-          // Then get all projects associated with these committees
-          const committeeIds = committees.map((committee) => committee.id);
+        committeeGroups.forEach((group) => {
+          (group as any).teacherRole = 'committee';
+        });
 
-          // Finally get groups associated with these projects where the project has a committee link
-          const committeeGroups = await this.groupRepository
-            .createQueryBuilder('group')
-            .innerJoinAndSelect('group.project', 'project')
-            .innerJoin(
-              'project.committees',
-              'committee',
-              'committee.id IN (:...committeeIds)',
-              { committeeIds },
-            )
-            .leftJoinAndSelect('group.students', 'students')
-            .leftJoinAndSelect('students.user', 'studentUser')
-            .leftJoinAndSelect('group.leader', 'leader')
-            .leftJoinAndSelect('leader.user', 'leaderUser')
-            .leftJoinAndSelect('group.department', 'department')
-            .leftJoinAndSelect('group.teacher', 'teacher')
-            .leftJoinAndSelect('teacher.user', 'teacherUser')
-            .getMany();
+        allGroups = [...allGroups, ...committeeGroups];
 
-          committeeGroups.forEach((group) => {
-            (group as any).teacherRole = 'committee';
-          });
-
-          allGroups = [...allGroups, ...committeeGroups];
-        }
-
-        // If we only wanted committee groups, return now
         if (teacherType === 'committee') return allGroups;
       }
 
@@ -780,7 +763,8 @@ export class ScoreService extends BaseService<Score> {
         newScore.project = group.project;
         newScore.total_score = score.weightedTotal;
         newScore.comment = 'Student score';
-        await this.repository.manager.save(newScore);
+        // await this.repository.manager.save(newScore);
+        console.log(newScore);
       }
       groupScore += score.weightedTotal;
     }
@@ -794,6 +778,7 @@ export class ScoreService extends BaseService<Score> {
     groupScoreEntity.total_score = groupScore;
     groupScoreEntity.comment = 'Group score';
     groupScoreEntity.student = null;
-    await this.repository.manager.save(groupScoreEntity);
+    // await this.repository.manager.save(groupScoreEntity);
+    console.log(groupScoreEntity);
   }
 }

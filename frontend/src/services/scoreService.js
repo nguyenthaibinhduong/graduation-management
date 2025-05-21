@@ -5,7 +5,7 @@ const scoreService = {
     return await api.post('/score/detail', scoreDetailData)
   },
 
-  getTeacherType: async (groupId, teacherId,type) => {
+  getTeacherType: async (groupId, teacherId, type) => {
     const { data } = await api.get(`/score/teacher-type/${groupId}/${teacherId}/${type}`)
     return data.data
   },
@@ -15,7 +15,7 @@ const scoreService = {
     return data.data
   },
 
-  updateScoreDetail: async (scoreDetailId, scoreDetailData,type) => {
+  updateScoreDetail: async (scoreDetailId, scoreDetailData, type) => {
     return await api.put(`/score/detail/${scoreDetailId}/${type}`, scoreDetailData)
   },
 
@@ -31,6 +31,9 @@ const scoreService = {
   getStudentScoreDetails: async (studentId) => {
     const { data } = await api.get(`/score/student/details/${studentId}`)
     return data.data
+  },
+  publicScore: async (groupId) => {
+    return await api.post('/score/public-score', { groupId })
   },
 }
 

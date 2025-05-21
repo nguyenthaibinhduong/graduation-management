@@ -31,12 +31,12 @@ export function createScoreStore() {
       }
     }
 
-    const updateScoreDetail = async (scoreDetailId, scoreDetailData,type) => {
+    const updateScoreDetail = async (scoreDetailId, scoreDetailData, type) => {
       loading.value = true
       error.value = null
 
       try {
-        const response = await scoreService.updateScoreDetail(scoreDetailId, scoreDetailData,type)
+        const response = await scoreService.updateScoreDetail(scoreDetailId, scoreDetailData, type)
         showToast('Score detail updated successfully', 'success')
         return response
       } catch (err) {
@@ -81,12 +81,12 @@ export function createScoreStore() {
       }
     }
 
-    const fetchTeacherType = async (groupId, teacherId,type) => {
+    const fetchTeacherType = async (groupId, teacherId, type) => {
       loading.value = true
       error.value = null
 
       try {
-        const data = await scoreService.getTeacherType(groupId, teacherId,type)
+        const data = await scoreService.getTeacherType(groupId, teacherId, type)
         teacherType.value = data
         return data
       } catch (err) {
@@ -134,6 +134,21 @@ export function createScoreStore() {
       }
     }
 
+    const publicScore = async (groupId) => {
+      loading.value = true
+      error.value = null
+
+      try {
+        await scoreService.publicScore(groupId)
+        showToast('Công khai điểm thành công!', 'success')
+      } catch (err) {
+        error.value = err.message || 'Công khai điểm thất bại!'
+        showToast(error.value, 'error')
+        throw err
+      } finally {
+        loading.value = false
+      }
+    }
     return {
       // State
       scoreDetails,
@@ -151,6 +166,7 @@ export function createScoreStore() {
       fetchTeacherType,
       fetchGroupsByTeacher,
       fetchStudentScoreDetails,
+      publicScore,
     }
   })
 }

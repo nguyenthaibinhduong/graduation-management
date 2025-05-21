@@ -34,6 +34,7 @@ import LayoutSecond from '@/layouts/LayoutSecond.vue'
 import DashBoardAdmin from '@/views/dashboard/DashBoardAdmin.vue'
 import DashBoardTeacher from '@/views/dashboard/DashBoardTeacher.vue'
 import DashBoardStudent from '@/views/dashboard/DashBoardStudent.vue'
+import ScoreAdminView from '@/views/admin/ScoreAdminView.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 const API_URL = import.meta.env.VITE_API_URL
 const routes = [
@@ -79,6 +80,7 @@ const routes = [
       { path: '/committee-management', component: CommitteeView, meta: { roles: ['admin'] } },
       { path: '/score/:id', component: ScoreView, meta: { roles: ['admin'] } },
       { path: '/committee-management/:id', component: CommitteeDetail, meta: { roles: ['admin'] } },
+      { path: '/score-admin', component: ScoreAdminView, meta: { roles: ['admin'] } },
       //Trang cho teacher
       { path: '/teacher-dashboard', component: DashBoardTeacher, meta: { roles: ['teacher'] } },
       { path: '/teacher-group-advisor', component: GroupTeacherView, meta: { roles: ['teacher'] } },
