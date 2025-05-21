@@ -56,49 +56,88 @@
 
         <!-- Hội đồng giám khảo -->
         <div class="bg-white p-6 rounded-2xl shadow-sm">
-            <div class="text-xl font-semibold mb-2">Hội đồng giám khảo</div>
-            <ul class="list-disc list-inside space-y-1">
-                <li>TS. Lê Văn E (Chủ tịch hội đồng)</li>
-                <li>TS. Mai Thị F (Thành viên)</li>
-                <li>ThS. Phạm Văn G (Thư ký)</li>
-            </ul>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Thông tin hội đồng chấm</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-gray-500">Tên hội đồng</p>
+                    <p class="text-base font-medium text-gray-800">{{ committee?.name }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Trạng thái</p>
+                    <span :class="{
+                        'bg-blue-100 text-blue-700': committee?.status === 'active',
+                        'bg-red-100 text-red-700': committee?.status === 'inactive',
+                    }" class="px-3 py-1 rounded-full text-sm font-medium">
+                        {{ committee?.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+                    </span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Khoa</p>
+                    <p class="text-base font-medium text-gray-800">{{ committee?.department?.name }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Học kỳ</p>
+                    <p class="text-base font-medium text-gray-800">{{ committee?.course?.name }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Thời gian bắt đầu</p>
+                    <p class="text-base font-medium text-gray-800">
+                        {{ formatDate(committee?.time_start) }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Thời gian kết thúc</p>
+                    <p class="text-base font-medium text-gray-800">
+                        {{ formatDate(committee?.time_end) }}
+                    </p>
+                </div>
+            </div>
+
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Danh sách Giáo viên</h2>
+            <DataTableCustom :block="['toolbar', 'add', 'export', 'action', 'selectOne', 'selectAll']"
+                :data="committee?.teachers" :columns="[
+                    { field: 'user.fullname', header: 'Họ và tên' },
+                    { field: 'user.email', header: 'Email' },
+                    { field: 'user.phone', header: 'Số điện thoại' },
+                ]" />
         </div>
         <!-- Bảng điểm -->
         <div class="bg-white p-6 rounded-2xl shadow-sm">
             <div class="text-xl font-semibold mb-2">Bảng điểm</div>
-            <DataTable :value="grades" class="p-datatable-sm">
-                <Column field="type" header="Loại đánh giá" />
-                <Column field="score" header="Điểm" />
-            </DataTable>
+            <StudentScoreView />
         </div>
 
     </div>
 </template>
 
 <script setup>
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import { useGroupStore, useProjectStore } from '@/stores/store';
+import { useCommitteeStore, useGroupStore, useProjectStore } from '@/stores/store';
 import { onMounted, ref, watchEffect } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { Button } from 'primevue';
 import { showToast } from '@/utils/toast';
+import StudentScoreView from './StudentScoreView.vue';
+import DataTableCustom from '@/components/list/DataTableCustom.vue';
 
-const grades = [
-    { type: 'Giữa kỳ', score: 8.5 },
-    { type: 'Cuối kỳ', score: 9.0 },
-    { type: 'Trình bày', score: 8.7 },
-]
 
 const groupStore = useGroupStore()
 const projectStore = useProjectStore()
+const commiteeStore = useCommitteeStore()
 const authStore = useAuthStore()
 const group = ref()
 const project = ref()
+const committee = ref()
 const router = useRouter()
 
-
+const formatDate = (date) => {
+    if (!date) return 'N/A'
+    return new Date(date).toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    })
+}
 
 onMounted(async () => {
     await fetchData()
@@ -107,6 +146,10 @@ watchEffect(async () => {
     group.value = groupStore.group
     if (groupStore?.group?.project?.id && authStore?.user?.role == 'student') {
         project.value = projectStore.item
+
+    }
+    if (groupStore?.group?.committee) {
+        committee.value = commiteeStore.item
     }
 
 })
@@ -118,8 +161,16 @@ const fetchData = async () => {
     if (groupStore?.group?.project?.id && authStore?.user?.role == 'student') {
         await projectStore.findItem(groupStore?.group?.project?.id, authStore?.user?.student?.id, authStore?.user?.role)
         project.value = projectStore.item
+
     } else {
         project.value = null
+    }
+    if (groupStore?.group?.committee) {
+        await commiteeStore.findItem(groupStore?.group?.committee?.id)
+        committee.value = commiteeStore.item
+    }
+    else {
+        committee.value = null
     }
 }
 

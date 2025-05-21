@@ -339,6 +339,7 @@ export class GroupsService extends BaseService<Group> {
             'student_attemp',
             'student_attemp.user',
             'project',
+            'committee'
           ],
         });
 
@@ -358,6 +359,7 @@ export class GroupsService extends BaseService<Group> {
               'student_attemp',
               'student_attemp.user',
               'project',
+              'committee'
             ],
           });
           return this.freshData(fullGroup);
@@ -381,6 +383,7 @@ export class GroupsService extends BaseService<Group> {
                 'student_attemp',
                 'student_attemp.user',
                 'project',
+                'committee'
               ],
             });
             return this.freshData(fullGroup);
