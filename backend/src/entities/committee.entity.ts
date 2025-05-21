@@ -6,6 +6,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,6 +15,7 @@ import { Department } from './department.entity';
 import { EvaluationForm } from './evaluation_form.entity';
 import { Project } from './project.entity';
 import { Teacher } from './teacher.entity';
+import { Group } from './group.entity';
 
 @Entity('committees')
 export class Committee {
@@ -30,6 +32,10 @@ export class Committee {
 
   @ManyToMany(() => Project, (project) => project.committees)
   projects?: Project[];
+
+  //Group relation
+  @OneToMany(() => Group, (group) => group.committee)
+  groups?: Group[];
 
   @ManyToMany(() => Teacher, (teacher) => teacher.committees)
   @JoinTable({

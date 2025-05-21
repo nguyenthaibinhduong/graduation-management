@@ -25,7 +25,8 @@
         <Column header="Điểm hội đồng">
           <template #body="{ data }">
             {{
-              data?.byType?.committee?.score !== null && data?.byType?.committee?.score !== undefined
+              data?.byType?.committee?.score !== null &&
+              data?.byType?.committee?.score !== undefined
                 ? data.byType.committee.score
                 : 'Chưa có điểm'
             }}
@@ -42,7 +43,6 @@
       </DataTable>
     </div>
   </div>
-
 </template>
 
 <script setup>

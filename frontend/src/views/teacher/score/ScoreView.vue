@@ -72,11 +72,12 @@
                 <!-- Hiển thị nút Chấm điểm hoặc Chỉnh sửa dựa trên trạng thái -->
                 <Button
                   v-if="
-                    memberWeightedScores[member.id] &&
-                    memberWeightedScores[member.id]?.missingEvaluations &&
-                    memberWeightedScores[member.id].missingEvaluations.includes(
-                      selectedGroup?.teacherRole
-                    )
+                    (memberWeightedScores[member.id] &&
+                      memberWeightedScores[member.id]?.missingEvaluations &&
+                      memberWeightedScores[member.id].missingEvaluations.includes(
+                        selectedGroup?.teacherRole
+                      )) ||
+                    memberWeightedScores[member.id]?.weighted === null
                   "
                   label="Chấm điểm"
                   size="small"
