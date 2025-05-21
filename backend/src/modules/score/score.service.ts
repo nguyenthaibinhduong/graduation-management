@@ -26,6 +26,7 @@ import { CreateScoreDetailDto } from './dto/score-detail.dto';
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
 import { w } from '@faker-js/faker/dist/airline-D6ksJFwG';
+import { User, UserRole } from 'src/entities/user.entity';
 
 @Injectable()
 export class ScoreService extends BaseService<Score> {
@@ -251,7 +252,7 @@ export class ScoreService extends BaseService<Score> {
 
       if (!teacherRole) {
         throw new NotFoundException(
-          `Teacher is not an advisor, reviewer, or committee member for this group`,
+          `Giáo viên không có quyền chấm`,
         );
       }
 
@@ -491,30 +492,38 @@ export class ScoreService extends BaseService<Score> {
   async updateScoreDetail(
     id: number,
     updateData: Partial<ScoreDetail>,
+    typeCheck: any,
+    userId:any
   ): Promise<ScoreDetail> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-
-      const scoreDetail = await queryRunner.manager.findOne(ScoreDetail, {
-        where: { id },
-      });
-      if (!scoreDetail) {
-        throw new NotFoundException('Score detail not found');
+    const user = await this.check_exist_with_data(User, {
+      where: { id: userId, role: UserRole.TEACHER },
+      relations:['teacher']
+    }, 'Tài khoản không hợp lệ');
+    const scoreDetail = await this.check_exist_with_data(ScoreDetail, {
+      where: { id },
+      relations: {
+        student: {
+          group: true
+        }
       }
+    }, 'Lỗi');
+    const teacherRole = await this.determineTeacherType(
+      scoreDetail?.student?.group?.id,
+      user?.teacher?.id,
+      typeCheck
+    );
 
-      Object.assign(scoreDetail, updateData);
-      const updatedScoreDetail = await queryRunner.manager.save(scoreDetail);
-
-      await queryRunner.commitTransaction();
-      return updatedScoreDetail;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('Error updating score detail');
-    } finally {
-      await queryRunner.release();
+    if (!teacherRole) {
+      throw new NotFoundException(
+        `Giáo viên không có quyền sửa điểm`,
+      );
     }
+    
+
+    Object.assign(scoreDetail, updateData);
+    const updatedScoreDetail = await this.repository.manager.save(scoreDetail);
+
+    return updatedScoreDetail;
   }
 
   /**

@@ -31,12 +31,12 @@ export function createScoreStore() {
       }
     }
 
-    const updateScoreDetail = async (scoreDetailId, scoreDetailData) => {
+    const updateScoreDetail = async (scoreDetailId, scoreDetailData,type) => {
       loading.value = true
       error.value = null
 
       try {
-        const response = await scoreService.updateScoreDetail(scoreDetailId, scoreDetailData)
+        const response = await scoreService.updateScoreDetail(scoreDetailId, scoreDetailData,type)
         showToast('Score detail updated successfully', 'success')
         return response
       } catch (err) {

@@ -128,7 +128,7 @@ const onSubmit = async () => {
       await scoreStore.updateScoreDetail(detail.id, {
         scoreValue,
         comment,
-      })
+      }, route.params.type)
     }
     confirmVisible.value = false
     router.push({ path: '/score' })

@@ -15,8 +15,8 @@ const scoreService = {
     return data.data
   },
 
-  updateScoreDetail: async (scoreDetailId, scoreDetailData) => {
-    return await api.put(`/score/detail/${scoreDetailId}`, scoreDetailData)
+  updateScoreDetail: async (scoreDetailId, scoreDetailData,type) => {
+    return await api.put(`/score/detail/${scoreDetailId}/${type}`, scoreDetailData)
   },
 
   deleteScoreDetail: async (scoreDetailId) => {

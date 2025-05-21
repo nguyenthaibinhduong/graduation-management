@@ -12,6 +12,7 @@ import {
   Query,
   ParseIntPipe,
   NotFoundException,
+  Request,
 } from '@nestjs/common';
 import { ScoreService } from './score.service';
 import { Response } from 'src/common/globalClass';
@@ -179,15 +180,27 @@ export class ScoreController {
     }
   }
 
-  @Put('detail/:id')
+  @Put('detail/:id/:typeCheck')
   async updateScoreDetail(
     @DecodedId(['params', 'id']) scoreDetailId: number,
+    @Param ('typeCheck') typeCheck: any,
     @Body() updateData: Partial<ScoreDetail>,
+    @Request() request: any,
   ): Promise<Response<ScoreDetail>> {
     try {
+      const userId = request.user?.id;
+
+      if (!userId ) {
+        throw new HttpException(
+          { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin' },
+          HttpStatus.ERROR,
+        );
+      }
       const updatedScoreDetail = await this.scoreService.updateScoreDetail(
         scoreDetailId,
         updateData,
+        typeCheck,
+        userId
       );
       return new Response(
         updatedScoreDetail,
