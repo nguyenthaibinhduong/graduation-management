@@ -107,7 +107,8 @@ onMounted(async () => {
         label: 'Đề tài',
         route: '/project-manangerment',
       },
-      { label: 'Hội đồng', route: '/committee-management' }
+      { label: 'Hội đồng', route: '/committee-management' },
+      { label: 'Điểm', route: '/score-admin' }
     )
   }
 
