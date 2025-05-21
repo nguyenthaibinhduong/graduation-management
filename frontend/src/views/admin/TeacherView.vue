@@ -162,7 +162,7 @@ const optionColumn = ref([
   { field: 'user.email', header: 'Email', sortable: true },
   { field: 'user.phone', header: 'Số điện thoại', sortable: true },
   { field: 'degree', header: 'Học vị', sortable: true },
-  { field: 'position', header: 'Chức vụ', sortable: true },
+  { field: 'position_names', header: 'Chức vụ', sortable: true },
   { field: 'department.name', header: 'Khoa', sortable: true },
 ])
 const filterData = ref({
@@ -173,6 +173,7 @@ const filterData = ref({
 const newTeacher = ref({
   code: '',
   degree: '',
+  departmentId: null,
   positionIds: [],
   user: {
     fullname: '',
@@ -192,10 +193,10 @@ watchEffect(() => {
   positions.value = positionStore.items
   teachers.value = teacherStore.items.map((teacher) => ({
     ...teacher,
-    position: teacher.position.map((pos) => pos.name).join(', '),
+    position_names: teacher.position.map((pos) => pos.name).join(', '),
   }))
+
   departments.value = departmentsStore.items
-  console.log(teachers.value)
 })
 const fetchTeacher = async (newPage, newLimit, newSearch, filter = {}) => {
   await teacherStore.fetchItems(
@@ -209,7 +210,6 @@ const addTeacher = () => {
   visibleLeft.value = true
 }
 const saveTeacher = async () => {
-  console.log('newTeacher', newTeacher.value)
   if (isEditing.value) {
     await teacherStore.updateItem(editedTeacherId.value, newTeacher.value)
   } else {
@@ -224,7 +224,20 @@ const deleteTeacher = async (id) => {
 
 const editTeacher = (teacher) => {
   editedTeacherId.value = teacher.id
-  newTeacher.value = { ...teacher }
+  const clonedData = JSON.parse(JSON.stringify(teacher));
+  const { department, position, ...data } = clonedData;
+  newTeacher.value = {
+    ...data,
+    positionIds: Array.isArray(position)
+      ? position.map(p => p.id)
+      : position
+        ? [position.id]
+        : [],
+    departmentId: department?.id || null
+  };
+
+
+
   isEditing.value = true
   visibleLeft.value = true
 }

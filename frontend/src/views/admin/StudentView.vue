@@ -286,7 +286,6 @@ const editStudent = (dataEdit) => {
       (item) => item.id == clonedData.department.id
     ),
   };
-  console.log(newStudent.value);
 
   isEditing.value = true;
   visibleLeft.value = true;

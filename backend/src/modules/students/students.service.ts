@@ -132,26 +132,20 @@ export class StudentsService extends BaseService<Student> {
     try {
     const { department_id, major_id, user, ...data }: any = dataStudent;
   
-     let student = await this.check_exist_with_data(Student, {
+     var student = await this.check_exist_with_data(Student, {
         where: { id },
         relations:['department','major','user']
       }, 'Sinh viên không tồn tại');
       
-      if (department_id) {
         
-        let department = await this.check_exist_with_data(Department, {
-          where: { id:department_id }
-        }, 'Khoa không tồn tại');
-        student.department = department ? department: student.department
-        
-      }
-      if (major_id) {
-        
-        let major = await this.check_exist_with_data(Major, {
+      const department = await this.check_exist_with_data(Department, {
+        where: { id:department_id }
+      }, 'Khoa không tồn tại');
+       student.department = department || student.department
+      const major = await this.check_exist_with_data(Major, {
           where: { id:major_id }
         }, 'Chuyên ngành không tồn tại');
-        student.major = major ? major: student.major
-      }
+      student.major =  major || student.major
       if (user) {
         const { id, password, ...safeUser } = user;
         await this.repository.manager.update(User, student?.user.id, safeUser);
