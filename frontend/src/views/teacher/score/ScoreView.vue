@@ -1,16 +1,7 @@
 <template>
   <div class="w-full space-y-4">
     <!-- Nút chức năng -->
-    <div class="flex gap-x-4 p-2 rounded-lg">
-      <Button size="small" label="Tất cả" :class="{ 'p-button-outlined': activeRole !== 'all' }"
-        @click="filterByRole('all')" />
-      <Button size="small" label="Chấm điểm Hướng dẫn" :class="{ 'p-button-outlined': activeRole !== 'advisor' }"
-        @click="filterByRole('advisor')" />
-      <Button size="small" label="Chấm điểm phản biện" :class="{ 'p-button-outlined': activeRole !== 'reviewer' }"
-        @click="filterByRole('reviewer')" />
-      <Button size="small" label="Chấm điểm hội đồng" :class="{ 'p-button-outlined': activeRole !== 'committee' }"
-        @click="filterByRole('committee')" />
-    </div>
+    <SelectGroupButton :options="buttonOptions" />
     <!-- Bảng dữ liệu nhóm -->
     <DataTableCustom title="Danh sách nhóm" :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="groups"
       :total="groups.length" :columns="dataColumns" @rowSelect="onSelectGroup" />
@@ -87,7 +78,7 @@
                 (
                 <span>{{
                   teacherRoleViMap[selectedGroup.teacherRole] || selectedGroup.teacherRole
-                  }}</span>)
+                }}</span>)
               </p>
 
               <!-- Điểm của SV Accordion -->
@@ -151,10 +142,18 @@ import AccordionTab from 'primevue/accordiontab'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useScoreStore } from '@/stores/store'
+import SelectGroupButton from '@/components/button/SelectGroupButton.vue'
 
 const scoreStore = useScoreStore()
 const authStore = useAuthStore()
 const groups = ref([])
+
+const buttonOptions = [
+  { label: 'Tất cả', action: () => filterByRole('all') },
+  { label: 'Chấm điểm Hướng dẫn', action: () => filterByRole('advisor') },
+  { label: 'Chấm điểm phản biện', action: () => filterByRole('reviewer') },
+  { label: 'Chấm điểm hội đồng', action: () => filterByRole('committee') }
+];
 
 const teacherId = authStore.user?.teacher?.id
 

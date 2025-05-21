@@ -9,7 +9,7 @@
                 <Chart type="bar" :data="barData" :options="chartOptions" />
             </div>
             <div class="bg-white p-4 rounded-xl ">
-                <Chart type="pie" :data="pieData" :options="chartOptions" />
+                <Chart type="bar" :data="horizontalBarData" :options="horizontalOptions" />
             </div>
             <div class="bg-white p-4 rounded-xl ">
                 <Chart type="line" :data="lineData1" :options="chartOptions" />
@@ -21,13 +21,13 @@
                 <Chart type="radar" :data="radarData" :options="chartOptions" />
             </div>
             <div class="bg-white p-4 rounded-xl ">
-                <Chart type="bar" :data="horizontalBarData" :options="horizontalOptions" />
-            </div>
-            <div class="bg-white p-4 rounded-xl ">
                 <Chart type="doughnut" :data="doughnutData" :options="chartOptions" />
             </div>
             <div class="bg-white p-4 rounded-xl ">
                 <Chart type="scatter" :data="scatterData" :options="scatterOptions" />
+            </div>
+            <div class="bg-white p-4 rounded-xl ">
+                <Chart type="pie" :data="pieData" :options="chartOptions" />
             </div>
         </div>
     </div>

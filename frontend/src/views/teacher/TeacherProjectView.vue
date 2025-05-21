@@ -1,16 +1,5 @@
 <template>
-  <div class="w-full flex gap-x-4 p-2 rounded-lg">
-    <Button size="small" label="Đề tài đề xuất" :outlined="statusData !== 'propose'"
-      :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'propose'" />
-    <Button size="small" label="Đề tài chưa duyệt" :outlined="statusData !== 'pending'"
-      :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'pending'" />
-    <Button size="small" label="Đề tài đã duyệt" :outlined="statusData !== 'approve'"
-      :severity="statusData === 'approve' ? 'primary' : undefined" @click="statusData = 'approve'" />
-    <Button size="small" label="Đề tài công bố" :outlined="statusData !== 'public'"
-      :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
-    <Button size="small" label="Tất cả" :outlined="statusData !== 'public'"
-      :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
-  </div>
+  <SelectGroupButton :options="buttonOptions" />
   <DataTableCustom title="Danh sách đề tài - Giảng viên" :data="projects" :columns="[
     { field: 'title', header: 'Tên đề tài' },
     { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
@@ -55,6 +44,7 @@ import MyInput from '@/components/form/MyInput.vue'
 import MyDrawer from '@/components/drawer/MyDrawer.vue'
 import { useRouter } from 'vue-router'
 import { Button } from 'primevue'
+import SelectGroupButton from '@/components/button/SelectGroupButton.vue'
 
 const visibleLeft = ref(false)
 const projectStore = useProjectStore()
@@ -64,7 +54,17 @@ const teacher = ref(null)
 const loading = ref(false)
 const isImport = ref(false)
 const isEditing = ref(false)
-const statusData = ref('propose')
+const statusData = ref(null)
+
+
+const buttonOptions = [
+  { label: 'Tất cả', action: () => { statusData.value = null } },
+  { label: 'Đề tài đề xuất', action: () => { statusData.value = 'propose' } },
+  { label: 'Đề tài chưa duyệt', action: () => { statusData.value = 'pending' } },
+  { label: 'Đề tài đã duyệt', action: () => { statusData.value = 'approve' } },
+  { label: 'Đề tài công bố', action: () => { statusData.value = 'public' } }
+];
+
 
 const editedProjectId = ref(null)
 const newData = ref({

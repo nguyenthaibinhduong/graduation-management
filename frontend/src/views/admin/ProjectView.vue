@@ -1,14 +1,5 @@
 <template>
-    <div class="w-full flex gap-x-4 p-2 rounded-lg">
-        <Button size="small" label="Tất cả" :outlined="statusData !== null"
-            :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = null" />
-        <Button size="small" label="Đề tài chưa duyệt" :outlined="statusData !== 'pending'"
-            :severity="statusData === 'pending' ? 'primary' : undefined" @click="statusData = 'pending'" />
-        <Button size="small" label="Đề tài đã duyệt" :outlined="statusData !== 'approve'"
-            :severity="statusData === 'approve' ? 'primary' : undefined" @click="statusData = 'approve'" />
-        <Button size="small" label="Đề tài công bố" :outlined="statusData !== 'public'"
-            :severity="statusData === 'public' ? 'primary' : undefined" @click="statusData = 'public'" />
-    </div>
+    <SelectGroupButton :options="buttonOptions" />
 
     <DataTableCustom :block="['toolbar', 'headerBar', 'selectAll', 'action']" title="Danh sách đề tài - Admin"
         :data="projects" :columns="[
@@ -38,6 +29,7 @@ import { useProjectStore } from "@/stores/store";
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import { useRouter } from "vue-router";
 import { Button } from "primevue";
+import SelectGroupButton from "@/components/button/SelectGroupButton.vue";
 
 
 const visibleLeft = ref(false);
@@ -47,6 +39,15 @@ const loading = ref(false);
 const isImport = ref(false);
 const isEditing = ref(false);
 const statusData = ref(null)
+
+const buttonOptions = [
+    { label: 'Tất cả', action: () => { statusData.value = null } },
+    { label: 'Chưa duyệt', action: () => { statusData.value = 'pending' } },
+    { label: 'Đã duyệt', action: () => { statusData.value = 'approve' } },
+    { label: 'Công bố', action: () => { statusData.value = 'public' } }
+];
+
+
 
 const editedProjectId = ref(null);
 const newData = ref({

@@ -53,3 +53,27 @@ body {
   width: 0px;
   display: none;
 }
+
+.p-selectbutton {
+  display: inline-flex;
+  user-select: none;
+  vertical-align: bottom;
+  outline-color: transparent;
+  border-radius: var(--p-selectbutton-border-radius);
+}
+
+.p-togglebutton.p-togglebutton-checked>.p-togglebutton-label,
+.p-togglebutton.p-togglebutton-checked::before {
+  background: var(--p-button-primary-background);
+
+}
+
+.p-togglebutton.p-togglebutton-checked {
+  color: white;
+  font-weight: 400;
+}
+
+button.p-togglebutton.p-component {
+  background-color: white;
+  border: white;
+}
