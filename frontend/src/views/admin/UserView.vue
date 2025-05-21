@@ -44,6 +44,12 @@ const users = ref([]);
 const loading = ref(false);
 const isEditing = ref(false);
 const editedUserId = ref(null);
+const optionRole = ref([
+  { id: 'student', label: "Sinh viên" },
+  { id: 'teacher', label: "Giảng viên" },
+  { id: 'admin', label: "Giáo vụ - Admin" },
+
+])
 const optionColumn = ref([
   { field: "username", header: "Tên tài khoản", sortable: true },
   { field: "fullname", header: "Tên người dùng", sortable: true },
