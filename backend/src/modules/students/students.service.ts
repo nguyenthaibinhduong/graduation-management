@@ -1,6 +1,6 @@
-import { JwtUtilityService } from "src/common/jwtUtility.service";
+import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
-import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import {
   BadRequestException,
   Injectable,
@@ -130,29 +130,42 @@ export class StudentsService extends BaseService<Student> {
     dataStudent: UpdateStudentDto,
   ): Promise<Student> {
     try {
-    const { department_id, major_id, user, ...data }: any = dataStudent;
-  
-     var student = await this.check_exist_with_data(Student, {
-        where: { id },
-        relations:['department','major','user']
-      }, 'Sinh viên không tồn tại');
-      
-        
-      const department = await this.check_exist_with_data(Department, {
-        where: { id:department_id }
-      }, 'Khoa không tồn tại');
-       student.department = department || student.department
-      const major = await this.check_exist_with_data(Major, {
-          where: { id:major_id }
-        }, 'Chuyên ngành không tồn tại');
-      student.major =  major || student.major
+      const { department_id, major_id, user, ...data }: any = dataStudent;
+
+      var student = await this.check_exist_with_data(
+        Student,
+        {
+          where: { id },
+          relations: ['department', 'major', 'user'],
+        },
+        'Sinh viên không tồn tại',
+      );
+
+      const department = await this.check_exist_with_data(
+        Department,
+        {
+          where: { id: department_id },
+        },
+        'Khoa không tồn tại',
+      );
+      student.department = department || student.department;
+      const major = await this.check_exist_with_data(
+        Major,
+        {
+          where: { id: major_id },
+        },
+        'Chuyên ngành không tồn tại',
+      );
+      student.major = major || student.major;
       if (user) {
         const { id, password, ...safeUser } = user;
         await this.repository.manager.update(User, student?.user.id, safeUser);
-
       }
-      
-      const updatedStudent = await this.repository.manager.save(Student, student);
+
+      const updatedStudent = await this.repository.manager.save(
+        Student,
+        student,
+      );
 
       if (updatedStudent.user) delete updatedStudent.user.password;
       return updatedStudent;
@@ -162,7 +175,6 @@ export class StudentsService extends BaseService<Student> {
       );
     }
   }
-  
 
   async createManyStudent(
     students: CreateStudentDto[],
@@ -181,5 +193,19 @@ export class StudentsService extends BaseService<Student> {
     }
 
     return { success, errors };
+  }
+
+  async getStudentById(id: number): Promise<Student> {
+    const student = await this.studentRepository.findOne({
+      where: { id },
+      relations: ['user', 'major', 'department', 'group'],
+    });
+    if (!student) {
+      throw new NotFoundException('Sinh viên không tồn tại');
+    }
+    if (student.user) {
+      delete student.user.password;
+    }
+    return student;
   }
 }

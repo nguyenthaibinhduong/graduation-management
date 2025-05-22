@@ -85,7 +85,7 @@ export class StudentsController {
     @DecodedId(['params', 'id']) id: number,
   ): Promise<Response<Student>> {
     try {
-      const student = await this.studentService.getById({ where: { id } });
+      const student = await this.studentService.getStudentById(id);
       return student
         ? new Response(student, HttpStatus.SUCCESS, Message.SUCCESS)
         : new Response(null, HttpStatus.UNAUTHORIZED, Message.UNAUTHORIZED);
@@ -101,7 +101,11 @@ export class StudentsController {
   async update(
     @DecodedId(['params', 'id']) id: string,
     @Body(new ValidationPipe()) body: UpdateStudentDto,
-    @DecodedId(['body', '                                                                                                                                                                                                                                     ']) department_id?: string,
+    @DecodedId([
+      'body',
+      '                                                                                                                                                                                                                                     ',
+    ])
+    department_id?: string,
     @DecodedId(['body', 'major_id']) major_id?: string,
   ): Promise<Response<Student>> {
     try {

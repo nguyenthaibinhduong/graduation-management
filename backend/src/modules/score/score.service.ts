@@ -714,8 +714,7 @@ export class ScoreService extends BaseService<Score> {
   }
 
   //Calculate group&student score, save to database
-  async publicScore(groupId: any) {
-    //validate groupId
+  async getGroupScore(groupId: any): Promise<any> {
     const group = await this.groupRepository.findOne({
       where: { id: groupId },
       relations: ['students', 'project'],
@@ -727,14 +726,12 @@ export class ScoreService extends BaseService<Score> {
     if (!members || members.length === 0) {
       throw new NotFoundException('No students found in this group');
     }
-    // Check if group score already exists
     const existingGroupScore = await this.scoreRepository.findOne({
       where: { group: { id: groupId } },
     });
     if (existingGroupScore) {
       throw new ConflictException('Group score already exists');
     }
-    // Check if student score already exists
     for (const member of members) {
       const existingStudentScore = await this.scoreRepository.findOne({
         where: { student: { id: member.id } },
@@ -745,40 +742,15 @@ export class ScoreService extends BaseService<Score> {
         );
       }
     }
-
     var groupScore = 0;
-
-    // Init student score in SCORE table (group_id = null)
     for (const member of members) {
       const score = await this.calculateWeightedTotalScore(member.id);
-      if (!score) {
-        throw new NotFoundException(
-          `Score by detail of student has not finished yet`,
-        );
-      }
-      if (score) {
-        const newScore = new Score();
-        newScore.student = member;
-        newScore.group = null;
-        newScore.project = group.project;
-        newScore.total_score = score.weightedTotal;
-        newScore.comment = 'Student score';
-        // await this.repository.manager.save(newScore);
-        console.log(newScore);
+      if (!score || score.isComplete == false) {
+        return { ...group, groupScore: null, isComplete: false };
       }
       groupScore += score.weightedTotal;
     }
-
     groupScore = groupScore / members.length;
-
-    // Init group score in SCORE table (student_id = null)
-    const groupScoreEntity = new Score();
-    groupScoreEntity.group = group;
-    groupScoreEntity.project = group.project;
-    groupScoreEntity.total_score = groupScore;
-    groupScoreEntity.comment = 'Group score';
-    groupScoreEntity.student = null;
-    // await this.repository.manager.save(groupScoreEntity);
-    console.log(groupScoreEntity);
+    return { ...group, groupScore, isComplete: true };
   }
 }

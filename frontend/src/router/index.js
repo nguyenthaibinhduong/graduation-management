@@ -35,6 +35,7 @@ import DashBoardAdmin from '@/views/dashboard/DashBoardAdmin.vue'
 import DashBoardTeacher from '@/views/dashboard/DashBoardTeacher.vue'
 import DashBoardStudent from '@/views/dashboard/DashBoardStudent.vue'
 import ScoreAdminView from '@/views/admin/ScoreAdminView.vue'
+import GroupScoreDetail from '@/views/admin/GroupScoreDetail.vue'
 // Tự động import các component khi cần thiết (lazy-load)
 const API_URL = import.meta.env.VITE_API_URL
 const routes = [
@@ -81,6 +82,11 @@ const routes = [
       { path: '/score/:id', component: ScoreView, meta: { roles: ['admin'] } },
       { path: '/committee-management/:id', component: CommitteeDetail, meta: { roles: ['admin'] } },
       { path: '/score-admin', component: ScoreAdminView, meta: { roles: ['admin'] } },
+      {
+        path: '/group-score-detail/:id',
+        component: GroupScoreDetail,
+        meta: { roles: ['admin'] },
+      },
       //Trang cho teacher
       { path: '/teacher-dashboard', component: DashBoardTeacher, meta: { roles: ['teacher'] } },
       { path: '/teacher-group-advisor', component: GroupTeacherView, meta: { roles: ['teacher'] } },
@@ -92,6 +98,7 @@ const routes = [
         component: ScoreDetailCreate,
         meta: { roles: ['teacher'] },
       },
+
       //Trang cho student
       { path: '/student-dashboard', component: DashBoardStudent, meta: { roles: ['student'] } },
       { path: '/group-manangerment', component: StudentGroup, meta: { roles: ['student'] } },

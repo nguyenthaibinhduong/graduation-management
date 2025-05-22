@@ -90,7 +90,7 @@ export class ScoreController {
   async determineTeacherType(
     @DecodedId(['params', 'groupId']) groupId: number,
     @DecodedId(['params', 'teacherId']) teacherId: number,
-    @Param ('typeCheck') typeCheck: any
+    @Param('typeCheck') typeCheck: any,
     // @Param('groupId', ParseIntPipe) groupId: number,
     // @Param('teacherId', ParseIntPipe) teacherId: number,
   ): Promise<Response<any>> {
@@ -98,7 +98,7 @@ export class ScoreController {
       const teacherType = await this.scoreService.determineTeacherType(
         groupId,
         teacherId,
-        typeCheck
+        typeCheck,
       );
       const response = {
         groupId,
@@ -183,14 +183,14 @@ export class ScoreController {
   @Put('detail/:id/:typeCheck')
   async updateScoreDetail(
     @DecodedId(['params', 'id']) scoreDetailId: number,
-    @Param ('typeCheck') typeCheck: any,
+    @Param('typeCheck') typeCheck: any,
     @Body() updateData: Partial<ScoreDetail>,
     @Request() request: any,
   ): Promise<Response<ScoreDetail>> {
     try {
       const userId = request.user?.id;
 
-      if (!userId ) {
+      if (!userId) {
         throw new HttpException(
           { statusCode: HttpStatus.ERROR, message: 'Thiếu thông tin' },
           HttpStatus.ERROR,
@@ -200,7 +200,7 @@ export class ScoreController {
         scoreDetailId,
         updateData,
         typeCheck,
-        userId
+        userId,
       );
       return new Response(
         updatedScoreDetail,
@@ -268,11 +268,13 @@ export class ScoreController {
     }
   }
 
-  @Post('public-score')
-  async publicScore(@Body('groupId') groupId: number): Promise<Response<void>> {
+  @Get('group-score')
+  async publicScore(
+    @DecodedId(['body', 'groupId']) groupId: number,
+  ): Promise<Response<void>> {
     try {
-      await this.scoreService.publicScore(groupId);
-      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
+      const groupScore = await this.scoreService.getGroupScore(groupId);
+      return new Response(groupScore, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },

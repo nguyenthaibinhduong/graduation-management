@@ -134,16 +134,14 @@ export function createScoreStore() {
       }
     }
 
-    const publicScore = async (groupId) => {
+    const fetchGroupScore = async (groupId) => {
       loading.value = true
       error.value = null
 
       try {
-        await scoreService.publicScore(groupId)
-        showToast('Công khai điểm thành công!', 'success')
+        return await scoreService.publicScore(groupId)
       } catch (err) {
-        error.value = err.message || 'Công khai điểm thất bại!'
-        showToast(error.value, 'error')
+        error.value = err.message
         throw err
       } finally {
         loading.value = false
@@ -166,7 +164,7 @@ export function createScoreStore() {
       fetchTeacherType,
       fetchGroupsByTeacher,
       fetchStudentScoreDetails,
-      publicScore,
+      fetchGroupScore,
     }
   })
 }

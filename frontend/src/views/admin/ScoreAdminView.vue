@@ -24,9 +24,11 @@ import { ref } from 'vue'
 import { watchEffect } from 'vue'
 import { watch } from 'vue'
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 const studentStore = useStudentStore()
 const groupStore = useGroupStore()
+const router = useRouter()
 
 const loading = ref(false)
 const filters = ref({ status: '', department_id: '', search: '', orderBy: 'asc' })
@@ -49,5 +51,13 @@ const fetchGroup = async (page = 1, limit = 10) => {
   )
   groups.value = groupStore.items
   loading.value = false
+}
+
+const onSelect = async (selected) => {
+  console.log('selected', selected.id)
+  // push /group-score-detail/:id
+  await router.push({
+    path: `/group-score-detail/${selected.id}`,
+  })
 }
 </script>
