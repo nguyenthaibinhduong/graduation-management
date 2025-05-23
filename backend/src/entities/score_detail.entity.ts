@@ -43,6 +43,9 @@ export class ScoreDetail {
   @Column({ type: 'varchar', length: 255 })
   comment: string;
 
+  @Column({ default: true })
+  isLocked: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 

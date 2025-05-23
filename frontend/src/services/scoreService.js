@@ -36,6 +36,10 @@ const scoreService = {
     const { data } = await api.get('/score/group-score', { groupId })
     return data.data
   },
+
+  unlockScoreDetail: async (scoreDetailId) => {
+    return await api.post(`/score/unlock/${scoreDetailId}`)
+  },
 }
 
 export default scoreService

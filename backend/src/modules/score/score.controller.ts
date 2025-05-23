@@ -250,9 +250,23 @@ export class ScoreController {
   @Get('student/details/:studentId')
   async getStudentScoreDetails(
     @DecodedId(['params', 'studentId']) studentId: number,
+    @Request() request: any,
   ): Promise<Response<any>> {
     try {
-      const scoreDetails =
+      const userId = request.user?.id;
+      const userRole = request.user?.role;
+      let scoreDetails: any;
+      if (userRole === 'student') {
+        if (studentId !== userId) {
+          throw new HttpException(
+            { statusCode: HttpStatus.ERROR, message: 'Unauthorized' },
+            HttpStatus.ERROR,
+          );
+        }
+        scoreDetails =
+          await this.scoreService.getScoreDetailByStudentId(userId);
+      }
+      scoreDetails =
         await this.scoreService.getScoreDetailByStudentId(studentId);
 
       return new Response(scoreDetails, HttpStatus.SUCCESS, Message.SUCCESS);
@@ -275,6 +289,25 @@ export class ScoreController {
     try {
       const groupScore = await this.scoreService.getGroupScore(groupId);
       return new Response(groupScore, HttpStatus.SUCCESS, Message.SUCCESS);
+    } catch (error) {
+      throw new HttpException(
+        { statusCode: HttpStatus.ERROR, message: error.message },
+        HttpStatus.ERROR,
+      );
+    }
+  }
+
+  @Post('unlock/:id')
+  async unlockScoreDetail(
+    @DecodedId(['params', 'id']) id: number,
+  ): Promise<Response<void>> {
+    try {
+      await this.scoreService.unlockScoreDetail(id);
+      return new Response(
+        null,
+        HttpStatus.SUCCESS,
+        'Score detail unlocked successfully',
+      );
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },

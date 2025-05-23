@@ -267,9 +267,9 @@ export class ScoreService extends BaseService<Score> {
         },
       );
 
-      // if (existingDetail) {
-      //   throw new ConflictException('Score detail already exists');
-      // }
+      if (existingDetail) {
+        throw new ConflictException('Bạn đã chấm điểm cho sinh viên này');
+      }
 
       // create score detail
       const scoreDetailEntity = new ScoreDetail();
@@ -286,6 +286,7 @@ export class ScoreService extends BaseService<Score> {
       // save score detail
       await this.repository.manager.save(scoreDetailEntity);
     } catch (error) {
+      console.error(error);
       if (error instanceof QueryFailedError) {
         throw new ConflictException('Score detail already exists');
       }
@@ -512,6 +513,11 @@ export class ScoreService extends BaseService<Score> {
       },
       'Lỗi',
     );
+    if (scoreDetail.isLocked) {
+      throw new NotFoundException(
+        'Vui lòng liên hệ admin nếu muốn chỉnh sửa điểm',
+      );
+    }
     const teacherRole = await this.determineTeacherType(
       scoreDetail?.student?.group?.id,
       user?.teacher?.id,
@@ -523,6 +529,8 @@ export class ScoreService extends BaseService<Score> {
     }
 
     Object.assign(scoreDetail, updateData);
+
+    scoreDetail.isLocked = true;
     const updatedScoreDetail = await this.repository.manager.save(scoreDetail);
 
     return updatedScoreDetail;
@@ -640,13 +648,8 @@ export class ScoreService extends BaseService<Score> {
     try {
       // Get overall scores by teacher type
       const scoresByType = await this.calculateScoresByTeacherType(studentId);
-      const {
-        weightedTotal,
-        missingEvaluations,
-        isComplete,
-        appliedWeights,
-        ...weightedTotalScore
-      } = await this.calculateWeightedTotalScore(studentId);
+      const weightedScoreResult =
+        await this.calculateWeightedTotalScore(studentId);
 
       // Get score details
       const scoreDetails = await this.scoreDetailRepository.find({
@@ -667,8 +670,20 @@ export class ScoreService extends BaseService<Score> {
         },
       });
 
+      // If no score details, return all properties as null and missingEvaluations is all 3 types
       if (!scoreDetails || scoreDetails.length === 0) {
-        throw new NotFoundException('No score details found for this student');
+        return {
+          advisor: null,
+          reviewer: null,
+          committee: null,
+          advisor_overall: null,
+          reviewer_overall: null,
+          committee_overall: null,
+          weightedTotal: null,
+          appliedWeights: null,
+          isComplete: null,
+          missingEvaluations: ['advisor', 'reviewer', 'committee'],
+        };
       }
 
       // Group score details by teacherType
@@ -677,8 +692,6 @@ export class ScoreService extends BaseService<Score> {
         if (!acc[type]) {
           acc[type] = [];
         }
-
-        // Remove teacherType from the detail to match the expected format
         const { teacherType, ...detailWithoutType } = detail;
         acc[type].push(detailWithoutType);
         return acc;
@@ -690,26 +703,37 @@ export class ScoreService extends BaseService<Score> {
       if (scoresByType) {
         Object.keys(result).forEach((type) => {
           if (scoresByType[type]?.score !== null) {
-            // Add overall score as a property to the group
             result[`${type}_overall`] = scoresByType[type].score;
           }
         });
       }
+
+      // Spread weightedScoreResult, but ensure all keys exist and are not undefined
       return {
         ...result,
-        weightedTotal,
-        appliedWeights,
-        isComplete,
-        missingEvaluations,
+        weightedTotal: weightedScoreResult?.weightedTotal ?? null,
+        appliedWeights: weightedScoreResult?.appliedWeights ?? null,
+        isComplete: weightedScoreResult?.isComplete ?? null,
+        missingEvaluations: weightedScoreResult?.missingEvaluations ?? [
+          'advisor',
+          'reviewer',
+          'committee',
+        ],
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      console.error('Error retrieving score details:', error);
-      throw new InternalServerErrorException(
-        'Error retrieving score details for student',
-      );
+      // Always return nulls if any error occurs
+      return {
+        advisor: null,
+        reviewer: null,
+        committee: null,
+        advisor_overall: null,
+        reviewer_overall: null,
+        committee_overall: null,
+        weightedTotal: null,
+        appliedWeights: null,
+        isComplete: null,
+        missingEvaluations: ['advisor', 'reviewer', 'committee'],
+      };
     }
   }
 
@@ -752,5 +776,15 @@ export class ScoreService extends BaseService<Score> {
     }
     groupScore = groupScore / members.length;
     return { ...group, groupScore, isComplete: true };
+  }
+
+  //Admin unclok score detail
+  async unlockScoreDetail(id: number): Promise<void> {
+    const scoreDetail = await this.scoreDetailRepository.findOne({
+      where: { id },
+    });
+    if (!scoreDetail) throw new NotFoundException('Score detail not found');
+    scoreDetail.isLocked = false;
+    await this.scoreDetailRepository.save(scoreDetail);
   }
 }

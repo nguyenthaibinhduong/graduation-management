@@ -147,6 +147,22 @@ export function createScoreStore() {
         loading.value = false
       }
     }
+
+    const unlockScoreDetail = async (scoreDetailId) => {
+      loading.value = true
+      error.value = null
+      try {
+        await scoreService.unlockScoreDetail(scoreDetailId)
+        showToast('Score detail unlocked successfully', 'success')
+      } catch (err) {
+        error.value = err.message || 'Failed to unlock score detail'
+        showToast(error.value, 'error')
+        throw err
+      } finally {
+        loading.value = false
+      }
+    }
+
     return {
       // State
       scoreDetails,
@@ -155,7 +171,6 @@ export function createScoreStore() {
       weightedTotalScore,
       teacherGroups,
       teacherType,
-
       // Actions
       createScoreDetail,
       updateScoreDetail,
@@ -165,6 +180,7 @@ export function createScoreStore() {
       fetchGroupsByTeacher,
       fetchStudentScoreDetails,
       fetchGroupScore,
+      unlockScoreDetail,
     }
   })
 }
