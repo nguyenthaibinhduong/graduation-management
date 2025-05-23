@@ -117,12 +117,12 @@ export function createScoreStore() {
       }
     }
 
-    const fetchStudentScoreDetails = async (studentId) => {
+    const fetchStudentScoreDetails = async (studentId, teacherType = null) => {
       loading.value = true
       error.value = null
 
       try {
-        const data = await scoreService.getStudentScoreDetails(studentId)
+        const data = await scoreService.getStudentScoreDetails(studentId, teacherType)
         scoreDetails.value = data
         return data
       } catch (err) {

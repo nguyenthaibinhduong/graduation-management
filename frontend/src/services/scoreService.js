@@ -28,8 +28,12 @@ const scoreService = {
     return data.data
   },
 
-  getStudentScoreDetails: async (studentId) => {
-    const { data } = await api.get(`/score/student/details/${studentId}`)
+  getStudentScoreDetails: async (studentId, teacherType = null) => {
+    let url = `/score/student/details/${studentId}`
+    if (teacherType) {
+      url += `?type=${teacherType}`
+    }
+    const { data } = await api.get(url)
     return data.data
   },
   publicScore: async (groupId) => {

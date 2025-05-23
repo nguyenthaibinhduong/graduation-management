@@ -644,13 +644,15 @@ export class ScoreService extends BaseService<Score> {
     }
   }
 
-  async getScoreDetailByStudentId(studentId: number): Promise<any> {
+  async getScoreDetailByStudentId(
+    studentId: number,
+    teacherType?: 'advisor' | 'reviewer' | 'committee',
+  ): Promise<any> {
     try {
       // Get overall scores by teacher type
       const scoresByType = await this.calculateScoresByTeacherType(studentId);
       const weightedScoreResult =
         await this.calculateWeightedTotalScore(studentId);
-
       // Get score details
       const scoreDetails = await this.scoreDetailRepository.find({
         where: { student: { id: studentId } },
@@ -660,6 +662,7 @@ export class ScoreService extends BaseService<Score> {
           scoreValue: true,
           teacherType: true,
           comment: true,
+          isLocked: true,
           criteria: {
             name: true,
             content: true,
@@ -687,15 +690,18 @@ export class ScoreService extends BaseService<Score> {
       }
 
       // Group score details by teacherType
-      const groupedScoreDetails = scoreDetails.reduce((acc, detail) => {
-        const type = detail.teacherType || 'unknown';
-        if (!acc[type]) {
-          acc[type] = [];
-        }
-        const { teacherType, ...detailWithoutType } = detail;
-        acc[type].push(detailWithoutType);
-        return acc;
-      }, {});
+      const groupedScoreDetails = scoreDetails.reduce(
+        (acc, detail) => {
+          const type = detail.teacherType || 'unknown';
+          if (!acc[type]) {
+            acc[type] = [];
+          }
+          const { teacherType, ...detailWithoutType } = detail;
+          acc[type].push(detailWithoutType);
+          return acc;
+        },
+        {} as Record<string, any[]>,
+      );
 
       const result = { ...groupedScoreDetails };
 
@@ -708,18 +714,47 @@ export class ScoreService extends BaseService<Score> {
         });
       }
 
-      // Spread weightedScoreResult, but ensure all keys exist and are not undefined
-      return {
+      // Compose the final result
+
+      // Compose isLocked per teacherType
+      const isLocked: Record<string, boolean> = {
+        advisor:
+          (groupedScoreDetails.advisor || []).some((d) => d.isLocked) || false,
+        reviewer:
+          (groupedScoreDetails.reviewer || []).some((d) => d.isLocked) || false,
+        committee:
+          (groupedScoreDetails.committee || []).some((d) => d.isLocked) ||
+          false,
+      };
+
+      const fullResult = {
         ...result,
         weightedTotal: weightedScoreResult?.weightedTotal ?? null,
         appliedWeights: weightedScoreResult?.appliedWeights ?? null,
         isComplete: weightedScoreResult?.isComplete ?? null,
+        isLocked,
         missingEvaluations: weightedScoreResult?.missingEvaluations ?? [
           'advisor',
           'reviewer',
           'committee',
         ],
       };
+      if (teacherType) {
+        const filtered: any = {
+          weightedTotal: fullResult.weightedTotal,
+          appliedWeights: fullResult.appliedWeights,
+          isComplete: fullResult.isComplete,
+          missingEvaluations: fullResult.missingEvaluations,
+          isLocked: fullResult.isLocked[teacherType],
+        };
+        filtered[teacherType] = fullResult[teacherType] ?? null;
+        filtered[`${teacherType}_overall`] =
+          fullResult[`${teacherType}_overall`] ?? null;
+        return filtered;
+      }
+
+      // Otherwise, return all
+      return fullResult;
     } catch (error) {
       // Always return nulls if any error occurs
       return {

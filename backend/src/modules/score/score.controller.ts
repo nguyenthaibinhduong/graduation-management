@@ -250,24 +250,40 @@ export class ScoreController {
   @Get('student/details/:studentId')
   async getStudentScoreDetails(
     @DecodedId(['params', 'studentId']) studentId: number,
+    @Query('type') teacherType: 'advisor' | 'reviewer' | 'committee',
     @Request() request: any,
   ): Promise<Response<any>> {
     try {
       const userId = request.user?.id;
       const userRole = request.user?.role;
       let scoreDetails: any;
+
+      //Student
       if (userRole === 'student') {
         if (studentId !== userId) {
           throw new HttpException(
-            { statusCode: HttpStatus.ERROR, message: 'Unauthorized' },
+            {
+              statusCode: HttpStatus.ERROR,
+              message: 'Bạn không có quyền xem điểm này',
+            },
             HttpStatus.ERROR,
           );
         }
         scoreDetails =
           await this.scoreService.getScoreDetailByStudentId(userId);
       }
-      scoreDetails =
-        await this.scoreService.getScoreDetailByStudentId(studentId);
+      // Teacher
+      else if (userRole === 'teacher') {
+        scoreDetails = await this.scoreService.getScoreDetailByStudentId(
+          studentId,
+          teacherType,
+        );
+      }
+      // Admin
+      else {
+        scoreDetails =
+          await this.scoreService.getScoreDetailByStudentId(studentId);
+      }
 
       return new Response(scoreDetails, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
@@ -285,8 +301,26 @@ export class ScoreController {
   @Get('group-score')
   async publicScore(
     @DecodedId(['body', 'groupId']) groupId: number,
+    @Request() request: any,
   ): Promise<Response<void>> {
     try {
+      const userId = request.user?.id;
+      const userRole = request.user?.role;
+      if (userRole === 'student') {
+        const groupScore = await this.scoreService.getGroupScore(groupId);
+        const isStudentInGroup = groupScore.students.some(
+          (student) => student.id === userId,
+        );
+        if (!isStudentInGroup) {
+          throw new HttpException(
+            {
+              statusCode: HttpStatus.ERROR,
+              message: 'Bạn không có quyền xem điểm này',
+            },
+            HttpStatus.ERROR,
+          );
+        }
+      }
       const groupScore = await this.scoreService.getGroupScore(groupId);
       return new Response(groupScore, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {

@@ -61,24 +61,45 @@
           <div v-else class="text-gray-500 italic">Chưa có đánh giá</div>
         </AccordionTab>
       </Accordion>
+      <!-- Group score -->
+      <div class="mt-8 flex">
+        <Card class="w-full border-2 border-blue-400 shadow-lg bg-blue-50">
+          <template #content>
+            <div class="text-center">
+              <div class="text-xl font-semibold text-blue-700 mb-1">Điểm nhóm</div>
+              <div class="text-3xl font-bold text-blue-900 my-2">
+                {{
+                  groupScore?.groupScore !== undefined && groupScore?.groupScore !== null
+                    ? groupScore.groupScore
+                    : 'Chưa có điểm nhóm'
+                }}
+              </div>
+            </div>
+          </template>
+        </Card>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useAuthStore } from '@/stores/auth'
-import { useScoreStore } from '@/stores/store'
+import { useScoreStore, useStudentStore } from '@/stores/store'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Accordion from 'primevue/accordion'
 import AccordionTab from 'primevue/accordiontab'
 import { onMounted, ref } from 'vue'
+import Card from 'primevue/card'
 
 const scoreStore = useScoreStore()
 const authStore = useAuthStore()
+const studentStore = useStudentStore()
 const score = ref(null)
 const scoreLoading = ref(false)
 const scoreError = ref('')
+const groupId = ref(null)
+const groupScore = ref(null)
 
 const teacherTypes = ['advisor', 'reviewer', 'committee']
 const teacherTypeLabel = (type) => {
@@ -90,6 +111,9 @@ const teacherTypeLabel = (type) => {
 
 onMounted(async () => {
   await fetchScore()
+  await studentStore.findItem(authStore?.user?.id)
+  groupId.value = studentStore.item?.group?.id
+  groupScore.value = await scoreStore.fetchGroupScore(groupId.value)
 })
 
 const fetchScore = async () => {
