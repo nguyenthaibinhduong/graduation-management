@@ -49,7 +49,7 @@
               {{ dayjs(getNestedValue(data, col.field)).format('DD/MM/YYYY') }}
             </span>
             <span v-else-if="col.type === 'image'">
-              <img class="rounded-xl" v-if="getNestedValue(data, col.field) !== 'N/A'"
+              <img class="rounded-xl" v-if="getNestedValue(data, col.field) !== ''"
                 :src="getNestedValue(data, col.field)" alt="image" style="max-width: 100px; max-height: 100px" />
             </span>
             <span v-else-if="col.type === 'status'">
@@ -98,7 +98,7 @@
         </template>
       </DataTable>
     </div>
-    <Toolbar class="mt-6 bg-slate-100">
+    <Toolbar class="mt-6 bg-slate-100" v-if="blockFuntion('pagginate')">
       <template #start>
         <Select size="small" v-model="limit" :options="(total > 20) ? [2, 5, 10, 20, total] : [2, 5, 10, 20]"
           @change="onLimitChange" placeholder="Hiện bản ghi" class="w-45" />
@@ -183,7 +183,7 @@ const onRowUnselect = (event) => {
   emit('rowSelect', event.data)
 }
 const getNestedValue = (obj, field) => {
-  return field.split('.').reduce((acc, key) => acc?.[key], obj) || 'N/A'
+  return field.split('.').reduce((acc, key) => acc?.[key], obj) || ''
 }
 const getStatus = (statuses, value) => {
   return statuses.find((s) => s.value === value)
