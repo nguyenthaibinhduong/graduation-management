@@ -36,6 +36,7 @@ import DashBoardTeacher from '@/views/dashboard/DashBoardTeacher.vue'
 import DashBoardStudent from '@/views/dashboard/DashBoardStudent.vue'
 import ScoreAdminView from '@/views/admin/ScoreAdminView.vue'
 import GroupScoreDetail from '@/views/admin/GroupScoreDetail.vue'
+import { generateHeaders } from '@/api/apiKeyEncrypt'
 // Tự động import các component khi cần thiết (lazy-load)
 const API_URL = import.meta.env.VITE_API_URL
 const routes = [
@@ -132,8 +133,10 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token')
   const authStore = useAuthStore()
+
   await authStore.fetchUser()
   const userRole = authStore.user?.role
+  const headersAuth = generateHeaders();
   if (to.meta.requiresAuth && !token) {
     return next('/login')
   }
@@ -142,7 +145,11 @@ router.beforeEach(async (to, from, next) => {
   }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     try {
-      const res = await axios.post(API_URL + '/auth/verify-token', { token })
+      const res = await axios.post(API_URL + '/auth/verify-token', { token }, {
+        headers: {
+          ...headersAuth,
+        }
+      })
       if (res.status === 201) {
         authStore.setAuth(true)
         return next()
@@ -156,6 +163,9 @@ router.beforeEach(async (to, from, next) => {
             {},
             {
               withCredentials: true,
+              headers: {
+                ...headersAuth
+              }
             }
           )
           if (refreshRes.status === 201 && refreshRes.data.access_token) {

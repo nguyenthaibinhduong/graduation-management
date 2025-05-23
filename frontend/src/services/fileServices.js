@@ -1,5 +1,6 @@
 import api from '@/api/api'
-
+import { generateHeaders } from '@/api/apiKeyEncrypt';
+const headersAuth = generateHeaders();
 const fileService = (resource) => ({
  upload: async (file) => {
     const payload = new FormData()
@@ -8,7 +9,7 @@ const fileService = (resource) => ({
       
       headers: {
         'Content-Type': 'multipart/form-data',
-   
+        ...headersAuth
       },
     })
   },

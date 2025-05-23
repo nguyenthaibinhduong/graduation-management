@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import { JwtUtilityService } from './common/jwtUtility.service';
 import { EncryptIdInterceptor } from './common/intercepters/encrypt-id.interceptor';
+import { ApiKeyMiddleware } from './common/middleware/api-key.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,7 @@ async function bootstrap() {
   const jwtUtilityService = app.get(JwtUtilityService); // Lấy từ DI container
   app.useGlobalInterceptors(new EncryptIdInterceptor(jwtUtilityService));
   app.setGlobalPrefix('api/v1', { exclude: [''] });
+  app.use(new ApiKeyMiddleware().use);
   await app.listen(port);
   console.log(`Server is running on Port :${port}`);
 }

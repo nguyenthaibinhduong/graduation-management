@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/stores/auth'
 import { showToast } from '@/utils/toast'
 import axios from 'axios'
+import { generateHeaders } from './apiKeyEncrypt'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -12,9 +13,15 @@ const api = axios.create({
 // Lấy token từ localStorage khi request
 api.interceptors.request.use(
   (config) => {
+    const headers = generateHeaders();
+    
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+    }
+    config.headers = {
+      ...config.headers,
+      ...headers
     }
     return config
   },

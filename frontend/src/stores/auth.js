@@ -4,12 +4,15 @@ import axios from 'axios'
 import api from '@/api/api'
 import router from '@/router'
 import { showToast } from '@/utils/toast'
+import { generateHeaders } from '@/api/apiKeyEncrypt'
 const API_URL = import.meta.env.VITE_API_URL
+const headersAuth = generateHeaders();
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('token') || null,
     isAuthenticated: localStorage.getItem('isAuthenticated') == true,
+    
   }),
   actions: {
     setAuth(status) {
@@ -21,6 +24,7 @@ export const useAuthStore = defineStore('auth', {
         const apiAuth = axios.create({
           headers: {
             'Content-Type': 'application/json',
+            ...headersAuth
           },
           withCredentials: true,
         })
@@ -45,7 +49,8 @@ export const useAuthStore = defineStore('auth', {
         {
           withCredentials: true,
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...headersAuth
           },
         }
       )
@@ -64,7 +69,10 @@ export const useAuthStore = defineStore('auth', {
             API_URL+'/auth/logout',
             {},
             {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: {
+                Authorization: `Bearer ${token}`,
+                ...headersAuth
+               }
             }
           )
         }
