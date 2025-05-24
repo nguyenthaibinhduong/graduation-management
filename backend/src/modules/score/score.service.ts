@@ -719,14 +719,14 @@ export class ScoreService extends BaseService<Score> {
     }
     const existingGroupScore = await this.check_exist_with_data(Score,{
       where: { group: { id: groupId } },
-    },'Nhóm đã có điểm');
+    },'Nhóm chưa có điểm');
     for (const member of members) {
       const existingStudentScore = await this.scoreRepository.findOne({
         where: { student: { id: member.id } },
       });
-      if (existingStudentScore) {
+      if (!existingStudentScore) {
         throw new ConflictException(
-          `Sinh viên mã ${member.id} đã có điểm`,
+          `Sinh viên mã ${member.id} chưa có điểm`,
         );
       }
     }
