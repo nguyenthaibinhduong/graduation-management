@@ -113,6 +113,8 @@
                       { field: 'criteria.weightPercent', header: 'Trọng số (%)' },
                       { field: 'scoreValue', header: 'Điểm' },
                       { field: 'comment', header: 'Nhận xét' },
+                      { field: 'teacher.user.fullname', header: 'Giảng viên' },
+                      { field: 'teacher.code', header: 'Mã GV' },
                     ]"
                     :total="studentScores[selectedStudentId][role]?.length"
                   />

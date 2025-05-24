@@ -211,10 +211,26 @@ export class ScoreService extends BaseService<Score> {
     } = scoreDetail;
 
     try {
-      const score = await this.check_exist_with_data(Score, {where: { id: score_id },},null);
-      const teacher = await this.check_exist_with_data(Teacher, {where: { id: teacher_id },},'Giảng viên không hợp lệ');
-      const student = await this.check_exist_with_data(Student, { where: { id: student_id },relations: ['group'],},'Sinh viên không hợp lệ');
-      const criteria = await this.check_exist_with_data(Criteria, {where: { id: criteria_id } },"Tiêu chí không hợp lệ");
+      const score = await this.check_exist_with_data(
+        Score,
+        { where: { id: score_id } },
+        null,
+      );
+      const teacher = await this.check_exist_with_data(
+        Teacher,
+        { where: { id: teacher_id } },
+        'Giảng viên không hợp lệ',
+      );
+      const student = await this.check_exist_with_data(
+        Student,
+        { where: { id: student_id }, relations: ['group'] },
+        'Sinh viên không hợp lệ',
+      );
+      const criteria = await this.check_exist_with_data(
+        Criteria,
+        { where: { id: criteria_id } },
+        'Tiêu chí không hợp lệ',
+      );
       const teacherRole = await this.determineTeacherType(
         student.group.id,
         teacher_id,
@@ -264,28 +280,34 @@ export class ScoreService extends BaseService<Score> {
       where: { id: groupId },
       relations: ['project', 'teacher', 'facultyReviewers', 'committee'],
     });
-  
+
     if (!group || !group.project)
       throw new NotFoundException(
-        !group ? 'Thông tin nhóm hoặc giáo viên không chính xác' : 'Nhóm chưa có đề tài',
+        !group
+          ? 'Thông tin nhóm hoặc giáo viên không chính xác'
+          : 'Nhóm chưa có đề tài',
       );
-  
-    if (typeCheck === 'advisor' && group.teacher?.id == teacherId) return 'advisor';
-  
-    if (typeCheck === 'reviewer' && group.facultyReviewers?.some(r => r.id == teacherId))
+
+    if (typeCheck === 'advisor' && group.teacher?.id == teacherId)
+      return 'advisor';
+
+    if (
+      typeCheck === 'reviewer' &&
+      group.facultyReviewers?.some((r) => r.id == teacherId)
+    )
       return 'reviewer';
-  
+
     if (typeCheck === 'committee' && group.committee?.id) {
       const committee = await this.repository.manager.findOne(Committee, {
         where: { id: group.committee.id },
         relations: ['teachers'],
       });
-      if (committee?.teachers.some(t => t.id == teacherId)) return 'committee';
+      if (committee?.teachers.some((t) => t.id == teacherId))
+        return 'committee';
     }
-  
+
     return null;
   }
-  
 
   /**
    * Calculate scores by teacher type (advisor, reviewer, committee)
@@ -415,9 +437,7 @@ export class ScoreService extends BaseService<Score> {
         isComplete: missingTypes.length === 0,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Lỗi',
-      );
+      throw new InternalServerErrorException('Lỗi');
     }
   }
 
@@ -590,7 +610,7 @@ export class ScoreService extends BaseService<Score> {
       // Get score details
       const scoreDetails = await this.scoreDetailRepository.find({
         where: { student: { id: studentId } },
-        relations: ['criteria'],
+        relations: ['criteria', 'teacher', 'teacher.user'],
         select: {
           id: true,
           scoreValue: true,
@@ -603,6 +623,13 @@ export class ScoreService extends BaseService<Score> {
             max_score: true,
             weightPercent: true,
             step: true,
+          },
+          teacher: {
+            id: true,
+            code: true,
+            user: {
+              fullname: true,
+            },
           },
         },
       });
@@ -706,28 +733,30 @@ export class ScoreService extends BaseService<Score> {
     }
   }
 
-  //Calculate group&student score, save to database
+  // Get scores for group
   async getGroupScore(groupId: any): Promise<any> {
-    const group = await this.check_exist_with_data(Group,{
-      where: { id: groupId },
-      relations: ['students', 'project'],
-    },'Nhóm không hợp lệ');
+    const group = await this.check_exist_with_data(
+      Group,
+      {
+        where: { id: groupId },
+        relations: ['students', 'project'],
+      },
+      'Nhóm không hợp lệ',
+    );
 
     const members = group.students;
     if (!members || members.length === 0) {
       throw new NotFoundException('Không có sinh viên trong nhóm');
     }
-    const existingGroupScore = await this.check_exist_with_data(Score,{
-      where: { group: { id: groupId } },
-    },'Nhóm đã có điểm');
+    // const existingGroupScore = await this.check_exist_with_data(Score,{
+    //   where: { group: { id: groupId } },
+    // },'Nhóm đã có điểm');
     for (const member of members) {
       const existingStudentScore = await this.scoreRepository.findOne({
         where: { student: { id: member.id } },
       });
       if (existingStudentScore) {
-        throw new ConflictException(
-          `Sinh viên mã ${member.id} đã có điểm`,
-        );
+        throw new ConflictException(`Sinh viên mã ${member.id} đã có điểm`);
       }
     }
     var groupScore = 0;
