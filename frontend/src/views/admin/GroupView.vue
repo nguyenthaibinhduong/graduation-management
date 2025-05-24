@@ -5,77 +5,43 @@
       <!-- Trạng thái -->
       <div class="flex flex-col gap-y-1">
         <label for="status" class="font-medium">Trạng thái</label>
-        <MyInput
-          class="w-full"
-          id="status"
-          type="select"
-          v-model="filters.status"
-          :options="[
-            { label: 'Tất cả', value: '' },
-            { label: 'Đang tạo nhóm', value: 'create' },
-            { label: 'Nhóm chờ duyệt', value: 'pending' },
-            { label: 'Nhóm đã duyệt', value: 'approved' },
-            { label: 'Nhóm đã hủy', value: 'rejected' },
-            { label: 'Nhóm đã ghi danh', value: 'finding' },
-            { label: 'Nhóm đang làm đề tài', value: 'success' },
-          ]"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Chọn trạng thái"
-        />
+        <MyInput class="w-full" id="status" type="select" v-model="filters.status" :options="[
+          { label: 'Tất cả', value: '' },
+          { label: 'Đang tạo nhóm', value: 'create' },
+          { label: 'Nhóm chờ duyệt', value: 'pending' },
+          { label: 'Nhóm đã duyệt', value: 'approved' },
+          { label: 'Nhóm đã hủy', value: 'rejected' },
+          { label: 'Nhóm đã ghi danh', value: 'finding' },
+          { label: 'Nhóm đang làm đề tài', value: 'success' },
+        ]" optionLabel="label" optionValue="value" placeholder="Chọn trạng thái" />
       </div>
 
       <!-- Khoa -->
       <div class="flex flex-col gap-y-1">
         <label for="department" class="font-medium">Khoa</label>
-        <MyInput
-          class="w-full"
-          id="department"
-          type="select"
-          v-model="filters.department_id"
-          :options="departments"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Chọn khoa"
-        />
+        <MyInput class="w-full" id="department" type="select" v-model="filters.department_id" :options="departments"
+          optionLabel="name" optionValue="id" placeholder="Chọn khoa" />
       </div>
 
       <!-- Sắp xếp -->
       <div class="flex flex-col gap-y-1">
         <label for="order" class="font-medium">Sắp xếp</label>
-        <MyInput
-          class="w-full"
-          id="order"
-          type="select"
-          v-model="filters.orderBy"
-          :options="[
-            { label: 'Mới nhất', value: 'desc' },
-            { label: 'Cũ nhất', value: 'asc' },
-          ]"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Chọn thứ tự"
-        />
+        <MyInput class="w-full" id="order" type="select" v-model="filters.orderBy" :options="[
+          { label: 'Mới nhất', value: 'desc' },
+          { label: 'Cũ nhất', value: 'asc' },
+        ]" optionLabel="label" optionValue="value" placeholder="Chọn thứ tự" />
       </div>
 
       <!-- Tìm kiếm -->
       <div class="flex flex-col gap-y-1 col-span-2">
         <label for="search" class="font-medium">Tìm kiếm</label>
-        <MyInput
-          class="w-full"
-          id="search"
-          v-model="filters.search"
-          placeholder="Nhập tên hoặc mã nhóm"
-          @keyup.enter="fetchGroup(1)"
-        />
+        <MyInput class="w-full" id="search" v-model="filters.search" placeholder="Nhập tên hoặc mã nhóm"
+          @keyup.enter="fetchGroup(1)" />
       </div>
     </div>
 
     <!-- Bảng dữ liệu -->
-    <DataTableCustom
-      title="Danh sách nhóm"
-      :block="['toolbar', 'headerBar', 'selectAll', 'action']"
-      :data="groups"
+    <DataTableCustom title="Danh sách nhóm" :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="groups"
       :columns="[
         { field: 'code', header: 'Mã nhóm' },
         { field: 'leader.user.fullname', header: 'Người tạo nhóm' },
@@ -115,45 +81,23 @@
             },
           ],
         },
-      ]"
-      :total="groupStore.total"
-      @fetch="onPaginate"
-      @add="onAdd"
-      @edit="onEdit"
-      @delete="onDelete"
-      @selectOne="onSelect"
-      @selectAll="onSelect"
-      @rowSelect="onSelect"
-    />
+      ]" :total="groupStore.total" @fetch="onPaginate" @add="onAdd" @edit="onEdit" @delete="onDelete"
+      @selectOne="onSelect" @selectAll="onSelect" @rowSelect="onSelect" />
     <div class="w-full grid grid-cols-5 gap-4 bg-white p-3 rounded-md shadow-sm text-sm">
       <!-- Trạng thái -->
 
       <!-- Khoa -->
       <div class="flex flex-col gap-y-1 col-span-1 col-start-4">
         <label for="department" class="font-medium">Khoa</label>
-        <MyInput
-          class="w-full"
-          id="department"
-          type="select"
-          v-model="lockData.department_id"
-          :options="departments"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Chọn khoa"
-        />
+        <MyInput class="w-full" id="department" type="select" v-model="lockData.department_id" :options="departments"
+          optionLabel="name" optionValue="id" placeholder="Chọn khoa" />
       </div>
       <div class="flex flex-col justify-end gap-y-1 col-span-1 col-start-5">
         <Button label="Khóa nhóm" @click="handleLockData" />
       </div>
     </div>
   </div>
-  <Dialog
-    v-model:visible="open"
-    modal
-    header="Chi tiết nhóm"
-    :style="{ width: '500px' }"
-    @after-hide="reset"
-  >
+  <Dialog v-model:visible="open" modal header="Chi tiết nhóm" :style="{ width: '500px' }" @after-hide="reset">
     <div class="w-full">
       <div class="space-y-2 text-base">
         <div><span class="font-medium">Tên nhóm:</span> {{ detail?.name }}</div>
@@ -169,12 +113,9 @@
         <div>
           <span class="font-medium">Thành viên:</span>
           <ul class="list-disc list-inside ml-2">
-            <li
-              v-for="member in detail?.status == 'create'
-                ? detail?.student_attemp
-                : detail.students"
-              :key="member.id"
-            >
+            <li v-for="member in detail?.status == 'create'
+              ? detail?.student_attemp
+              : detail.students" :key="member.id">
               {{ member.user?.fullname }} ({{ member.code }})
             </li>
             <li v-if="detail?.status == 'rejected'">
@@ -189,82 +130,38 @@
         <div class="">
           <div class="flex flex-col gap-y-1">
             <label for="status" class="font-medium">Trạng thái</label>
-            <MyInput
-              class="w-full"
-              id="status"
-              type="select"
-              v-model="update.status"
-              :options="[
-                { label: 'Đang tạo nhóm', value: 'create' },
-                { label: 'Chờ duyệt', value: 'pending' },
-                { label: 'Duyệt nhóm', value: 'approved' },
-                {
-                  label: 'Ghi danh đề tài ',
-                  value: 'finding',
-                },
-                { label: 'Chấp nhận ghi danh ', value: 'success' },
-                { label: 'Hủy nhóm ', value: 'rejected' },
-              ]"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Chọn trạng thái"
-            />
+            <MyInput class="w-full" id="status" type="select" v-model="update.status" :options="[
+              { label: 'Đang tạo nhóm', value: 'create' },
+              { label: 'Chờ duyệt', value: 'pending' },
+              { label: 'Duyệt nhóm', value: 'approved' },
+              {
+                label: 'Ghi danh đề tài ',
+                value: 'finding',
+              },
+              { label: 'Chấp nhận ghi danh ', value: 'success' },
+              { label: 'Hủy nhóm ', value: 'rejected' },
+            ]" optionLabel="label" optionValue="value" placeholder="Chọn trạng thái" />
           </div>
-          <div
-            v-if="['finding', 'success'].includes(update.status)"
-            class="flex flex-col gap-y-1 mt-2"
-          >
+          <div v-if="['finding', 'success'].includes(update.status)" class="flex flex-col gap-y-1 mt-2">
             <label for="project" class="font-medium">Đề tài</label>
-            <MyInput
-              class="w-full"
-              id="project"
-              type="select"
-              v-model="updateProject.project"
-              :options="projects"
-              optionLabel="title"
-              optionValue="id"
-              placeholder="Chọn đề tài"
-            />
+            <MyInput class="w-full" id="project" type="select" v-model="updateProject.project" :options="projects"
+              optionLabel="title" optionValue="id" placeholder="Chọn đề tài" />
           </div>
           <div v-if="update.status == 'success'" class="flex flex-col gap-y-1 mt-2">
-            <label for="status" class="font-medium">Phân công giảng viên hướng dẫn</label>
-            <MyInput
-              class="w-full"
-              id="status"
-              type="select"
-              v-model="updateTeacher.teacher"
-              :options="teachers"
-              optionLabel="fullname"
-              optionValue="code"
-              placeholder="Chọn giảng viên"
-            />
+            <label for="status" class="font-medium">Giảng viên hướng dẫn</label>
+            <MyInput class="w-full" id="status" type="select" v-model="updateTeacher.teacher" :options="teachers"
+              optionLabel="fullname" optionValue="code" placeholder="Chọn giảng viên" />
           </div>
           <!-- assign reviewer and committee -->
           <div v-if="update.status == 'success'" class="flex flex-col gap-y-1 mt-2">
-            <label for="status" class="font-medium">Phân công giảng viên phản biện</label>
-            <MyInput
-              class="w-full"
-              id="status"
-              type="select"
-              v-model="updateReviewer"
-              :options="teachers"
-              optionLabel="fullname"
-              optionValue="id"
-              placeholder="Chọn giảng viên"
-            />
+            <label for="status" class="font-medium">Giảng viên chấm điểm phản biện</label>
+            <MyInput class="w-full" id="status" type="select" v-model="updateReviewer" :options="teachers"
+              optionLabel="fullname" optionValue="id" placeholder="Chọn giảng viên" />
           </div>
           <div v-if="update.status == 'success'" class="flex flex-col gap-y-1 mt-2">
             <label for="status" class="font-medium">Phân công hội đồng</label>
-            <MyInput
-              class="w-full"
-              id="status"
-              type="select"
-              v-model="updateCommittee"
-              :options="committees"
-              optionLabel="name"
-              optionValue="id"
-              placeholder="Chọn hội đồng"
-            />
+            <MyInput class="w-full" id="status" type="select" v-model="updateCommittee" :options="committees"
+              optionLabel="name" optionValue="id" placeholder="Chọn hội đồng" />
           </div>
         </div>
         <div class="flex justify-end">

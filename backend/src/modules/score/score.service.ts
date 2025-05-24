@@ -58,7 +58,7 @@ export class ScoreService extends BaseService<Score> {
         where: { id: group_id },
       });
       if (!groupEntity) {
-        throw new NotFoundException('Group not found');
+        throw new NotFoundException('Nhóm không hợp lệ');
       }
 
       // Use manager to find project
@@ -66,7 +66,7 @@ export class ScoreService extends BaseService<Score> {
         where: { id: project_id },
       });
       if (!projectEntity) {
-        throw new NotFoundException('Project not found');
+        throw new NotFoundException('Đề tài không hợp lệ');
       }
 
       // Use manager to check for existing score
@@ -74,7 +74,7 @@ export class ScoreService extends BaseService<Score> {
         where: { group: { id: group_id } },
       });
       if (existingScore) {
-        throw new ConflictException('Score for this group already exists');
+        throw new ConflictException('Đã có điểm');
       }
 
       // Create score entity
@@ -101,7 +101,7 @@ export class ScoreService extends BaseService<Score> {
         throw error;
       }
 
-      throw new InternalServerErrorException('Error creating score');
+      throw new InternalServerErrorException('Lỗi khi chấm điểm');
     } finally {
       // Always release the query runner
       await queryRunner.release();
@@ -123,7 +123,7 @@ export class ScoreService extends BaseService<Score> {
         where: { id: student_id },
       });
       if (!studentEntity) {
-        throw new NotFoundException('Student not found');
+        throw new NotFoundException('Sinh viên không hợp lệ');
       }
 
       // Use manager to find project
@@ -131,7 +131,7 @@ export class ScoreService extends BaseService<Score> {
         where: { id: project_id },
       });
       if (!projectEntity) {
-        throw new NotFoundException('Project not found');
+        throw new NotFoundException('Đề tài không hợp lệ');
       }
 
       // Use manager to check for existing score
@@ -139,7 +139,7 @@ export class ScoreService extends BaseService<Score> {
         where: { student: { id: student_id } },
       });
       if (existingScore) {
-        throw new ConflictException('Score for this student already exists');
+        throw new ConflictException('Sinh viên đã có điểm');
       }
 
       // Create score entity
@@ -166,7 +166,7 @@ export class ScoreService extends BaseService<Score> {
         throw error;
       }
 
-      throw new InternalServerErrorException('Error creating student score');
+      throw new InternalServerErrorException('Lỗi');
     } finally {
       // Always release the query runner
       await queryRunner.release();
@@ -185,7 +185,7 @@ export class ScoreService extends BaseService<Score> {
         where: { id },
       });
       if (!score) {
-        throw new NotFoundException('Score not found');
+        throw new NotFoundException('Điểm không hợp lệ');
       }
 
       await queryRunner.manager.delete(Score, id);
@@ -193,7 +193,7 @@ export class ScoreService extends BaseService<Score> {
       await queryRunner.commitTransaction();
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('Error deleting score');
+      throw new InternalServerErrorException('Lỗi');
     } finally {
       await queryRunner.release();
     }
@@ -211,45 +211,15 @@ export class ScoreService extends BaseService<Score> {
     } = scoreDetail;
 
     try {
-      // validate score_id
-      const score = await this.repository.manager.findOne(Score, {
-        where: { id: score_id },
-      });
-      // if (!score) {
-      //   throw new NotFoundException('Score not found');
-      // }
-
-      // validate teacher_id
-      const teacher = await this.repository.manager.findOne(Teacher, {
-        where: { id: teacher_id },
-      });
-      if (!teacher) {
-        throw new NotFoundException('Teacher not found');
-      }
-
-      // validate student_id and get student with group relation
-      const student = await this.repository.manager.findOne(Student, {
-        where: { id: student_id },
-        relations: ['group'],
-      });
-      if (!student) {
-        throw new NotFoundException('Student not found');
-      }
-
-      // validate criteria_id
-      const criteria = await this.repository.manager.findOne(Criteria, {
-        where: { id: criteria_id },
-      });
-      if (!criteria) {
-        throw new NotFoundException('Criteria not found');
-      }
-
+      const score = await this.check_exist_with_data(Score, {where: { id: score_id },},null);
+      const teacher = await this.check_exist_with_data(Teacher, {where: { id: teacher_id },},'Giảng viên không hợp lệ');
+      const student = await this.check_exist_with_data(Student, { where: { id: student_id },relations: ['group'],},'Sinh viên không hợp lệ');
+      const criteria = await this.check_exist_with_data(Criteria, {where: { id: criteria_id } },"Tiêu chí không hợp lệ");
       const teacherRole = await this.determineTeacherType(
         student.group.id,
         teacher_id,
         teacherType,
       );
-
       if (!teacherRole) {
         throw new NotFoundException(`Giáo viên không có quyền chấm`);
       }
@@ -270,8 +240,6 @@ export class ScoreService extends BaseService<Score> {
       if (existingDetail) {
         throw new ConflictException('Bạn đã chấm điểm cho sinh viên này');
       }
-
-      // create score detail
       const scoreDetailEntity = new ScoreDetail();
       Object.assign(scoreDetailEntity, {
         ...data,
@@ -281,22 +249,9 @@ export class ScoreService extends BaseService<Score> {
         criteria,
         teacherType: teacherRole,
       });
-      // console.log(scoreDetailEntity);
-
-      // save score detail
       await this.repository.manager.save(scoreDetailEntity);
     } catch (error) {
-      console.error(error);
-      if (error instanceof QueryFailedError) {
-        throw new ConflictException('Score detail already exists');
-      }
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ConflictException
-      ) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Error creating score detail');
+      throw new InternalServerErrorException('Lỗi');
     }
   }
 
@@ -309,49 +264,28 @@ export class ScoreService extends BaseService<Score> {
       where: { id: groupId },
       relations: ['project', 'teacher', 'facultyReviewers', 'committee'],
     });
-
-    if (!group) {
+  
+    if (!group || !group.project)
       throw new NotFoundException(
-        `Thông tin nhóm hoặc giáo viên không chính xác`,
+        !group ? 'Thông tin nhóm hoặc giáo viên không chính xác' : 'Nhóm chưa có đề tài',
       );
-    }
-
-    if (!group.project) {
-      throw new NotFoundException(`Nhóm chưa có đề tài`);
-    }
-
-    // Advisor
-    if (
-      typeCheck == 'advisor' &&
-      group.teacher &&
-      group.teacher.id == teacherId
-    ) {
-      return 'advisor';
-    }
-
-    // Reviewer
-    if (typeCheck == 'reviewer' && group.facultyReviewers) {
-      const isReviewer = group.facultyReviewers.some(
-        (reviewer) => reviewer.id == teacherId,
-      );
-      if (isReviewer) {
-        return 'reviewer';
-      }
-    }
-
-    // Committee: Nếu group có committee và giáo viên là thành viên của committee đó
-    if (typeCheck == 'committee' && group.committee && group.committee.id) {
+  
+    if (typeCheck === 'advisor' && group.teacher?.id == teacherId) return 'advisor';
+  
+    if (typeCheck === 'reviewer' && group.facultyReviewers?.some(r => r.id == teacherId))
+      return 'reviewer';
+  
+    if (typeCheck === 'committee' && group.committee?.id) {
       const committee = await this.repository.manager.findOne(Committee, {
         where: { id: group.committee.id },
         relations: ['teachers'],
       });
-      if (committee?.teachers.some((t: any) => t.id == teacherId)) {
-        return 'committee';
-      }
+      if (committee?.teachers.some(t => t.id == teacherId)) return 'committee';
     }
-
+  
     return null;
   }
+  
 
   /**
    * Calculate scores by teacher type (advisor, reviewer, committee)
@@ -389,7 +323,7 @@ export class ScoreService extends BaseService<Score> {
 
         if (groupedScores[type]) {
           groupedScores[type].totalWeightedScore += weight * score;
-          groupedScores[type].totalWeight += weight;
+          groupedScores[type].totalWeight = 100;
           groupedScores[type].count++;
         }
       });
@@ -482,7 +416,7 @@ export class ScoreService extends BaseService<Score> {
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        'Error calculating weighted total score',
+        'Lỗi',
       );
     }
   }
@@ -774,30 +708,25 @@ export class ScoreService extends BaseService<Score> {
 
   //Calculate group&student score, save to database
   async getGroupScore(groupId: any): Promise<any> {
-    const group = await this.groupRepository.findOne({
+    const group = await this.check_exist_with_data(Group,{
       where: { id: groupId },
       relations: ['students', 'project'],
-    });
-    if (!group) {
-      throw new NotFoundException('Group not found');
-    }
+    },'Nhóm không hợp lệ');
+
     const members = group.students;
     if (!members || members.length === 0) {
-      throw new NotFoundException('No students found in this group');
+      throw new NotFoundException('Không có sinh viên trong nhóm');
     }
-    const existingGroupScore = await this.scoreRepository.findOne({
+    const existingGroupScore = await this.check_exist_with_data(Score,{
       where: { group: { id: groupId } },
-    });
-    if (existingGroupScore) {
-      throw new ConflictException('Group score already exists');
-    }
+    },'Nhóm đã có điểm');
     for (const member of members) {
       const existingStudentScore = await this.scoreRepository.findOne({
         where: { student: { id: member.id } },
       });
       if (existingStudentScore) {
         throw new ConflictException(
-          `Student score already exists for student ID ${member.id}`,
+          `Sinh viên mã ${member.id} đã có điểm`,
         );
       }
     }
@@ -818,7 +747,7 @@ export class ScoreService extends BaseService<Score> {
     const scoreDetail = await this.scoreDetailRepository.findOne({
       where: { id },
     });
-    if (!scoreDetail) throw new NotFoundException('Score detail not found');
+    if (!scoreDetail) throw new NotFoundException('Điểm không hợp lệ');
     scoreDetail.isLocked = false;
     await this.scoreDetailRepository.save(scoreDetail);
   }

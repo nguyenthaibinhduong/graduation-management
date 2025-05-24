@@ -20,10 +20,10 @@ export function createScoreStore() {
 
       try {
         const response = await scoreService.createScoreDetail(scoreDetailData)
-        showToast('Score detail created successfully', 'success')
+        showToast('Chấm điểm thành công', 'success')
         return response
       } catch (err) {
-        error.value = err.message || 'Failed to create score detail'
+        error.value = err.message || 'Lỗi'
         showToast(error.value, 'error')
         throw err
       } finally {
@@ -37,10 +37,10 @@ export function createScoreStore() {
 
       try {
         const response = await scoreService.updateScoreDetail(scoreDetailId, scoreDetailData, type)
-        showToast('Score detail updated successfully', 'success')
+        showToast('Cập nhật điểm thành công', 'success')
         return response
       } catch (err) {
-        error.value = err.message || 'Failed to update score detail'
+        error.value = err.message || 'Lỗi'
         showToast(error.value, 'error')
         throw err
       } finally {
@@ -54,7 +54,7 @@ export function createScoreStore() {
 
       try {
         await scoreService.deleteScoreDetail(scoreDetailId)
-        showToast('Score detail deleted successfully', 'success')
+        showToast('Xóa điểm thành công', 'success')
       } catch (err) {
         error.value = err.message || 'Failed to delete score detail'
         showToast(error.value, 'error')
@@ -73,7 +73,7 @@ export function createScoreStore() {
         weightedTotalScore.value = data
         return data
       } catch (err) {
-        error.value = err.message || 'Failed to fetch weighted total score'
+        error.value = err.message || 'Lỗi'
         showToast(error.value, 'error')
         throw err
       } finally {
@@ -90,7 +90,7 @@ export function createScoreStore() {
         teacherType.value = data
         return data
       } catch (err) {
-        error.value = err.message || 'Failed to fetch teacher type'
+        error.value = err.message || 'Lỗi'
         showToast(error.value, 'error')
         throw err
       } finally {
@@ -109,7 +109,7 @@ export function createScoreStore() {
         teacherGroups.value = data
         return data
       } catch (err) {
-        error.value = err.message || 'Failed to fetch groups by teacher'
+        error.value = err.message || 'Lỗi'
         showToast(error.value, 'error')
         throw err
       } finally {
@@ -126,7 +126,7 @@ export function createScoreStore() {
         scoreDetails.value = data
         return data
       } catch (err) {
-        error.value = err.message || 'Failed to fetch student score details'
+        error.value = err.message || 'Lỗi'
         showToast(error.value, 'error')
         throw err
       } finally {
@@ -153,9 +153,9 @@ export function createScoreStore() {
       error.value = null
       try {
         await scoreService.unlockScoreDetail(scoreDetailId)
-        showToast('Score detail unlocked successfully', 'success')
+        showToast('Đã mở khóa điểm', 'success')
       } catch (err) {
-        error.value = err.message || 'Failed to unlock score detail'
+        error.value = err.message || 'Không thể mở khóa'
         showToast(error.value, 'error')
         throw err
       } finally {

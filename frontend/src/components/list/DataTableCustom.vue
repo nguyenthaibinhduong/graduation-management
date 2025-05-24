@@ -60,7 +60,8 @@
                 </span>
               </template>
             </span>
-            <span v-html="safeHtml(getNestedValue(data, col.field))" v-else-if="col.type === 'html'">
+
+            <span class="pt-2" v-html="safeHtml(getNestedValue(data, col.field))" v-else-if="col.type === 'html'">
             </span>
             <span v-else>
               {{ getNestedValue(data, col.field) }}
