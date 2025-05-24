@@ -748,15 +748,19 @@ export class ScoreService extends BaseService<Score> {
     if (!members || members.length === 0) {
       throw new NotFoundException('Không có sinh viên trong nhóm');
     }
-    // const existingGroupScore = await this.check_exist_with_data(Score,{
-    //   where: { group: { id: groupId } },
-    // },'Nhóm đã có điểm');
+    // const existingGroupScore = await this.check_exist_with_data(
+    //   ScoreDetail,
+    //   {
+    //     where: { group: { id: groupId } },
+    //   },
+    //   'Nhóm chưa có điểm',
+    // );
     for (const member of members) {
-      const existingStudentScore = await this.scoreRepository.findOne({
+      const existingStudentScore = await this.scoreDetailRepository.findOne({
         where: { student: { id: member.id } },
       });
-      if (existingStudentScore) {
-        throw new ConflictException(`Sinh viên mã ${member.id} đã có điểm`);
+      if (!existingStudentScore) {
+        throw new ConflictException(`Sinh viên mã ${member.id} chưa có điểm`);
       }
     }
     var groupScore = 0;
