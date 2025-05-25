@@ -36,5 +36,8 @@ export class EvaluationForm {
     created_at: Date; // Ngày tạo tài khoản
   
     @UpdateDateColumn()
-    updated_at: Date; // Ngày cập nhật thông tin người dùng
+  updated_at: Date; // Ngày cập nhật thông tin người dùng
+  
+  @Column({ default: true })
+  active: boolean;
 }

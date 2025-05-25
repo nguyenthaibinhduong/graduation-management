@@ -58,6 +58,7 @@ export class CriteriaController {
         search,
         limit,
         page,
+        true
       );
       return new Response(criterias, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
@@ -104,7 +105,7 @@ export class CriteriaController {
   @Delete(':id')
   async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
-      await this.criteriaService.delete(id);
+      await this.criteriaService.delete(id,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -116,7 +117,7 @@ export class CriteriaController {
     @Body() ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.criteriaService.delete(ids);
+      await this.criteriaService.delete(ids,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

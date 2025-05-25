@@ -93,7 +93,7 @@ export const useAuthStore = defineStore('auth', {
       this.isAuthenticated = false
       localStorage.removeItem('isAuthenticated')
       localStorage.removeItem('token')
-      router.push('/login')
+      window.location.href = '/login';
     },
 
     async fetchUser() {

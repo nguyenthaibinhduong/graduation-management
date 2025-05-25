@@ -118,7 +118,7 @@ export class UsersController {
   @Delete(':id')
   async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
-      await this.userService.delete(id);
+      await this.userService.delete(id,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

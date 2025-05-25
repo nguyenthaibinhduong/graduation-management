@@ -262,50 +262,7 @@ export class CommitteesService extends BaseService<Committee> {
     }
   }
 
-  async deleteCommittee(ids: string | string[]): Promise<void> {
-    // Start a transaction
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
 
-    try {
-      // Ensure `ids` is an array
-      const idArray = Array.isArray(ids) ? ids : [ids];
-
-      // Find committees with their related entities
-      const committees = await this.committeeRepository.findBy({
-        id: In(idArray),
-      });
-
-      if (committees.length !== idArray.length) {
-        const foundIds = committees.map((committee) => committee.id);
-        const missingIds = idArray.filter((id) => !foundIds.includes(id));
-        throw new NotFoundException(
-          `Committees with IDs ${missingIds.join(', ')} not found`,
-        );
-      }
-
-      // Remove related teachers and projects for each committee
-      for (const committee of committees) {
-        committee.teachers = [];
-        committee.projects = [];
-        await this.committeeRepository.save(committee);
-      }
-
-      // Delete the committees
-      await this.committeeRepository.delete(idArray);
-
-      // Commit the transaction
-      await queryRunner.commitTransaction();
-    } catch (error) {
-      // Rollback the transaction in case of an error
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      // Release the query runner
-      await queryRunner.release();
-    }
-  }
 
   async getAllCommittees(
     search?: string,
@@ -317,7 +274,7 @@ export class CommitteesService extends BaseService<Committee> {
     limit?: number;
     page?: number;
   }> {
-    const where = search ? { name: Like(`%${search}%`) } : {};
+    const where = search ? { name: Like(`%${search}%`) , active:true } : {active:true};
     const [items, total] = await this.committeeRepository.findAndCount({
       where,
       relations: [

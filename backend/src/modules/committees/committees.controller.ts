@@ -131,11 +131,10 @@ export class CommitteesController {
   }
 
   @Delete(':id')
-  async remove(@DecodedId(['params']) id: string): Promise<Response<void>> {
+  async remove(@DecodedId(['params']) id: any): Promise<Response<void>> {
     try {
-      const decodeId = this.jwtUtilityService.decodeId(id);
-      const deletedCommittee =
-        await this.committeesService.deleteCommittee(decodeId);
+
+      const deletedCommittee = await this.committeesService.delete(id,true);
       return new Response(
         deletedCommittee,
         HttpStatus.SUCCESS,
@@ -150,14 +149,11 @@ export class CommitteesController {
   }
   @Post('remove-multi')
   async removeMulti(
-    @Body() ids: string[],
+    @DecodedId(['body','ids']) ids: any,
   ): Promise<Response<void> | HttpException> {
     try {
-      const idArray = Array.isArray(ids) ? ids : [ids];
-      const decodedIds = idArray.map((id) => {
-        return this.jwtUtilityService.decodeId(id);
-      });
-      await this.committeesService.deleteCommittee(decodedIds);
+      
+      await this.committeesService.delete(ids,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

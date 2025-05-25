@@ -3,6 +3,7 @@ import { Student } from './student.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   OneToOne,
@@ -66,4 +67,11 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date; // Ngày cập nhật thông tin người dùng
+
+  @DeleteDateColumn()
+  deleted_at?: Date;
+
+  @Column({ default: true })
+  active: boolean;
+
 }

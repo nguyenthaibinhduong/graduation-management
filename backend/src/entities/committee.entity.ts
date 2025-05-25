@@ -76,4 +76,7 @@ export class Committee {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({ default: true })
+  active: boolean;
 }

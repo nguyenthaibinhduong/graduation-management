@@ -87,7 +87,7 @@ export class UsersService extends BaseService<User> {
 
 
   async findByUsername(username: string) {
-    const user = await this.userRepository.findOneBy({ username });
+    const user = await this.userRepository.findOne({where:{ username ,active:true}});
     return user;
   }
 
@@ -198,11 +198,18 @@ export class UsersService extends BaseService<User> {
     limit?: number,
     page?: number,
   ): Promise<{ items: User[]; total: number; limit?: number; page?: number }> {
-    const where = search
-      ? [{ fullname: Like(`%${search}%`) }, { username: Like(`%${search}%`) }]
-      : role
-        ? { role }
-        : {};
+    let where: any;
+
+    if (search) {
+      where = [
+        { fullname: Like(`%${search}%`), active: true },
+        { username: Like(`%${search}%`), active: true },
+      ];
+    } else if (role) {
+      where = { role, active: true };
+    } else {
+      where = { active: true };
+    }
     const options: any = { where };
     if (limit && page) {
       options.take = limit;
@@ -216,7 +223,7 @@ export class UsersService extends BaseService<User> {
 
   async getUserDetails(user: any): Promise<any> {
     const userData = await this.userRepository.findOne({
-      where: { id: user.id },
+      where: { id: user.id,active:true },
       relations: {
         teacher: user.role === 'teacher'?{ department: true } : false,
         student:

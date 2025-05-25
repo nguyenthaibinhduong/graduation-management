@@ -1,3 +1,4 @@
+
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
 
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -10,7 +11,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from '../../entities/student.entity';
 import { BaseService } from 'src/common/base.service';
-import { Like, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { Department } from 'src/entities/department.entity';
 import { Major } from 'src/entities/major.entity';
@@ -52,6 +53,7 @@ export class StudentsService extends BaseService<Student> {
           fullname: Like(`%${search}%`),
         },
       }),
+      active: true,
       ...(department_id && { department: { id: department_id } }),
       ...(major_id && { major: { id: major_id } }),
     };
@@ -208,4 +210,39 @@ export class StudentsService extends BaseService<Student> {
     }
     return student;
   }
+
+  async deleteData(ids: number | number[], isSoft: boolean = false): Promise<void> {
+    const idArray = Array.isArray(ids) ? ids : [ids];
+  
+    // Lấy danh sách sinh viên kèm user
+    const students = await this.repository.find({
+      where: { id: In(idArray) ,  active: true  },
+      relations: ['user'],
+    });
+  
+    if (students.length !== idArray.length) {
+      throw new NotFoundException('One or more students not found');
+    }
+  
+    const userIds = students.map(s => s.user?.id).filter(Boolean);
+
+  try {
+      if (isSoft) {
+        // Cập nhật active = false
+        if (userIds.length) {
+          await this.repository.manager.update(User, { id: In(userIds) }, { active: false });
+        }
+        await this.repository.manager.update(Student, { id: In(idArray) }, { active: false });
+      } else {
+        // Xóa dữ liệu
+        if (userIds.length) {
+          await this.repository.manager.remove(User, students.map(s => s.user));
+        }
+        await this.repository.manager.remove(Student, students);
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+  
 }

@@ -9,6 +9,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Committee } from './committee.entity';
@@ -64,4 +65,12 @@ export class Teacher {
 
   @UpdateDateColumn()
   updated_at: Date; // Ngày cập nhật thông tin người dùng
+  
+  @DeleteDateColumn()
+  deleted_at?: Date;
+
+  @Column({ default: true })
+  active: boolean;
+
+
 }

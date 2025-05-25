@@ -34,8 +34,9 @@ export abstract class BaseService<T> {
     search?: string,
     limit?: number,
     page?: number,
+    isDeleted:boolean = false
   ): Promise<{ items: T[]; total: number; limit?: number; page?: number }> {
-    const where = search ? { name: Like(`%${search}%`) } : {};
+    const where = isDeleted?(search ? { name: Like(`%${search}%`), active:isDeleted } : {active:isDeleted}):(search ? { name: Like(`%${search}%`) } : {});
     const options: any = { where };
     if (limit && page) {
       options.take = limit;
@@ -61,7 +62,7 @@ export abstract class BaseService<T> {
     return this.getById(options);
   }
   // xóa 1 hoặc nhiều
-  async delete(ids: number | number[]): Promise<void> {
+  async delete(ids: number | number[],isSoft: boolean = false): Promise<void> {
     const idArray = Array.isArray(ids) ? ids : [ids];
     const where = { id: In(idArray) };
     const options: any = { where };
@@ -72,7 +73,11 @@ export abstract class BaseService<T> {
     }
 
     try {
-      await this.repository.delete(idArray);
+      if (isSoft) {
+        await this.repository.update(idArray, {active:false} as any);
+      } else {
+        await this.repository.delete(idArray);
+      }
     } catch (error) {
       throw error;
     }

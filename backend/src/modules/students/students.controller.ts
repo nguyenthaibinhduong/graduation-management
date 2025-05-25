@@ -101,11 +101,7 @@ export class StudentsController {
   async update(
     @DecodedId(['params', 'id']) id: string,
     @Body(new ValidationPipe()) body: UpdateStudentDto,
-    @DecodedId([
-      'body',
-      '                                                                                                                                                                                                                                     ',
-    ])
-    department_id?: string,
+    @DecodedId(['body','department_id'] ) department_id?: string,
     @DecodedId(['body', 'major_id']) major_id?: string,
   ): Promise<Response<Student>> {
     try {
@@ -134,7 +130,7 @@ export class StudentsController {
     @DecodedId(['params', 'id']) id: number,
   ): Promise<Response<void>> {
     try {
-      await this.studentService.delete(id);
+      await this.studentService.deleteData(id,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -146,7 +142,7 @@ export class StudentsController {
     @DecodedId(['body', 'ids']) ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.studentService.delete(ids);
+      await this.studentService.deleteData(ids,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

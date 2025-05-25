@@ -10,6 +10,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Major } from './major.entity';
@@ -54,4 +55,11 @@ export class Student {
   
   @UpdateDateColumn()
   updated_at: Date; // Ngày cập nhật thông tin người dùng
+
+  @DeleteDateColumn()
+  deleted_at?: Date;
+
+  @Column({ default: true })
+  active: boolean;
+
 }

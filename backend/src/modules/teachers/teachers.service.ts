@@ -100,6 +100,7 @@ export class TeachersService extends BaseService<Teacher> {
       }),
       ...(department_id && { department: { id: department_id } }),
       ...(position_ids?.length > 0 && { position: { id: In(position_ids) } }),
+      active:true
     };
 
     const [items, total] = await this.repository.findAndCount({
@@ -201,4 +202,38 @@ async updateTeacher(
 
     return { success, errors };
   }
+
+  async deleteData(ids: number | number[], isSoft: boolean = false): Promise<void> {
+    const idArray = Array.isArray(ids) ? ids : [ids];
+  
+    // Lấy danh sách giáo viên kèm user
+    const teachers = await this.repository.find({
+      where: { id: In(idArray),active: true },
+      relations: ['user'],
+    });
+  
+    if (teachers.length !== idArray.length) {
+      throw new NotFoundException('One or more teachers not found');
+    }
+  
+    const userIds = teachers.map(t => t.user?.id).filter(Boolean);
+  
+    try {
+      if (isSoft) {
+        // Cập nhật trạng thái active = false
+        if (userIds.length) {
+          await this.repository.manager.update(User, { id: In(userIds) }, { active: false });
+        }
+        await this.repository.manager.update(Teacher, { id: In(idArray) }, { active: false });
+      } else {
+        if (userIds.length) {
+          await this.repository.manager.remove(User, teachers.map(t => t.user));
+        }
+        await this.repository.manager.remove(Teacher, teachers);
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+  
 }

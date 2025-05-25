@@ -120,7 +120,7 @@ export class TeachersController {
   async remove(@DecodedId(['params']) id: number): Promise<Response<void>> {
     try {
       // const decodedId = this.jwtUtilityService.decodeId(id);
-      await this.teacherService.delete(id);
+      await this.teacherService.deleteData(id,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -132,7 +132,7 @@ export class TeachersController {
     @DecodedId(['body', 'ids']) ids: number[],
   ): Promise<Response<void>> {
     try {
-      await this.teacherService.delete(ids);
+      await this.teacherService.deleteData(ids,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

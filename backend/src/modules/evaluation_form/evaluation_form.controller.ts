@@ -64,6 +64,7 @@ export class EvaluationFormController {
         search,
         limit,
         page,
+        true
       );
       return new Response(form, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
@@ -108,7 +109,7 @@ export class EvaluationFormController {
   @Delete(':id')
   async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
-      await this.EvaluationFormService.delete(id);
+      await this.EvaluationFormService.delete(id,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -120,7 +121,7 @@ export class EvaluationFormController {
    @DecodedId(['body', 'ids']) ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.EvaluationFormService.delete(ids);
+      await this.EvaluationFormService.delete(ids,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(

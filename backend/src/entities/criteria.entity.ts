@@ -36,4 +36,7 @@ export class Criteria {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column({ default: true })
+  active: boolean;
 }
