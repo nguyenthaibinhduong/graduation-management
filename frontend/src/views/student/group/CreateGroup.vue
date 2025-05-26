@@ -262,12 +262,17 @@ const createGroup = async () => {
                 name: group_name.value,
                 student_codes: [student.value?.code],
             };
-            await groupStore.addItem(param);
-            await groupStore.getMyGroup();
-            console.log(group.value);
+            if (!group.value) {
+                await groupStore.addItem(param);
+                await groupStore.getMyGroup();
+                console.log(group.value);
 
-            group_name.value = "";
-            student_code.value = "";
+                group_name.value = "";
+                student_code.value = "";
+            } else {
+                showToast('Huỷ nhóm hiện tại để tạo nhóm khác', 'info');
+            }
+
         } else {
             await inviteMember();
         }
