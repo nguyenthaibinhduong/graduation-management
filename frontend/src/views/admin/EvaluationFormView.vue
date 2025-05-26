@@ -41,7 +41,7 @@
               />
             </div>
             <span>Nội dung</span>
-            <MyInput v-model="form.description" id="content" type="editor" required />
+            <MyInput v-model="form.content" id="content" type="editor" required />
           </div>
           <div class="flex flex-col">
             <DataTableCustom

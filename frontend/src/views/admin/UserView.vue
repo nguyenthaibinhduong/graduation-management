@@ -20,7 +20,8 @@
       <div class="p-field mb-2">
         <div class="flex flex-col gap-2">
           <label for="role">Vai trò</label>
-          <InputText class="w-full" id="role" v-model="newUser.role" />
+          <MyInput type="select" class="w-full" id="role" v-model="newUser.role" :options="optionRole"
+            optionLabel="label" optionValue="id" />
         </div>
       </div>
     </div>
@@ -37,6 +38,7 @@ import { useUserStore } from "@/stores/store";
 import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import { useRouter } from "vue-router";
 import { useExcelStore } from "@/stores/excel";
+import MyInput from "@/components/form/MyInput.vue";
 
 const visibleLeft = ref(false);
 const userStore = useUserStore();
@@ -49,7 +51,7 @@ const optionRole = ref([
   { id: 'teacher', label: "Giảng viên" },
   { id: 'admin', label: "Giáo vụ - Admin" },
 
-])
+]);
 const optionColumn = ref([
   { field: "username", header: "Tên tài khoản", sortable: true },
   { field: "fullname", header: "Tên người dùng", sortable: true },
