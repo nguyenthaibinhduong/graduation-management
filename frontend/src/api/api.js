@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/auth'
+  import { useAuthStore } from '@/stores/auth'
 import { showToast } from '@/utils/toast'
 import axios from 'axios'
 import { generateHeaders } from './apiKeyEncrypt'
@@ -83,7 +83,10 @@ api.interceptors.response.use(
 
       if (Array.isArray(messages)) {
         // Nếu messages là một mảng, duyệt qua từng lỗi
-        messages.forEach((msg) => showToast(msg, 'error','Lỗi'))
+        messages.forEach((msg) => {
+          const mess = msg.startsWith('user.') ? msg.replace('user.', '') : msg
+          showToast(mess, 'error', 'Lỗi')
+        })
       } else {
         showToast( 'Dữ liệu không hợp lệ.', 'error','Lỗi')
       }

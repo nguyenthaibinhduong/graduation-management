@@ -9,23 +9,24 @@ import {
   Matches,
   IsArray,
   isNotEmpty,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 
 export class CreateTeacherDto {
-  @IsString()
-  @IsNotEmpty()
-  code: string;
+  @IsNotEmpty({ message: 'Mã giảng viên không được để trống' })
+  code: string | any;
 
-  @IsNotEmpty()
-  user: any;
+  @ValidateNested()
+  @Type(() => CreateUserDto)
+  user: CreateUserDto;
 
-  @IsNotEmpty()
   degree: string;
 
-  @IsArray()
+  @IsArray({ message: 'Vị trí không được để trống' })
   positionIds?: number[];
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Khoa không được để trống' })
   departmentId: any;
 }

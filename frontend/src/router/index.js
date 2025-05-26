@@ -73,7 +73,7 @@ const routes = [
         meta: { roles: ['admin'] },
       },
       { path: '/project-manangerment', component: ProjectView, meta: { roles: ['admin'] } },
-      { path: '/account-manangerment', component: UserView, meta: { roles: ['admin'] } },
+      { path: '/account-manangerment', component: UserView, meta: { roles: ['master-admin'] } },
       {
         path: '/department-major-manangerment',
         component: MajorDepartmentView,
@@ -133,15 +133,22 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token')
   const authStore = useAuthStore()
-
   await authStore.fetchUser()
   const userRole = authStore.user?.role
+  const is_master = authStore.user?.is_master
+
   const headersAuth = generateHeaders();
   if (to.meta.requiresAuth && !token) {
     return next('/login')
   }
-  if (to?.meta?.roles && !to.meta?.roles?.includes(userRole)) {
-    return next('/not-found')
+  if (to.meta?.roles) {
+    const roles = Array.isArray(to.meta.roles) ? to.meta.roles : [to.meta.roles]
+  
+    const isAllowed = roles.includes(userRole) || (roles.includes('master-admin') && is_master)
+  
+    if (!isAllowed) {
+      return next('/not-found')
+    }
   }
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     try {

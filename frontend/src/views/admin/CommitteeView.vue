@@ -1,8 +1,6 @@
 <template>
-  <DataTableCustom
-    title="Danh sách Hội đồng"
-    :data="committees"
-    :columns="[
+  <DataTableCustom :block="['headerBar', 'selectAll', 'action', 'import', 'export']" title="Danh sách Hội đồng"
+    :data="committees" :columns="[
       { field: 'name', header: 'Tên hội đồng', sortable: true },
       { field: 'description', header: 'Mô tả', sortable: true },
       { field: 'course.name', header: 'Học kỳ', sortable: true },
@@ -21,51 +19,20 @@
           { value: 'inactive', label: 'Ngừng hoạt động', class: 'bg-red-100 text-red-700' },
         ],
       },
-    ]"
-    :total="committeeStore?.total"
-    :loading="loading"
-    @fetch="fetchCommittee"
-    @add="addCommittee"
-    @edit="editCommittee"
-    @delete="deleteCommittee"
-    @selectOne="handleSelectData"
-    @selectAll="handleSelectData"
-    @rowSelect="getDetail"
-  />
+    ]" :total="committeeStore?.total" :loading="loading" @fetch="fetchCommittee" @add="addCommittee"
+    @edit="editCommittee" @delete="deleteCommittee" @selectOne="handleSelectData" @selectAll="handleSelectData"
+    @rowSelect="getDetail" />
 
-  <MyDrawer
-    class="w-full"
-    title="hội đồng"
-    :isEditing="isEditing"
-    :onCancel="cancelForm"
-    :onSave="saveCommittee"
-    :showImport="isImport"
-    v-model:visible="visibleLeft"
-    position="right"
-    :closable="false"
-  >
+  <MyDrawer class="w-full" title="hội đồng" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveCommittee"
+    :showImport="isImport" v-model:visible="visibleLeft" position="right" :closable="false">
     <div v-if="!isImport" class="">
       <!-- Department and Course Inputs -->
       <div class="grid grid-cols-2 gap-4">
         <h3 class="col-span-2 text-lg font-semibold">Thông tin chung</h3>
-        <MyInput
-          v-model="newCommittee.department_id"
-          title="Khoa"
-          id="department"
-          type="select"
-          :options="departments"
-          optionLabel="name"
-          optionValue="id"
-        />
-        <MyInput
-          v-model="newCommittee.course_id"
-          title="Học kỳ"
-          id="course"
-          type="select"
-          :options="courses"
-          optionLabel="name"
-          optionValue="id"
-        />
+        <MyInput v-model="newCommittee.department_id" title="Khoa" id="department" type="select" :options="departments"
+          optionLabel="name" optionValue="id" />
+        <MyInput v-model="newCommittee.course_id" title="Học kỳ" id="course" type="select" :options="courses"
+          optionLabel="name" optionValue="id" />
       </div>
 
       <!-- Name and Description Inputs -->
@@ -74,59 +41,24 @@
         <MyInput v-model="newCommittee.name" title="Tên hội đồng" id="name" type="text" />
         <MyInput v-model="newCommittee.description" title="Mô tả" id="description" type="text" />
         <MyInput v-model="newCommittee.content" title="Nội dung" id="content" type="text" />
-        <MyInput
-          v-model="newCommittee.status"
-          title="Trạng thái"
-          id="status"
-          type="select"
-          :options="statusOptions"
-          optionLabel="name"
-          optionValue="value"
-        />
+        <MyInput v-model="newCommittee.status" title="Trạng thái" id="status" type="select" :options="statusOptions"
+          optionLabel="name" optionValue="value" />
       </div>
       <!-- Projects and Teachers multiselect -->
       <div class="grid grid-cols-2 gap-4">
         <h3 class="col-span-2 text-lg font-semibold mt-5">Giáo viên và Đề tài</h3>
-        <MyInput
-          v-model="newCommittee.teacher_ids"
-          title="Giáo viên"
-          id="teachers"
-          type="multiselect"
-          :options="teachers"
-          optionLabel="displayName"
-          optionValue="id"
-          filter
-        />
-        <MyInput
-          v-model="newCommittee.project_ids"
-          title="Đề tài"
-          id="project"
-          type="multiselect"
-          :options="projects"
-          optionLabel="title"
-          optionValue="id"
-          filter
-        />
+        <MyInput v-model="newCommittee.teacher_ids" title="Giáo viên" id="teachers" type="multiselect"
+          :options="teachers" optionLabel="displayName" optionValue="id" filter />
+        <MyInput v-model="newCommittee.project_ids" title="Đề tài" id="project" type="multiselect" :options="projects"
+          optionLabel="title" optionValue="id" filter />
       </div>
       <!-- Time Start and Time End Inputs -->
       <div class="grid grid-cols-2 gap-4">
         <h3 class="col-span-2 text-lg font-semibold mt-5">Thời gian</h3>
-        <MyInput
-          v-model="newCommittee.time_start"
-          title="Thời gian bắt đầu"
-          id="time_start"
-          type="date"
-          dateFormat="dd/mm/yy"
-          placeholder="dd/mm/yyyy"
-        />
-        <MyInput
-          v-model="newCommittee.time_end"
-          title="Thời gian kết thúc"
-          id="time_end"
-          type="date"
-          dateFormat="dd/mm/yy"
-          placeholder="dd/mm/yyyy"
-        />
+        <MyInput v-model="newCommittee.time_start" title="Thời gian bắt đầu" id="time_start" type="date"
+          dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" />
+        <MyInput v-model="newCommittee.time_end" title="Thời gian kết thúc" id="time_end" type="date"
+          dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" />
       </div>
     </div>
   </MyDrawer>
@@ -147,6 +79,7 @@ import DataTableCustom from '@/components/list/DataTableCustom.vue'
 import MyInput from '@/components/form/MyInput.vue'
 import MyDrawer from '@/components/drawer/MyDrawer.vue'
 import { useRouter } from 'vue-router'
+import { showToast } from '@/utils/toast'
 
 const committeeStore = useCommitteeStore()
 const departmentStore = useDepartmentStore()
@@ -255,7 +188,41 @@ const cancelForm = () => {
 const saveCommittee = async () => {
   try {
     loading.value = true
+    if (!newCommittee.value.name || !newCommittee.value.course_id || !newCommittee.value.department_id) {
+      showToast('Vui lòng điền đầy đủ thông tin: tên, khoá học và khoa.', 'error')
+      return
+    }
 
+    if (!newCommittee.value.teacher_ids.length || !newCommittee.value.project_ids.length) {
+      showToast('Vui lòng chọn ít nhất một giảng viên và một đề tài.', 'error')
+      return
+    }
+
+    if (newCommittee.value.teacher_ids.length > 10) {
+      showToast('Ủy ban tối đa chỉ có 10 giảng viên.', 'error')
+      return
+    }
+
+    if (newCommittee.value.project_ids.length > 10) {
+      showToast('Ủy ban tối đa chỉ có 10 đề tài.', 'error')
+      return
+    }
+
+    if (!newCommittee.value.time_start || !newCommittee.value.time_end) {
+      showToast('Vui lòng chọn thời gian bắt đầu và kết thúc.', 'error')
+      return
+    }
+
+    if (newCommittee.value.time_start > newCommittee.value.time_end) {
+      showToast('Thời gian bắt đầu phải trước thời gian kết thúc.', 'error')
+      return
+    }
+
+    const now = new Date()
+    if (newCommittee.value.time_start < now || newCommittee.value.time_end < now) {
+      showToast('Thời gian bắt đầu và kết thúc phải trong tương lai.', 'error')
+      return
+    }
     newCommittee.value.total_teacher = newCommittee.value.teacher_ids.length
     newCommittee.value.total_project = newCommittee.value.project_ids.length
 

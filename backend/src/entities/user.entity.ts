@@ -68,10 +68,10 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date; // Ngày cập nhật thông tin người dùng
 
-  @DeleteDateColumn()
-  deleted_at?: Date;
-
+ 
   @Column({ default: true })
   active: boolean;
 
+  @Column({ default: false })
+  is_master: boolean;
 }

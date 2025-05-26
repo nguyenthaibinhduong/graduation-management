@@ -10,28 +10,14 @@
         <div class="flex items-center gap-3">
           <!-- Desktop menu -->
           <div class="hidden md:flex items-center gap-2">
-            <Button
-              @click="router.push('/profile')"
-              type="button"
-              aria-label="Profile Menu"
-              class="p-button-rounded p-button-text text-blue-800"
-              :title="'Profile Menu'"
-            >
-              <img
-                v-if="authStore.user?.avatar"
-                :src="authStore.user?.avatar"
-                alt="User Avatar"
-                class="w-8 h-8 rounded-full object-cover"
-              />
+            <Button @click="router.push('/profile')" type="button" aria-label="Profile Menu"
+              class="p-button-rounded p-button-text text-blue-800" :title="'Profile Menu'">
+              <img v-if="authStore.user?.avatar" :src="authStore.user?.avatar" alt="User Avatar"
+                class="w-8 h-8 rounded-full object-cover" />
               <h6 class="font-medium m-0">{{ authStore.user?.fullname }}</h6>
             </Button>
-            <Button
-              @click="handleLogout"
-              severity="danger"
-              variant="outlined"
-              icon="pi pi-sign-out"
-              aria-label="Logout"
-            ></Button>
+            <Button @click="handleLogout" severity="danger" variant="outlined" icon="pi pi-sign-out"
+              aria-label="Logout"></Button>
           </div>
         </div>
       </template>
@@ -68,13 +54,13 @@ const router = useRouter()
 onMounted(async () => {
   await authStore.fetchUser()
   const role = authStore.user?.role
-
+  const is_master = authStore.user?.is_master
   if (role === 'admin') {
     items.value.push(
-      {
+      is_master ? {
         label: 'Tài khoản',
         route: '/account-manangerment',
-      },
+      } : {},
       {
         label: 'Sinh viên',
         route: '/student-manangerment',
