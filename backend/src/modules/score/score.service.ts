@@ -345,7 +345,7 @@ export class ScoreService extends BaseService<Score> {
 
         if (groupedScores[type]) {
           groupedScores[type].totalWeightedScore += weight * score;
-          groupedScores[type].totalWeight = 100;
+          groupedScores[type].totalWeight += weight;
           groupedScores[type].count++;
         }
       });
@@ -601,13 +601,24 @@ export class ScoreService extends BaseService<Score> {
   async getScoreDetailByStudentId(
     studentId: number,
     teacherType?: 'advisor' | 'reviewer' | 'committee',
+    userId?: number,
   ): Promise<any> {
     try {
+      const user = await this.check_exist_with_data(
+        User,
+        {
+          where: { id: userId, role: UserRole.TEACHER },
+          relations: ['teacher'],
+        },
+        null,
+      );
+      const teacherId = user?.teacher?.id;
       // Get overall scores by teacher type
       const scoresByType = await this.calculateScoresByTeacherType(studentId);
       const weightedScoreResult =
         await this.calculateWeightedTotalScore(studentId);
-      // Get score details
+
+      // Get all score details for the student
       const scoreDetails = await this.scoreDetailRepository.find({
         where: { student: { id: studentId } },
         relations: ['criteria', 'teacher', 'teacher.user'],
@@ -675,17 +686,26 @@ export class ScoreService extends BaseService<Score> {
         });
       }
 
-      // Compose the final result
-
-      // Compose isLocked per teacherType
+      // Compose isLocked per teacherType and teacherId
       const isLocked: Record<string, boolean> = {
-        advisor:
-          (groupedScoreDetails.advisor || []).some((d) => d.isLocked) || false,
-        reviewer:
-          (groupedScoreDetails.reviewer || []).some((d) => d.isLocked) || false,
-        committee:
-          (groupedScoreDetails.committee || []).some((d) => d.isLocked) ||
-          false,
+        advisor: teacherId
+          ? (groupedScoreDetails.advisor || [])
+              .filter((d) => d.teacher?.id === teacherId)
+              .some((d) => d.isLocked) || false
+          : (groupedScoreDetails.advisor || []).some((d) => d.isLocked) ||
+            false,
+        reviewer: teacherId
+          ? (groupedScoreDetails.reviewer || [])
+              .filter((d) => d.teacher?.id === teacherId)
+              .some((d) => d.isLocked) || false
+          : (groupedScoreDetails.reviewer || []).some((d) => d.isLocked) ||
+            false,
+        committee: teacherId
+          ? (groupedScoreDetails.committee || [])
+              .filter((d) => d.teacher?.id === teacherId)
+              .some((d) => d.isLocked) || false
+          : (groupedScoreDetails.committee || []).some((d) => d.isLocked) ||
+            false,
       };
 
       const fullResult = {
@@ -700,6 +720,7 @@ export class ScoreService extends BaseService<Score> {
           'committee',
         ],
       };
+
       if (teacherType) {
         const filtered: any = {
           weightedTotal: fullResult.weightedTotal,
@@ -708,7 +729,11 @@ export class ScoreService extends BaseService<Score> {
           missingEvaluations: fullResult.missingEvaluations,
           isLocked: fullResult.isLocked[teacherType],
         };
-        filtered[teacherType] = fullResult[teacherType] ?? null;
+        filtered[teacherType] = teacherId
+          ? (fullResult[teacherType] || []).filter(
+              (d) => d.teacher?.id === teacherId,
+            )
+          : (fullResult[teacherType] ?? null);
         filtered[`${teacherType}_overall`] =
           fullResult[`${teacherType}_overall`] ?? null;
         return filtered;
@@ -772,6 +797,8 @@ export class ScoreService extends BaseService<Score> {
       groupScore += score.weightedTotal;
     }
     groupScore = groupScore / members.length;
+    groupScore = Number(groupScore.toFixed(2));
+
     return { ...group, groupScore, isComplete: true };
   }
 

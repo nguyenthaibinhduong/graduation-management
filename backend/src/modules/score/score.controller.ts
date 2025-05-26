@@ -257,7 +257,6 @@ export class ScoreController {
       const userId = request.user?.id;
       const userRole = request.user?.role;
       let scoreDetails: any;
-
       //Student
       if (userRole === 'student') {
         if (studentId !== userId) {
@@ -277,6 +276,7 @@ export class ScoreController {
         scoreDetails = await this.scoreService.getScoreDetailByStudentId(
           studentId,
           teacherType,
+          userId,
         );
       }
       // Admin
@@ -315,7 +315,7 @@ export class ScoreController {
           throw new HttpException(
             {
               statusCode: HttpStatus.ERROR,
-              message: 'Bạn không có quyền xem điểm này',
+              message: 'Bạn chưa có nhóm hoặc không có quyền xem điểm này',
             },
             HttpStatus.ERROR,
           );
