@@ -4,14 +4,14 @@
         <p class="text-gray-600 mb-4 text-center">Chào mừng bạn đến với trang tổng quan của hệ thống quản lý khóa
             luận.</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-4 rounded-xl ">
                 <Chart type="bar" :data="barData" :options="chartOptions" />
             </div>
             <div class="bg-white p-4 rounded-xl ">
                 <Chart type="pie" :data="pieData" :options="chartOptions" />
             </div>
-        </div>
+        </div> -->
 
     </div>
     <StudentProjectDoing />

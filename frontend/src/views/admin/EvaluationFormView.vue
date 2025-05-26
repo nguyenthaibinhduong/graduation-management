@@ -15,8 +15,9 @@
                 <section class="grid grid-cols-2 gap-6 py-4">
                     <div class="flex flex-col gap-y-2">
                         <MyInput v-model="form.title" id="title" title="Tiêu đề phiếu" required />
-                        <span>Tiêu chí được chọn</span>
-                        <div class="w-full grid grid-cols-4 gap-2 bg-slate-50  p-2 rounded-lg h-[50px]">
+                        <span v-if="!isEditing">Tiêu chí được chọn</span>
+                        <div v-if="!isEditing"
+                            class="w-full grid grid-cols-4 gap-2 bg-slate-50  p-2 rounded-lg h-[50px]">
 
                             <Button v-for="criteria in selectedCriteria" class="btn-submit" :label="criteria?.name" />
                         </div>
@@ -24,7 +25,7 @@
                         <MyInput v-model="form.content" id="content" type="editor" required />
 
                     </div>
-                    <div class="flex flex-col">
+                    <div v-if="!isEditing" class="flex flex-col">
 
                         <DataTableCustom :block="['toolbar', 'action']" title=" Danh sách tiêu chí đánh giá"
                             :data="criteriaOptions" :columns="[
@@ -144,6 +145,7 @@ function editEvaluation(row) {
     resetForm();
     isEditing.value = true;
     editedId.value = row.id;
+    form.value = row;
     visibleLeft.value = true;
 }
 

@@ -58,13 +58,11 @@
                 <Button v-if="
                   !memberWeightedScores[member.id]?.isLocked &&
                   memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
-                " label="Chỉnh sửa" size="small" icon="pi pi-pencil" severity="secondary"
-                  @click="editScore(member)" />
+                " label="Chỉnh sửa" size="small" icon="pi pi-pencil" severity="secondary" @click="editScore(member)" />
                 <Button v-if="
                   memberWeightedScores[member.id]?.isLocked &&
                   memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
-                " label="Xem chi tiết điểm" size="small" icon="pi pi-eye" severity="info"
-                  @click="viewScore(member)" />
+                " label="Xem chi tiết điểm" size="small" icon="pi pi-eye" severity="info" @click="viewScore(member)" />
               </div>
 
               <p class="text-sm text-gray-500">MSSV: {{ member?.code }}</p>
@@ -106,7 +104,7 @@
                 (
                 <span>{{
                   teacherRoleViMap[selectedGroup.teacherRole] || selectedGroup.teacherRole
-                  }}</span>)
+                }}</span>)
               </p>
 
               <!-- Điểm của SV Accordion -->
@@ -165,7 +163,6 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useScoreStore } from '@/stores/store'
 import SelectGroupButton from '@/components/button/SelectGroupButton.vue'
-import g from 'file-saver'
 
 const scoreStore = useScoreStore()
 const authStore = useAuthStore()
@@ -269,4 +266,7 @@ const viewScore = (member) => {
     memberWeightedScores.value[member.id]?.[selectedGroup.value.teacherRole] || []
   showScoreModal.value = true
 }
+
+
+
 </script>

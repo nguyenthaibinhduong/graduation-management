@@ -1,7 +1,7 @@
 <template>
     <SelectGroupButton :options="buttonOptions" />
 
-    <DataTableCustom :block="['toolbar', 'headerBar', 'selectAll', 'action']" title="Danh sách đề tài - Admin"
+    <DataTableCustom :block="['headerBar', 'selectAll', 'action', 'add', 'import']" title="Danh sách đề tài - Admin"
         :data="projects" :columns="[
             { field: 'title', header: 'Tên đề tài', },
             { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
@@ -18,8 +18,29 @@
                     { value: 'public', label: 'Đã công bố', class: 'bg-violet-100 text-violet-700' }
                 ]
             }
-        ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @rowSelect="getDetail" />
+        ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" @rowSelect="getDetail"
+        @export="handleOpenDialog" />
+    <ImportExportDialog v-model:visible="openDialog" :type="typeDialog" @hide="resetDialog" @export="exportData"
+        :isShowUpload="fasle">
+        <template #import>
 
+        </template>
+        <template #export>
+            <!-- UI export tuỳ chỉnh -->
+            <div class="w-full pb-2">
+                <SelectGroupButton :options="buttonOptions" />
+                <DataTableCustom :block="['toolbar', 'selectAll', 'headerBar', 'selectAll', 'action']"
+                    title="Danh sách đề tài" :data="projects" :columns="[
+                        { field: 'title', header: 'Tên đề tài' },
+                        { field: 'description', header: 'Mô tả ngắn đề tài' },
+                        { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
+                        { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
+                        { field: 'course.name', header: 'Học kỳ' },
+                        { field: 'status', header: 'Trạng thái' }
+                    ]" :total="projectStore?.total" :loading="loading" @fetch="fetchProject" />
+            </div>
+        </template>
+    </ImportExportDialog>
 
 
 </template>
@@ -30,6 +51,8 @@ import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import { useRouter } from "vue-router";
 import { Button } from "primevue";
 import SelectGroupButton from "@/components/button/SelectGroupButton.vue";
+import { useExcelStore } from "@/stores/excel";
+import ImportExportDialog from "@/components/drawer/ImportExportDialog.vue";
 
 
 const visibleLeft = ref(false);
@@ -128,5 +151,40 @@ const handleSelectData = (ids) => {
 };
 
 
+const openDialog = ref(false)
+const typeDialog = ref('export')
+
+
+
+const handleOpenDialog = (type = 'export') => {
+    openDialog.value = true
+    typeDialog.value = type
+}
+
+// ĐÓNG DIALOG
+const resetDialog = () => {
+    openDialog.value = false
+
+}
+
+const excelStore = useExcelStore();
+const optionColumn = ref([
+    { field: 'title', header: 'Tên đề tài' },
+    { field: 'description', header: 'Mô tả ngắn đề tài' },
+    { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
+    { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
+    { field: 'content', header: 'nội dung' },
+    { field: 'course.name', header: 'Học kỳ' },
+    { field: 'status', header: 'Trạng thái' }
+])
+
+// EXPORT THEO COLUMN CỦA BẢNG
+const exportData = () => {
+    excelStore.exportToExcel({
+        data: projects.value,
+        columns: optionColumn.value,
+        fileName: 'DanhSachDeTai.xlsx',
+    })
+}
 
 </script>

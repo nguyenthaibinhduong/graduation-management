@@ -18,7 +18,7 @@ export class ApiKeyMiddleware implements NestMiddleware {
     const maxDiff = 5 * 60 * 1000; // 5 phút
 
     if (timeDiff > maxDiff) {
-      throw new UnauthorizedException('Request expired');
+      throw new UnauthorizedException('Hết thời gian phản hồi. Vui lòng tải lại trang');
     }
 
     const apiSecret = process.env.API_SECRET;
