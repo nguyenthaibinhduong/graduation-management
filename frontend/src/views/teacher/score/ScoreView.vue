@@ -68,7 +68,7 @@
               <div class="w-full flex justify-between">
                 <p class="font-medium">{{ member?.user?.fullname }}</p>
                 <!-- Hiển thị nút Chấm điểm hoặc Chỉnh sửa dựa trên trạng thái -->
-                <<<<<<< HEAD
+
                 <Button
                   v-if="
                     (memberWeightedScores[member.id] &&
@@ -102,34 +102,11 @@
                 />
                 <Button
                   v-if="
-                    memberWeightedScores[member.id]?.isLocked &&
-                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
-                  "
-                  label="Xem chi tiết điểm"
-                  size="small"
-                  icon="pi pi-eye"
-                  severity="info"
-                  @click="viewScore(member)"
-                />
-                =======
-                <Button
-                  v-if="
-                    (memberWeightedScores[member.id] &&
-                      memberWeightedScores[member.id]?.missingEvaluations &&
-                      memberWeightedScores[member.id].missingEvaluations.includes(
-                        selectedGroup?.teacherRole
-                      )) ||
-                    memberWeightedScores[member.id]?.weighted === null
-                  "
-                  label="Chấm điểm"
-                  size="small"
-                  icon="pi pi-pencil"
-                  @click="scoreStudent(member)"
-                />
-                <Button
-                  v-if="
                     !memberWeightedScores[member.id]?.isLocked &&
-                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] !== null &&
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] !== undefined &&
+                    (!Array.isArray(memberWeightedScores[member.id]?.[selectedGroup.teacherRole]) ||
+                      memberWeightedScores[member.id]?.[selectedGroup.teacherRole].length > 0)
                   "
                   label="Chỉnh sửa"
                   size="small"
@@ -148,7 +125,6 @@
                   severity="info"
                   @click="viewScore(member)"
                 />
-                >>>>>>> 35b3e37221f42a7aaef3da8d427934cc74fc41fa
               </div>
 
               <p class="text-sm text-gray-500">MSSV: {{ member?.code }}</p>
