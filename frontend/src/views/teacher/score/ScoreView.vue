@@ -1,30 +1,48 @@
 <template>
   <!-- Place this Dialog at the root of your template -->
   <Dialog v-model:visible="showScoreModal" header="Chi tiết điểm" :style="{ width: '700px' }">
-    <DataTableCustom v-if="selectedScoreDetails.length" :data="selectedScoreDetails"
-      :block="['toolbar', 'headerBar', 'selectAll', 'action', 'pagginate']" :columns="[
+    <DataTableCustom
+      v-if="selectedScoreDetails.length"
+      :data="selectedScoreDetails"
+      :block="['toolbar', 'headerBar', 'selectAll', 'action', 'pagginate']"
+      :columns="[
         { field: 'criteria.name', header: 'Tiêu chí' },
         {
           field: 'criteria.content',
           header: 'Nội dung',
-          type: 'html'
+          type: 'html',
         },
         { field: 'criteria.max_score', header: 'Điểm tối đa' },
         { field: 'criteria.weightPercent', header: 'Trọng số (%)' },
         { field: 'scoreValue', header: 'Điểm' },
         { field: 'comment', header: 'Nhận xét' },
-      ]" class="w-full p-datatable-sm" stripedRows />
+      ]"
+      class="w-full p-datatable-sm"
+      stripedRows
+    />
     <div v-else class="text-gray-500 italic">Chưa có đánh giá</div>
   </Dialog>
   <div class="w-full space-y-4">
     <!-- Nút chức năng -->
     <SelectGroupButton :options="buttonOptions" />
     <!-- Bảng dữ liệu nhóm -->
-    <DataTableCustom title="Danh sách nhóm" :block="['toolbar', 'headerBar', 'selectAll', 'action']" :data="groups"
-      :total="groups.length" :columns="dataColumns" @rowSelect="onSelectGroup" />
+    <DataTableCustom
+      title="Danh sách nhóm"
+      :block="['toolbar', 'headerBar', 'selectAll', 'action']"
+      :data="groups"
+      :total="groups.length"
+      :columns="dataColumns"
+      @rowSelect="onSelectGroup"
+    />
     <!-- Drawer hiển thị chi tiết nhóm -->
-    <Drawer v-model:visible="drawerVisible" position="right" class="w-1/2" @close="onCancel" :dismissable="true"
-      :closeOnEscape="true">
+    <Drawer
+      v-model:visible="drawerVisible"
+      position="right"
+      class="w-1/2"
+      @close="onCancel"
+      :dismissable="true"
+      :closeOnEscape="true"
+    >
       <template #header>
         <div class="flex justify-between items-center w-full">
           <div class="flex items-center gap-4">
@@ -41,70 +59,152 @@
 
         <h3 class="font-semibold text-base mt-4">Danh sách thành viên</h3>
         <ul class="space-y-3">
-          <li v-for="member in selectedGroup?.students" :key="member?.id"
-            class="p-3 border rounded-md flex justify-between items-center">
+          <li
+            v-for="member in selectedGroup?.students"
+            :key="member?.id"
+            class="p-3 border rounded-md flex justify-between items-center"
+          >
             <div class="w-full">
               <div class="w-full flex justify-between">
                 <p class="font-medium">{{ member?.user?.fullname }}</p>
                 <!-- Hiển thị nút Chấm điểm hoặc Chỉnh sửa dựa trên trạng thái -->
-                <Button v-if="
-                  (memberWeightedScores[member.id] &&
-                    memberWeightedScores[member.id]?.missingEvaluations &&
-                    memberWeightedScores[member.id].missingEvaluations.includes(
-                      selectedGroup?.teacherRole
-                    )) ||
-                  memberWeightedScores[member.id]?.weighted === null
-                " label="Chấm điểm" size="small" icon="pi pi-pencil" @click="scoreStudent(member)" />
-                <Button v-if="
-                  !memberWeightedScores[member.id]?.isLocked &&
-                  memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
-                " label="Chỉnh sửa" size="small" icon="pi pi-pencil" severity="secondary" @click="editScore(member)" />
-                <Button v-if="
-                  memberWeightedScores[member.id]?.isLocked &&
-                  memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
-                " label="Xem chi tiết điểm" size="small" icon="pi pi-eye" severity="info" @click="viewScore(member)" />
+
+                <Button
+                  v-if="
+                    (memberWeightedScores[member.id] &&
+                      memberWeightedScores[member.id]?.missingEvaluations &&
+                      memberWeightedScores[member.id].missingEvaluations.includes(
+                        selectedGroup?.teacherRole
+                      )) ||
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] === null ||
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] === undefined ||
+                    (Array.isArray(memberWeightedScores[member.id]?.[selectedGroup.teacherRole]) &&
+                      memberWeightedScores[member.id]?.[selectedGroup.teacherRole].length === 0)
+                  "
+                  label="Chấm điểm"
+                  size="small"
+                  icon="pi pi-pencil"
+                  @click="scoreStudent(member)"
+                />
+                <Button
+                  v-if="
+                    !memberWeightedScores[member.id]?.isLocked &&
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] !== null &&
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] !== undefined &&
+                    (!Array.isArray(memberWeightedScores[member.id]?.[selectedGroup.teacherRole]) ||
+                      memberWeightedScores[member.id]?.[selectedGroup.teacherRole].length > 0)
+                  "
+                  label="Chỉnh sửa"
+                  size="small"
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  @click="editScore(member)"
+                />
+                <Button
+                  v-if="
+                    !memberWeightedScores[member.id]?.isLocked &&
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] !== null &&
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] !== undefined &&
+                    (!Array.isArray(memberWeightedScores[member.id]?.[selectedGroup.teacherRole]) ||
+                      memberWeightedScores[member.id]?.[selectedGroup.teacherRole].length > 0)
+                  "
+                  label="Chỉnh sửa"
+                  size="small"
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  @click="editScore(member)"
+                />
+                <Button
+                  v-if="
+                    memberWeightedScores[member.id]?.isLocked &&
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
+                  "
+                  label="Xem chi tiết điểm"
+                  size="small"
+                  icon="pi pi-eye"
+                  severity="info"
+                  @click="viewScore(member)"
+                />
               </div>
 
               <p class="text-sm text-gray-500">MSSV: {{ member?.code }}</p>
               <p class="text-sm">
                 Trạng thái:
-                <span v-if="
-                  memberWeightedScores[member.id] !== undefined &&
-                  memberWeightedScores[member.id] !== null
-                ">
+                <span
+                  v-if="
+                    memberWeightedScores[member.id] !== undefined &&
+                    memberWeightedScores[member.id] !== null
+                  "
+                >
                   <span v-if="memberWeightedScores[member.id]?.missingEvaluations">
-                    <span v-if="
-                      !memberWeightedScores[member.id].missingEvaluations.includes(
-                        selectedGroup?.teacherRole
-                      )
-                    " class="text-green-500">
+                    <span
+                      v-if="
+                        !memberWeightedScores[member.id].missingEvaluations.includes(
+                          selectedGroup?.teacherRole
+                        ) &&
+                        memberWeightedScores[member.id]?.isLocked &&
+                        memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
+                      "
+                      class="text-green-500"
+                    >
                       Đã chấm điểm
                     </span>
-                    <span v-else class="text-red-500"> Chưa chấm điểm </span>
+                    <span
+                      v-if="
+                        (memberWeightedScores[member.id] &&
+                          memberWeightedScores[member.id]?.missingEvaluations &&
+                          memberWeightedScores[member.id].missingEvaluations.includes(
+                            selectedGroup?.teacherRole
+                          )) ||
+                        memberWeightedScores[member.id]?.[selectedGroup.teacherRole] === null ||
+                        memberWeightedScores[member.id]?.[selectedGroup.teacherRole] ===
+                          undefined ||
+                        (Array.isArray(
+                          memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
+                        ) &&
+                          memberWeightedScores[member.id]?.[selectedGroup.teacherRole].length === 0)
+                      "
+                      class="text-red-500"
+                    >
+                      Chưa chấm điểm
+                    </span>
                   </span>
-                  <span v-else class="text-red-500"> Chưa chấm điểm </span>
+                  <!-- <span v-else class="text-red-500"> Chưa chấm điểm </span> -->
                 </span>
               </p>
               <!-- Only show score for current teacherRole -->
-              <p v-if="
-                memberWeightedScores[member.id]?.[selectedGroup.teacherRole + '_overall'] &&
-                selectedGroup?.teacherRole
-              " class="text-sm">
+              <p
+                v-if="
+                  memberWeightedScores[member.id]?.[selectedGroup.teacherRole + '_overall'] &&
+                  selectedGroup?.teacherRole
+                "
+                class="text-sm"
+              >
                 Điểm:
                 <span class="font-semibold">
                   {{
-                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole + '_overall'] !==
-                      null &&
-                      memberWeightedScores[member.id]?.[selectedGroup.teacherRole + '_overall'] !==
-                      undefined
-                      ? memberWeightedScores[member.id]?.[selectedGroup.teacherRole + '_overall']
-                      : 'Chưa có điểm'
+                    (memberWeightedScores[member.id] &&
+                      memberWeightedScores[member.id]?.missingEvaluations &&
+                      memberWeightedScores[member.id].missingEvaluations.includes(
+                        selectedGroup?.teacherRole
+                      )) ||
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] === null ||
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] === undefined ||
+                    (Array.isArray(memberWeightedScores[member.id]?.[selectedGroup.teacherRole]) &&
+                      memberWeightedScores[member.id]?.[selectedGroup.teacherRole].length === 0) ||
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole + '_overall'] ===
+                      undefined ||
+                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole + '_overall'] ===
+                      null
+                      ? 'Chưa có điểm'
+                      : memberWeightedScores[member.id]?.[selectedGroup.teacherRole + '_overall']
                   }}
                 </span>
                 (
                 <span>{{
                   teacherRoleViMap[selectedGroup.teacherRole] || selectedGroup.teacherRole
-                }}</span>)
+                }}</span
+                >)
               </p>
 
               <!-- Điểm của SV Accordion -->
@@ -118,11 +218,11 @@
                         {{
                           Array.isArray(memberWeightedScores[member.id].missingEvaluations)
                             ? memberWeightedScores[member.id].missingEvaluations
-                              .map((role) => teacherRoleViMap[role] || role)
-                              .join(', ')
+                                .map((role) => teacherRoleViMap[role] || role)
+                                .join(', ')
                             : teacherRoleViMap[
-                            memberWeightedScores[member.id].missingEvaluations
-                            ] || memberWeightedScores[member.id].missingEvaluations
+                                memberWeightedScores[member.id].missingEvaluations
+                              ] || memberWeightedScores[member.id].missingEvaluations
                         }}
                       </span>
                     </div>
@@ -266,7 +366,4 @@ const viewScore = (member) => {
     memberWeightedScores.value[member.id]?.[selectedGroup.value.teacherRole] || []
   showScoreModal.value = true
 }
-
-
-
 </script>
