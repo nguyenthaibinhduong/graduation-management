@@ -259,17 +259,18 @@ export class ScoreController {
       let scoreDetails: any;
       //Student
       if (userRole === 'student') {
-        if (studentId !== userId) {
-          throw new HttpException(
-            {
-              statusCode: HttpStatus.ERROR,
-              message: 'Bạn không có quyền xem điểm này',
-            },
-            HttpStatus.ERROR,
-          );
-        }
+        // if (studentId !== userId) {
+        //   throw new HttpException(
+        //     {
+        //       statusCode: HttpStatus.ERROR,
+        //       message: 'Bạn không có quyền xem điểm này',
+        //     },
+        //     HttpStatus.ERROR,
+        //   );
+        // }
+
         scoreDetails =
-          await this.scoreService.getScoreDetailByStudentId(userId);
+          await this.scoreService.getScoreDetailByStudentId(studentId);
       }
       // Teacher
       else if (userRole === 'teacher') {
@@ -309,7 +310,7 @@ export class ScoreController {
       if (userRole === 'student') {
         const groupScore = await this.scoreService.getGroupScore(groupId);
         const isStudentInGroup = groupScore.students.some(
-          (student) => student.id === userId,
+          (student) => student.code === request.user?.username,
         );
         if (!isStudentInGroup) {
           throw new HttpException(

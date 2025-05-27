@@ -124,7 +124,7 @@ const fetchScore = async () => {
   scoreLoading.value = true
   scoreError.value = ''
   try {
-    const response = await scoreStore.fetchStudentScoreDetails(authStore?.user?.id)
+    const response = await scoreStore.fetchStudentScoreDetails(authStore?.user?.student?.id)
     score.value = response.data ? response.data : response
   } catch (err) {
     scoreError.value = 'Không thể lấy dữ liệu điểm.'
