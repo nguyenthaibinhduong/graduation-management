@@ -44,7 +44,7 @@
           <div class="grid grid-cols-2 gap-6">
             <MyInput v-model="newCriteria.name" id="name" title="Tên tiêu chí" />
             <MyInput v-model="newCriteria.max_score" id="max_score" title="Điểm tối đa" type="number" />
-            <MyInput v-model="newCriteria.step" id="step" title="Bước nhảy" />
+            <MyInput v-model="newCriteria.step" id="step" title="Bước nhảy" type="number" />
             <MyInput v-model="newCriteria.weightPercent" id="weightPercent" prefix="%" title="Tỉ trọng (%)"
               type="number" />
           </div>
@@ -81,7 +81,7 @@ const form = ref({
   criteria_ids: [],
 })
 const newCriteria = ref({
-  title: '',
+  name: '',
   content: '',
   max_score: null,
   step: null,
@@ -141,19 +141,83 @@ async function saveEvaluation() {
   if (isEditing.value) {
 
     await evaluationStore.updateItem(editedId.value, payload)
+    cancelForm()
   } else {
     await evaluationStore.addItem(payload)
+    cancelForm()
   }
-  cancelForm()
+
 }
 
 async function saveCriteria() {
+  if (!newCriteria.value.name) {
+    showToast('Vui lòng điền tên thông tin tiêu chí.', 'error')
+    return
+  }
+  if (!newCriteria.value.max_score) {
+    showToast('Vui lòng điền điểm tối đa.', 'error')
+    return
+  }
+  if (!newCriteria.value.step) {
+    showToast('Vui lòng điền bước nhảy.', 'error')
+    return
+  }
+  if (!newCriteria.value.weightPercent) {
+    showToast('Vui lòng điền tỉ trọng.', 'error')
+    return
+  }
+  if (newCriteria.value.weightPercent < 0 || newCriteria.value.weightPercent > 100) {
+    showToast('Tỉ trọng phải nằm trong khoảng từ 0 đến 100.', 'error')
+    return
+  }
+  if (newCriteria.value.max_score <= 0) {
+    showToast('Điểm tối đa phải lớn hơn 0.', 'error')
+    return
+  }
+  if (newCriteria.value.step <= 0) {
+    showToast('Bước nhảy phải lớn hơn 0.', 'error')
+    return
+  }
+  if (newCriteria.value.max_score % newCriteria.value.step !== 0) {
+    showToast('Điểm tối đa phải chia hết cho bước nhảy.', 'error')
+    return
+  }
+  if (newCriteria.value.weightPercent % 1 !== 0) {
+    showToast('Tỉ trọng phải là số nguyên.', 'error')
+    return
+  }
+  if (newCriteria.value.weightPercent < 0 || newCriteria.value.weightPercent > 100) {
+    showToast('Tỉ trọng phải nằm trong khoảng từ 0 đến 100.', 'error')
+    return
+  }
+  if (newCriteria.value.max_score <= 0) {
+    showToast('Điểm tối đa phải lớn hơn 0.', 'error')
+    return
+  }
+  if (newCriteria.value.step <= 0) {
+    showToast('Bước nhảy phải lớn hơn 0.', 'error')
+    return
+  }
+  if (newCriteria.value.max_score % newCriteria.value.step !== 0) {
+    showToast('Điểm tối đa phải chia hết cho bước nhảy.', 'error')
+    return
+  }
+  if (newCriteria.value.weightPercent % 1 !== 0) {
+    showToast('Tỉ trọng phải là số nguyên.', 'error')
+    return
+  }
+  if (newCriteria.value.weightPercent < 0 || newCriteria.value.weightPercent > 100) {
+    showToast('Tỉ trọng phải nằm trong khoảng từ 0 đến 100.', 'error')
+    return
+  }
+
+
   const payload = {
     ...newCriteria.value,
   }
   await criteriaStore.addItem(payload)
   newCriteria.value = {
-    title: '',
+
     content: '',
     max_score: null,
     step: null,
