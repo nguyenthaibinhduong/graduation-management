@@ -98,82 +98,34 @@ const addUser = () => {
   visibleLeft.value = true;
 };
 const saveUser = async () => {
-  if (!newUser.value.username || !newUser.value.password || !newUser.value.role) {
-    showToast("error", "Vui lòng điền đầy đủ thông tin");
-    return;
-  }
+
   if (isEditing.value && editedUserId.value === null) {
-    showToast("error", "Không tìm thấy ID người dùng để cập nhật");
+    showToast("Không tìm thấy ID người dùng để chỉnh sửa", "error");
     return;
   }
 
-  if (newUser.value.role === "") {
-    showToast("error", "Vui lòng chọn vai trò");
+
+
+  if (isEditing.value && editedUserId.value === newUser.value.username) {
+    showToast("Không có thay đổi nào để lưu", "info");
     return;
   }
-  if (newUser.value.username.length < 6) {
-    showToast("error", "Tên tài khoản phải có ít nhất 6 ký tự");
+  if (isEditing.value && newUser.value.username === newUser.value.password) {
+    showToast("Tên tài khoản và mật khẩu không được giống nhau", "error");
     return;
   }
-  if (newUser.value.password.length < 6) {
-    showToast("error", "Mật khẩu phải có ít nhất 6 ký tự");
-    return;
-  }
-  if (newUser.value.username.length > 20) {
-    showToast("error", "Tên tài khoản không được vượt quá 20 ký tự");
-    return;
-  }
-  if (newUser.value.password.length > 20) {
-    showToast("error", "Mật khẩu không được vượt quá 20 ký tự");
-    return;
-  }
-  if (newUser.value.username.includes(" ")) {
-    showToast("error", "Tên tài khoản không được chứa khoảng trắng");
-    return;
-  }
-  if (newUser.value.password.includes(" ")) {
-    showToast("error", "Mật khẩu không được chứa khoảng trắng");
-    return;
-  }
-  if (newUser.value.username.includes("@")) {
-    showToast("error", "Tên tài khoản không được chứa ký tự '@'");
-    return;
-  }
-  if (newUser.value.password.includes("@")) {
-    showToast("error", "Mật khẩu không được chứa ký tự '@'");
-    return;
-  }
-  if (newUser.value.username.includes("!")) {
-    showToast("error", "Tên tài khoản không được chứa ký tự '!'");
-    return;
-  }
-  if (newUser.value.password.includes("!")) {
-    showToast("error", "Mật khẩu không được chứa ký tự '!'");
-    return;
-  }
-  if (newUser.value.username.includes("#")) {
-    showToast("error", "Tên tài khoản không được chứa ký tự '#'");
-    return;
-  }
-  if (newUser.value.password.includes("#")) {
-    showToast("error", "Mật khẩu không được chứa ký tự '#'");
-    return;
-  }
-  if (newUser.value.username.includes("$")) {
-    showToast("error", "Tên tài khoản không được chứa ký tự '$'");
-    return;
-  }
-  if (newUser.value.password.includes("$")) {
-    showToast("error", "Mật khẩu không được chứa ký tự '$'");
-    return;
-  }
-  if (newUser.value.username.includes("%")) {
-    showToast("error", "Tên tài khoản không được chứa ký tự '%'");
+  if (isEditing.value && newUser.value.username === "admin") {
+    showToast("Không thể chỉnh sửa tài khoản admin", "error");
     return;
   }
   if (isEditing.value) {
+
     await userStore.updateItem(editedUserId.value, newUser.value);
   } else {
+    if (!newUser.value.username || !newUser.value.password || !newUser.value.role) {
+      showToast("Vui lòng điền đầy đủ thông tin", "error");
+      return;
+    }
     await userStore.addItem(newUser.value);
   }
   cancelForm();

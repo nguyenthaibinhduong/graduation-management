@@ -36,7 +36,7 @@ import {
     fullname?: string;
   
     @IsDateString({}, { message: 'Ngày sinh phải đúng định dạng ISO (YYYY-MM-DD)' })
-    @Validate(IsAdultConstraint)
+    // @Validate(IsAdultConstraint)
     birth_date?: string;
     
 
