@@ -298,9 +298,9 @@ export class ScoreController {
     }
   }
 
-  @Get('group-score')
+  @Get('group-score/:groupId')
   async publicScore(
-    @DecodedId(['body', 'groupId']) groupId: number,
+    @DecodedId(['params', 'groupId']) groupId: number,
     @Request() request: any,
   ): Promise<Response<void>> {
     try {

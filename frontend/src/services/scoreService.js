@@ -36,8 +36,8 @@ const scoreService = {
     const { data } = await api.get(url)
     return data.data
   },
-  publicScore: async (groupId) => {
-    const { data } = await api.get('/score/group-score', { groupId })
+  getGroupScore: async (groupId) => {
+    const { data } = await api.get(`/score/group-score/${groupId}`)
     return data.data
   },
 

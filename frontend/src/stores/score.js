@@ -139,7 +139,7 @@ export function createScoreStore() {
       error.value = null
 
       try {
-        return await scoreService.publicScore(groupId)
+        return await scoreService.getGroupScore(groupId)
       } catch (err) {
         error.value = err.message
         throw err
