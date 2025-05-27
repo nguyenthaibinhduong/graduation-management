@@ -102,20 +102,6 @@
                 />
                 <Button
                   v-if="
-                    !memberWeightedScores[member.id]?.isLocked &&
-                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] !== null &&
-                    memberWeightedScores[member.id]?.[selectedGroup.teacherRole] !== undefined &&
-                    (!Array.isArray(memberWeightedScores[member.id]?.[selectedGroup.teacherRole]) ||
-                      memberWeightedScores[member.id]?.[selectedGroup.teacherRole].length > 0)
-                  "
-                  label="Chỉnh sửa"
-                  size="small"
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  @click="editScore(member)"
-                />
-                <Button
-                  v-if="
                     memberWeightedScores[member.id]?.isLocked &&
                     memberWeightedScores[member.id]?.[selectedGroup.teacherRole]
                   "

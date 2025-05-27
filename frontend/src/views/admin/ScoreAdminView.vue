@@ -5,6 +5,7 @@
     :data="groups"
     :columns="[
       { field: 'code', header: 'Mã nhóm' },
+      { field: 'name', header: 'Tên nhóm' },
       { field: 'leader.user.fullname', header: 'Người tạo nhóm' },
       { field: 'teacher.user.fullname', header: 'GVHD' },
       { field: 'total_member', header: 'Số thành viên' },
