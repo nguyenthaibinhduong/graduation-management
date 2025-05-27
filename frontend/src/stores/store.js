@@ -1,3 +1,4 @@
+import { createAnalystStore } from './analyst'
 import { createBaseStore } from './base'
 import { createFileStore } from './files'
 import { createGroupStore } from './group'
@@ -33,3 +34,4 @@ export const useFileStore = createFileStore()
 export const useScoreStore = createScoreStore()
 
 export const useCommitteeStore = createBaseStore('committees')
+export const useAnalystStore = createAnalystStore('analyst')

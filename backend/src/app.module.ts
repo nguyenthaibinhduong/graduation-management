@@ -22,6 +22,7 @@ import { ScoreModule } from './modules/score/score.module';
 import { CommitteesModule } from './modules/committees/committees.module';
 import { GroupsModule } from './modules/groups/groups.module';
 import { CriteriaModule } from './modules/criteria/criteria.module';
+import { AnalystModule } from './modules/analyst/analyst.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { CriteriaModule } from './modules/criteria/criteria.module';
     CommitteesModule,
     GroupsModule,
     CriteriaModule,
+    AnalystModule,
   ],
   controllers: [AppController],
   providers: [AppService],

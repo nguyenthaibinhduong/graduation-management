@@ -10,12 +10,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Committee } from './committee.entity';
 import { Position } from './position.entity';
 import { Department } from './department.entity';
 import { Group } from './group.entity';
+import { Project } from './project.entity';
 
 @Entity('teachers')
 export class Teacher {
@@ -47,6 +49,10 @@ export class Teacher {
   @ManyToOne(() => Department, (department) => department.teachers)
   @JoinColumn({ name: 'department_id' })
   department: Department;
+
+  @OneToMany(() => Project, (project) => project.teacher)
+  projects: Project[];
+
 
   //Giao vien phan bien
   @ManyToMany(() => Group, (group) => group.facultyReviewers)

@@ -6,7 +6,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-4 rounded-xl ">
-                <Chart type="bar" :data="barData" :options="chartOptions" />
+                <Chart type="bar" :data="barStudentData" :options="chartOptions" />
             </div>
             <div class="bg-white p-4 rounded-xl ">
                 <Chart type="bar" :data="horizontalBarData" :options="horizontalOptions" />
@@ -49,6 +49,10 @@ import {
     PointElement,
     RadialLinearScale
 } from 'chart.js'
+import { computed, onMounted, ref, watchEffect } from 'vue'
+import { useAnalystStore } from '@/stores/store'
+import { watchWithFilter } from '@vueuse/core'
+
 
 ChartJS.register(
     Title, Tooltip, Legend,
@@ -56,18 +60,58 @@ ChartJS.register(
     ArcElement, LineElement, PointElement, RadialLinearScale
 )
 
-// Biểu đồ cột
-const barData = {
-    labels: ['CNTT', 'Kinh tế', 'Ngôn ngữ', 'Quản trị', 'Tài chính'],
+const analysStore = useAnalystStore()
+
+onMounted(async () => {
+    await analysStore.fetchItems()
+});
+const data = ref()
+const labelsDepartment = ref()
+const dataStudentCount = ref()
+
+const labelsTeacher = ref()
+const projectCount = ref()
+watchEffect(() => {
+    data.value = analysStore.items
+    if (data.value && data.value.countPeopleDepartment) {
+        labelsDepartment.value = data.value.countPeopleDepartment.map(item => item.name);
+    }
+    if (data.value && data.value.countPeopleDepartment) {
+        dataStudentCount.value = data.value.countPeopleDepartment.map(item => item.studentCount);
+    }
+    if (data.value && data.value.projectsByTeacher) {
+        labelsTeacher.value = data.value.projectsByTeacher.map(item => item.name);
+    }
+    if (data.value && data.value.countPeopleDepartment) {
+        projectCount.value = data.value.projectsByTeacher.map(item => item.projectCount);
+    }
+    console.log(labelsTeacher.value);
+
+
+});
+
+
+const barStudentData = computed(() => ({
+    labels: labelsDepartment.value,
     datasets: [
         {
             label: 'Số SV làm khóa luận',
             backgroundColor: '#42A5F5',
-            data: [30, 25, 15, 20, 10],
+            data: dataStudentCount.value,
             borderRadius: 6
         }
     ]
-}
+}));
+
+const horizontalBarData = computed(() => ({
+    labels: labelsTeacher.value || ['Giảng viên 1', 'Giảng viên 2', 'Giảng viên 3'],
+    datasets: [{
+        label: 'Số đề tài hướng dẫn',
+        data: projectCount.value || [5, 3, 8],
+        backgroundColor: '#7E57C2',
+        borderRadius: 6
+    }]
+}))
 
 // Biểu đồ tròn
 const pieData = {
@@ -152,15 +196,7 @@ const radarOptions = {
 }
 
 // Biểu đồ thanh ngang – đề tài theo giảng viên
-const horizontalBarData = {
-    labels: ['Thầy A', 'Cô B', 'Thầy C', 'Cô D'],
-    datasets: [{
-        label: 'Số đề tài hướng dẫn',
-        data: [12, 15, 9, 7],
-        backgroundColor: '#7E57C2',
-        borderRadius: 6
-    }]
-}
+
 const horizontalOptions = {
     indexAxis: 'y',
     responsive: true,
