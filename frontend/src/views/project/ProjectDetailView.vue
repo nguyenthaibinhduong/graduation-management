@@ -178,6 +178,8 @@ onMounted(async () => {
     const projectId = route.params.id;
     const obj_id = user?.student?.id || user?.teacher?.id;
     await projectStore.findItem(projectId, obj_id, user.role);
+
+
     if (authStore.user?.role == 'student') {
       await groupStore.getMyGroup()
     }
@@ -192,6 +194,7 @@ watchEffect(() => {
   if (authStore.user?.role == 'student') {
     group.value = groupStore.group
   }
+
 });
 
 const statusLabel = (status) => {

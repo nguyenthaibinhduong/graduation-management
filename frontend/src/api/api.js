@@ -2,6 +2,7 @@
 import { showToast } from '@/utils/toast'
 import axios from 'axios'
 import { generateHeaders } from './apiKeyEncrypt'
+import router from '@/router'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -106,6 +107,7 @@ api.interceptors.response.use(
         error.response?.data?.message || 'Bạn không có quyền truy cập vào tính năng này.',
         'error','Lỗi'
       )
+      router.push('/not-found')
       return Promise.reject('Không tìm thấy trang bạn yêu cầu.')
     }
     if (status === 500) {
