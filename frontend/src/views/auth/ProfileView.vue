@@ -66,7 +66,7 @@
             <label class="font-semibold text-gray-700">Ngày sinh:</label>
             <span>{{
               dayjs(authStore.user?.birth_date).format('MM/DD/YYYY') || 'Chưa cập nhật'
-              }}</span>
+            }}</span>
           </div>
           <div class="flex items-center gap-2">
             <label class="font-semibold text-gray-700">Địa chỉ:</label>
@@ -155,6 +155,7 @@ import MyInput from '@/components/form/MyInput.vue'
 import GoBack from '@/components/button/GoBack.vue'
 import { useFileStore } from '@/stores/store'
 import { useUserStore } from '@/stores/users'
+import { showToast } from '@/utils/toast'
 
 // Stores
 const authStore = useAuthStore()
@@ -220,6 +221,53 @@ const openPasswordForm = () => {
   visibleEditPassword.value = true
 }
 const saveUser = async () => {
+
+  if (user.value.phone.length < 10 || user.value.phone.length > 15) {
+    showToast('Số điện thoại phải từ 10 đến 15 ký tự', 'error')
+    return
+  }
+
+
+  if (user.value.email.length < 5 || user.value.email.length > 50) {
+    showToast('Email phải từ 5 đến 50 ký tự', 'error')
+    return
+  }
+  if (!user.value.email.includes('@') || !user.value.email.includes('.')) {
+    showToast('Email không hợp lệ', 'error')
+    return
+  }
+  if (user.value.email.includes(' ')) {
+    showToast('Email không được chứa khoảng trắng', 'error')
+    return
+  }
+  if (user.value.email.includes('@')) {
+    showToast('Email không được chứa ký tự "@"', 'error')
+    return
+  }
+  if (user.value.email.includes('!')) {
+    showToast('Email không được chứa ký tự "!"', 'error')
+    return
+  }
+  if (user.value.email.includes('#')) {
+    showToast('Email không được chứa ký tự "#"', 'error')
+    return
+  }
+  if (user.value.email.includes('$')) {
+    showToast('Email không được chứa ký tự "$"', 'error')
+    return
+  }
+  if (user.value.email.includes('%')) {
+    showToast('Email không được chứa ký tự "%"', 'error')
+    return
+  }
+  if (user.value.email.includes('^')) {
+    showToast('Email không được chứa ký tự "^"', 'error')
+    return
+  }
+  if (user.value.email.includes('&')) {
+    showToast('Email không được chứa ký tự "&"', 'error')
+    return
+  }
   if (file.value) {
     if (authStore.user?.avatar) {
       await fileStore.deleteFileItem(authStore.user.avatar);
@@ -233,6 +281,90 @@ const saveUser = async () => {
   visibleEditUser.value = false
 }
 const savePassword = async () => {
+  if (!password.value.oldPassword || !password.value.newPassword || !password.value.confirmPassword) {
+    showToast('Vui lòng điền đầy đủ thông tin mật khẩu', 'error')
+    return
+  }
+  if (password.value.oldPassword === password.value.newPassword) {
+    alert('Mật khẩu mới không được trùng với mật khẩu cũ')
+    return
+  }
+  if (password.value.newPassword.length < 6) {
+    alert('Mật khẩu mới phải có ít nhất 6 ký tự')
+    return
+  }
+  if (password.value.newPassword.length > 20) {
+    alert('Mật khẩu mới không được vượt quá 20 ký tự')
+    return
+  }
+  if (password.value.newPassword.includes(' ')) {
+    alert('Mật khẩu mới không được chứa khoảng trắng')
+    return
+  }
+  if (password.value.newPassword.includes('@')) {
+    alert('Mật khẩu mới không được chứa ký tự "@"')
+    return
+  }
+  if (password.value.newPassword.includes('!')) {
+    alert('Mật khẩu mới không được chứa ký tự "!"')
+    return
+  }
+  if (password.value.newPassword.includes('#')) {
+    alert('Mật khẩu mới không được chứa ký tự "#"')
+    return
+  }
+  if (password.value.newPassword.includes('$')) {
+    alert('Mật khẩu mới không được chứa ký tự "$"')
+    return
+  }
+  if (password.value.newPassword.includes('%')) {
+    alert('Mật khẩu mới không được chứa ký tự "%"')
+    return
+  }
+  if (password.value.newPassword.includes('^')) {
+    alert('Mật khẩu mới không được chứa ký tự "^"')
+    return
+  }
+  if (password.value.newPassword.includes('&')) {
+    alert('Mật khẩu mới không được chứa ký tự "&"')
+    return
+  }
+  if (password.value.newPassword.includes('*')) {
+    alert('Mật khẩu mới không được chứa ký tự "*"')
+    return
+  }
+  if (password.value.newPassword.includes('(')) {
+    alert('Mật khẩu mới không được chứa ký tự "("')
+    return
+  }
+  if (password.value.newPassword.includes(')')) {
+    alert('Mật khẩu mới không được chứa ký tự ")"')
+    return
+  }
+  if (password.value.newPassword.includes('-')) {
+    alert('Mật khẩu mới không được chứa ký tự "-"')
+    return
+  }
+  if (password.value.newPassword.includes('=')) {
+    alert('Mật khẩu mới không được chứa ký tự "="')
+    return
+  }
+  if (password.value.newPassword.includes('+')) {
+    alert('Mật khẩu mới không được chứa ký tự "+"')
+    return
+  }
+  if (password.value.newPassword.includes('{')) {
+    alert('Mật khẩu mới không được chứa ký tự "{"')
+    return
+  }
+  if (password.value.newPassword.includes('}')) {
+    alert('Mật khẩu mới không được chứa ký tự "}"')
+    return
+  }
+  if (password.value.newPassword.includes('[')) {
+    alert('Mật khẩu mới không được chứa ký tự "["')
+    return
+  }
   if (password.value.newPassword !== password.value.confirmPassword) {
     alert('Mật khẩu xác nhận không khớp')
     return

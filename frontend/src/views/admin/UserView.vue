@@ -39,6 +39,7 @@ import DataTableCustom from "@/components/list/DataTableCustom.vue";
 import { useRouter } from "vue-router";
 import { useExcelStore } from "@/stores/excel";
 import MyInput from "@/components/form/MyInput.vue";
+import { showToast } from "@/utils/toast";
 
 const visibleLeft = ref(false);
 const userStore = useUserStore();
@@ -97,6 +98,79 @@ const addUser = () => {
   visibleLeft.value = true;
 };
 const saveUser = async () => {
+  if (!newUser.value.username || !newUser.value.password || !newUser.value.role) {
+    showToast("error", "Vui lòng điền đầy đủ thông tin");
+    return;
+  }
+  if (isEditing.value && editedUserId.value === null) {
+    showToast("error", "Không tìm thấy ID người dùng để cập nhật");
+    return;
+  }
+
+  if (newUser.value.role === "") {
+    showToast("error", "Vui lòng chọn vai trò");
+    return;
+  }
+  if (newUser.value.username.length < 6) {
+    showToast("error", "Tên tài khoản phải có ít nhất 6 ký tự");
+    return;
+  }
+  if (newUser.value.password.length < 6) {
+    showToast("error", "Mật khẩu phải có ít nhất 6 ký tự");
+    return;
+  }
+  if (newUser.value.username.length > 20) {
+    showToast("error", "Tên tài khoản không được vượt quá 20 ký tự");
+    return;
+  }
+  if (newUser.value.password.length > 20) {
+    showToast("error", "Mật khẩu không được vượt quá 20 ký tự");
+    return;
+  }
+  if (newUser.value.username.includes(" ")) {
+    showToast("error", "Tên tài khoản không được chứa khoảng trắng");
+    return;
+  }
+  if (newUser.value.password.includes(" ")) {
+    showToast("error", "Mật khẩu không được chứa khoảng trắng");
+    return;
+  }
+  if (newUser.value.username.includes("@")) {
+    showToast("error", "Tên tài khoản không được chứa ký tự '@'");
+    return;
+  }
+  if (newUser.value.password.includes("@")) {
+    showToast("error", "Mật khẩu không được chứa ký tự '@'");
+    return;
+  }
+  if (newUser.value.username.includes("!")) {
+    showToast("error", "Tên tài khoản không được chứa ký tự '!'");
+    return;
+  }
+  if (newUser.value.password.includes("!")) {
+    showToast("error", "Mật khẩu không được chứa ký tự '!'");
+    return;
+  }
+  if (newUser.value.username.includes("#")) {
+    showToast("error", "Tên tài khoản không được chứa ký tự '#'");
+    return;
+  }
+  if (newUser.value.password.includes("#")) {
+    showToast("error", "Mật khẩu không được chứa ký tự '#'");
+    return;
+  }
+  if (newUser.value.username.includes("$")) {
+    showToast("error", "Tên tài khoản không được chứa ký tự '$'");
+    return;
+  }
+  if (newUser.value.password.includes("$")) {
+    showToast("error", "Mật khẩu không được chứa ký tự '$'");
+    return;
+  }
+  if (newUser.value.username.includes("%")) {
+    showToast("error", "Tên tài khoản không được chứa ký tự '%'");
+    return;
+  }
   if (isEditing.value) {
     await userStore.updateItem(editedUserId.value, newUser.value);
   } else {

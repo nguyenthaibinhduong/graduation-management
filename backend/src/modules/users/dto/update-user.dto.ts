@@ -33,14 +33,14 @@ import {
   
   export class UpdateUserDto {
     @IsString({ message: 'Họ tên phải là chuỗi' })
-    fullname: string;
+    fullname?: string;
   
     @IsDateString({}, { message: 'Ngày sinh phải đúng định dạng ISO (YYYY-MM-DD)' })
     @Validate(IsAdultConstraint)
-    birth_date: string;
+    birth_date?: string;
     
 
     @IsEmail({}, { message: 'Email không hợp lệ' })
-    email: string;
+    email?: string;
   }
   

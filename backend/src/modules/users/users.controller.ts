@@ -104,7 +104,7 @@ export class UsersController {
   @Put(':id')
   async update(
     @DecodedId(["params"]) id: number,
-    @Body(new ValidationPipe()) user: UpdateAccountDto,
+    @Body(new ValidationPipe()) user: any,
   ): Promise<Response<void>> {
     try {
       const updatedUser = await this.userService.updateAccount(user,id);
