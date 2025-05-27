@@ -186,7 +186,7 @@
                         <span class="font-medium">Trạng thái:</span>
                         <span :class="statusClass(group?.status)">{{
                             statusLabel(group?.status)
-                            }}</span>
+                        }}</span>
                     </div>
                     <div class="flex justify-end space-x-2">
                         <Button v-if="['create', 'pending'].includes(group?.status) && student?.id != group?.leader?.id"
@@ -287,13 +287,18 @@ const inviteMember = async () => {
             name: group_name.value,
             student_codes: [student.value?.code, student_code?.value],
         };
+        if (!group.value) {
+            await groupStore.addItem(param);
+            await groupStore.getMyGroup();
+            console.log(group.value);
 
-        await groupStore.addItem(param);
-        await groupStore.getMyGroup();
-        console.log(group.value);
+            group_name.value = "";
+            student_code.value = "";
+        } else {
+            showToast('Huỷ nhóm hiện tại để tạo nhóm khác', 'info');
+        }
 
-        group_name.value = "";
-        student_code.value = "";
+
     }
 };
 
