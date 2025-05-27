@@ -159,9 +159,16 @@ export class ProjectsController {
   async update(
     @Param('type') type: string,
     @DecodedId(["params"]) id: number,
-    @Body(new ValidationPipe()) project: CreateProjectDto,
+    @Body(new ValidationPipe()) body: CreateProjectDto,
+    @DecodedId(["body", "student_id"]) student_id: any,
+    @DecodedId(["body","teacher_id"]) teacher_id: any,
   ): Promise<Response<Project>> {
     try {
+      const project = {
+        ...body,
+        student_id,
+        teacher_id,
+      };
       const updatedProject = await this.projectService.updateProject(
         id,
         project,
@@ -182,7 +189,7 @@ export class ProjectsController {
   async remove(
     @Param('type') type: string,
     @DecodedId(["params"]) id: number,
-    @Param('obj_id') obj_id: number,
+    @DecodedId(["params", "obj_id"]) obj_id: number,
   ): Promise<Response<void>> {
     try {
       await this.projectService.deleteProject(id, obj_id, type);
@@ -198,14 +205,13 @@ export class ProjectsController {
   @Post('remove-multi/:type')
   async removeMulti(
     @Param('type') type: string,
-    @Body() body: { ids: number[]; obj_id: number },
+    // @Body() body: { ids: number[]; obj_id: number },
+    @DecodedId(["body","ids"]) ids: number,
+    @DecodedId(["body", "obj_id"]) obj_id: number,
   ): Promise<Response<void> | HttpException> {
     try {
-      if (type == 'student') {
-        const { ids, obj_id } = body;
-        await this.projectService.deleteProject(ids, obj_id, type);
-        return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
-      }
+      await this.projectService.deleteProject(ids, obj_id, type);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },

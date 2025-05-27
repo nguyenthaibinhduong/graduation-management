@@ -410,36 +410,35 @@ export class ProjectsService extends BaseService<Project> {
     type: string,
   ): Promise<void> {
     const idArray = Array.isArray(ids) ? ids : [ids];
+    
+    let whereCondition: any = {
+      id: In(idArray),
+      status: 'propose',
+    };
+  
     if (type === 'student') {
-      var projects = await this.projectRepository.find({
-        where: {
-          id: In(idArray),
-          student: { id: obj_id },
-          status: 'propose',
-        },
-        relations: ['student'],
-      });
+      whereCondition.student = { id: obj_id };
     } else if (type === 'teacher') {
-      var projects = await this.projectRepository.find({
-        where: {
-          id: In(idArray),
-          teacher: { id: obj_id },
-          status: 'propose',
-        },
-        relations: ['teacher'],
-      });
+      whereCondition.teacher = { id: obj_id };
+    } else {
+      throw new BadRequestException('Loại người dùng không hợp lệ');
     }
-
-    if (projects.length === 0) {
-      throw new NotFoundException('Đề tài đang ở trạng thái không thể xóa');
+  
+    const projects = await this.projectRepository.find({
+      where: whereCondition,
+      relations: [type], // chỉ lấy quan hệ cần thiết
+    });
+  
+    if (!projects.length) {
+      throw new NotFoundException('Không tìm thấy đề tài hợp lệ để xóa');
     }
-
+  
     const validIds = projects.map((p) => p.id);
-
+  
     try {
       await this.projectRepository.delete(validIds);
     } catch (error) {
-      throw new BadRequestException(`Lỗi khi xóa đề tài: ${error.message}`);
+      throw new BadRequestException(`Lỗi khi xóa đề tài`)
     }
-  }
+  } 
 }

@@ -6,7 +6,7 @@
 
 
     </div>
-    <DataTableCustom :title="'Danh sách đề tài đề xuất'" :data="projects" :columns="[
+    <DataTableCustom :block="['export', 'import']" :title="'Danh sách đề tài đề xuất'" :data="projects" :columns="[
         { field: 'title', header: 'Tên đề tài' },
         { field: 'teacher.user.fullname', header: 'Giáo viên tham chiếu' },
         { field: 'course.name', header: 'Học kỳ' },
@@ -131,6 +131,37 @@ const addProject = () => {
 };
 
 const saveProject = async () => {
+    if (!newData.value.title || !newData.value.description || !newData.value.content || !newData.value.max_total_group) {
+        showToast('Vui lòng điền đầy đủ thông tin', 'error');
+        return;
+    }
+    if (!newData.value.teacher_id) {
+        showToast('Vui lòng chọn giáo viên tham chiếu', 'error');
+        return;
+    }
+
+    if (newData.value.max_total_group > 10) {
+        showToast('Số lượng nhóm tham gia không được vượt quá 10', 'error');
+        return;
+    }
+    if (newData.value.max_total_group < 1) {
+        showToast('Số lượng nhóm tham gia phải lớn hơn hoặc bằng 1', 'error');
+        return;
+    }
+    if (newData.value.max_total_group % 1 !== 0) {
+        showToast('Số lượng nhóm tham gia phải là số nguyên', 'error');
+        return;
+    }
+    if (newData.value.max_total_group <= 0) {
+        showToast('Số lượng nhóm tham gia phải lớn hơn 0', 'error');
+        return;
+    }
+    if (newData.value.max_total_group % 1 !== 0) {
+        showToast('Số lượng nhóm tham gia phải là số nguyên', 'error');
+        return;
+    }
+
+
     const data = {
         ...newData.value,
     };
@@ -149,6 +180,7 @@ const deleteProject = async (ids) => {
     if (authStore?.user?.student?.id) {
         await projectStore.fetchItemsForStudent(statusData.value, authStore.user.student.id);
     }
+
 };
 
 const editProject = (dataEdit) => {
@@ -183,6 +215,7 @@ const getDetail = (data) => {
     if (data?.id) router.push(`/project-detail/${data?.id}`);
 };
 
+const selectedIds = ref();
 const handleSelectData = (ids) => {
     selectedIds.value = ids;
 };
