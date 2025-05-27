@@ -111,8 +111,12 @@ const teacherTypeLabel = (type) => {
 
 onMounted(async () => {
   await fetchScore()
-  await studentStore.findItem(authStore?.user?.id)
+  await studentStore.findItem(authStore?.user?.student?.id)
   groupId.value = studentStore.item?.group?.id
+  if (!groupId.value) {
+    scoreError.value = 'Bạn chưa tham gia nhóm nào.'
+    return
+  }
   groupScore.value = await scoreStore.fetchGroupScore(groupId.value)
 })
 
