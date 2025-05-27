@@ -1,7 +1,7 @@
 <template>
   <SelectGroupButton :options="buttonOptions" />
-  <DataTableCustom :block="['headerBar', 'selectAll', 'action', 'export', 'import']"
-    title="Danh sách đề tài - Giảng viên" :data="projects" :columns="[
+  <DataTableCustom :block="['headerBar', 'selectAll', 'export', 'import']" title="Danh sách đề tài - Giảng viên"
+    :data="projects" :columns="[
       { field: 'title', header: 'Tên đề tài' },
       { field: 'student.user.fullname', header: 'Sinh viên đề xuất' },
       { field: 'course.name', header: 'Học kỳ' },
@@ -149,6 +149,7 @@ const getDetail = (data) => {
   if (data?.id) router.push(`/project-detail/${data?.id}`)
 }
 
+const selectedIds = ref()
 const handleSelectData = (ids) => {
   selectedIds.value = ids
 }
