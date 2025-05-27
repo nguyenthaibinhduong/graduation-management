@@ -30,23 +30,23 @@ export class User {
   @Column({ length: 255 })
   username: string;
 
-  @Column({ length: 255 })
-  fullname: string;
+  @Column({ length: 255, nullable: true })
+  fullname: string | null;
 
-  @Column()
-  birth_date: Date;
+  @Column({ nullable: true })
+  birth_date: Date | null;
 
   @Column({ default: '' })
   address?: string;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, nullable: true })
   phone: string; // Số điện thoại (unique)
 
   @Column()
   @Exclude()
   password: string; // Mật khẩu (lưu trữ sau khi mã hóa)
 
-  @Column({ length: 255 })
+  @Column({ length: 255, nullable: true })
   avatar: string;
 
   @Column({ type: 'enum', enum: UserRole })
