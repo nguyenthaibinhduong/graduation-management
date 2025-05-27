@@ -36,7 +36,7 @@ export class User {
   @Column()
   birth_date: Date;
 
-  @Column()
+  @Column({ default: '' })
   address?: string;
 
   @Column({ length: 255 })
@@ -47,7 +47,7 @@ export class User {
   password: string; // Mật khẩu (lưu trữ sau khi mã hóa)
 
   @Column({ length: 255 })
-  avatar: string; 
+  avatar: string;
 
   @Column({ type: 'enum', enum: UserRole })
   role: UserRole;
@@ -68,7 +68,6 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date; // Ngày cập nhật thông tin người dùng
 
- 
   @Column({ default: true })
   active: boolean;
 

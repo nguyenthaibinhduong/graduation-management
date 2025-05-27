@@ -28,7 +28,6 @@ export class CreateEnrollmentSessionDto {
   department_id: number | string;
 
   @IsNotEmpty({ message: 'Khóa học không được để trống' })
-  @IsNumber({}, { message: 'Khóa học phải là số' })
+  // @IsNumber({}, { message: 'Khóa học phải là số' })
   course_id: number | string;
 }
-
