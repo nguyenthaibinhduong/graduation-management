@@ -107,7 +107,7 @@ api.interceptors.response.use(
         error.response?.data?.message || 'Bạn không có quyền truy cập vào tính năng này.',
         'error','Lỗi'
       )
-      router.push('/not-found')
+      // router.push('/not-found')
       return Promise.reject('Không tìm thấy trang bạn yêu cầu.')
     }
     if (status === 500) {
