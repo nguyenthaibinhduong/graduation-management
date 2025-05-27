@@ -1,14 +1,15 @@
 <template>
-  <DataTableCustom title="Danh sách đợt đăng ký" :block="['selectAll', 'import', 'export']" :data="students" :columns="[
-    { field: 'title', header: 'Tiêu đề' },
-    { field: 'content', header: 'Nội dung' },
-    { field: 'course.name', header: 'Học kỳ', sortable: true },
-    { field: 'department.name', header: 'Khoa', sortable: true },
-    { field: 'start_time', type: 'datetime', header: 'Ngày bắt đầu', sortable: true },
-    { field: 'end_time', type: 'datetime', header: 'Ngày Kết thúc', sortable: true },
+  <DataTableCustom title="Danh sách đợt đăng ký" :block="['selectAll', 'edit', 'import', 'export']" :data="students"
+    :columns="[
+      { field: 'title', header: 'Tiêu đề' },
+      { field: 'content', header: 'Nội dung' },
+      { field: 'course.name', header: 'Học kỳ', sortable: true },
+      { field: 'department.name', header: 'Khoa', sortable: true },
+      { field: 'start_time', type: 'datetime', header: 'Ngày bắt đầu', sortable: true },
+      { field: 'end_time', type: 'datetime', header: 'Ngày Kết thúc', sortable: true },
 
-  ]" :total="enrollmentStore?.total" :loading="loading" @fetch="fetchEnrollment" @add="addEnrollment"
-    @edit="editEnrollment" @delete="deleteEnrollment" @selectOne="handleSelectData" @selectAll="handleSelectData" />
+    ]" :total="enrollmentStore?.total" :loading="loading" @fetch="fetchEnrollment" @add="addEnrollment"
+    @selectOne="handleSelectData" @selectAll="handleSelectData" @delete="deleteEnrollment" />
 
 
   <MyDrawer class="w-full" title="đợt đăng ký" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveEnrollment"
@@ -134,7 +135,7 @@ const cancelForm = () => {
   };
 };
 
-
+const selectedIds = ref();
 const handleSelectData = (ids) => {
   selectedIds.value = ids;
 };

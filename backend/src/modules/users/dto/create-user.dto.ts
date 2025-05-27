@@ -7,6 +7,7 @@ import {
     ValidationArguments,
     ValidatorConstraint,
     ValidatorConstraintInterface,
+    IsEmail,
   } from 'class-validator';
   
   // Custom validator kiểm tra > 18 tuổi
@@ -39,7 +40,10 @@ import {
     @IsNotEmpty({ message: 'Ngày sinh không được để trống' })
     @Validate(IsAdultConstraint)
     birth_date: string;
-  
-   
+    
+
+    @IsEmail({}, { message: 'Email không hợp lệ' })
+    @IsNotEmpty({ message: 'Email không được để trống' })
+    email: string;
   }
   

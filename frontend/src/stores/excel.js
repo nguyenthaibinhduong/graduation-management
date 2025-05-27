@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import * as XLSX from "xlsx";
 import { saveAs } from 'file-saver';
 import {  ref } from "vue";
+import { showToast } from "@/utils/toast";
 
 export const useExcelStore = defineStore("excel", () => {
   
@@ -58,7 +59,7 @@ export const useExcelStore = defineStore("excel", () => {
         dataSets.value[config.key] = result
         return result
       } catch (err) {
-        throw new Error(err.message || "Lỗi xử lý file Excel!")
+        showToast(err.message || "Lỗi xử lý file Excel!", 'error');
       }
     }
   return {

@@ -1,15 +1,18 @@
+
 import { Type } from "class-transformer";
-import { IsOptional, ValidateNested } from "class-validator";
+import { IsOptional, IsString, ValidateNested } from "class-validator";
+import { UpdateUserDto } from "src/modules/users/dto/update-user.dto";
 
 export class UpdateStudentDto  {
-    code: string;
+    @IsString({ message: 'Mã sinh viên phải là chuỗi' })
+     code: string;
+   
     
-    major_id?: string | number;
-    
-    department_id?: string | number;;
-    
-    @IsOptional()
-    @ValidateNested({ message: 'Người dùng không hợp lệ' })
-    @Type(() => Object) // Replace with a DTO for User if available
-    user?: object;
+     major_id?: string | number;
+   
+     department_id?: string | number;;
+   
+     @ValidateNested()
+     @Type(() => UpdateUserDto)
+     user: UpdateUserDto;
 }

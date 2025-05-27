@@ -7,6 +7,7 @@ import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { Like, Repository } from 'typeorm';
 import { CreateEnrollmentSessionDto } from './dto/create-enrollment_session.dto';
 import { UpdateEnrollmentSessionDto } from './dto/update-enrollment_session.dto';
+import { ac } from '@faker-js/faker/dist/airline-D6ksJFwG';
 
 @Injectable()
 export class EnrollmentSessionsService extends BaseService<EnrollmentSession> {
@@ -27,9 +28,10 @@ export class EnrollmentSessionsService extends BaseService<EnrollmentSession> {
   ): Promise<{ items: EnrollmentSession[]; total: number; limit?: number; page?: number }> {
     const where:any = search
       ? {
-          name: Like(`%${search}%`)
+        name: Like(`%${search}%`),
+        active: true, // Giả sử bạn chỉ muốn lấy các đợt đăng ký đang hoạt động
         }
-      : {};
+      : { active: true};
   
     const [items, total] = await this.repository.findAndCount({
       where,
@@ -65,51 +67,49 @@ export class EnrollmentSessionsService extends BaseService<EnrollmentSession> {
   }
   }
   
-async updateEnrollmentSession(id: number, dataEnrollmentSession: UpdateEnrollmentSessionDto): Promise<EnrollmentSession> {
-  try {
-    const { department_id, course_id, ...data }:any = dataEnrollmentSession;
-
-    const existingEnrollmentSession = await this.enrollmentSessionRepository.findOne({
-      where: { id },
-      relations: ['course', 'department'],
-    });
-
-    if (!existingEnrollmentSession) {
-      throw new NotFoundException('Đợt đăng ký không tồn tại');
+  async updateEnrollmentSession(id: number, dataEnrollmentSession: UpdateEnrollmentSessionDto): Promise<EnrollmentSession> {
+    try {
+      const { department_id, course_id, ...data } = dataEnrollmentSession;
+  
+      const existingEnrollmentSession = await this.enrollmentSessionRepository.findOne({
+        where: { id },
+        relations: ['course', 'department'],
+      });
+  
+      if (!existingEnrollmentSession) {
+        throw new NotFoundException('Đợt đăng ký không tồn tại');
+      }
+  
+      // Cập nhật department nếu có
+      if (department_id !== undefined) {
+        const department = await this.departmentRepository.findOne({ where: { id: department_id } });
+        if (!department) throw new NotFoundException('Khoa không tồn tại');
+        existingEnrollmentSession.department = department;
+      }
+  
+      // Cập nhật course nếu có
+      if (course_id !== undefined) {
+        const course = await this.courseRepository.findOne({ where: { id: course_id } });
+        if (!course) throw new NotFoundException('Học kỳ không tồn tại');
+        existingEnrollmentSession.course = course;
+      }
+  
+      // Cập nhật các field khác
+      Object.assign(existingEnrollmentSession, data);
+  
+      // Sử dụng save để đảm bảo cập nhật đúng và đầy đủ
+      await this.enrollmentSessionRepository.save(existingEnrollmentSession);
+  
+      return this.enrollmentSessionRepository.findOne({
+        where: { id },
+        relations: { course: true, department: true },
+      });
+  
+    } catch (error) {
+      throw new InternalServerErrorException(error.message || 'Có lỗi xảy ra khi cập nhật đợt đăng ký');
     }
-
-    let department = existingEnrollmentSession.department;
-    let course = existingEnrollmentSession.course;
-
-    if (department_id) {
-      department = await this.departmentRepository.findOne({ where: { id: department_id } });
-      if (!department) throw new NotFoundException('Khoa không tồn tại');
-    }
-
-    if (course_id) {
-      course = await this.courseRepository.findOne({ where: { id: course_id } });
-      if (!course) throw new NotFoundException('Học kỳ không tồn tại');
-    }
-
-    const updatedEnrollmentSession = this.enrollmentSessionRepository.create({
-      ...existingEnrollmentSession,
-      ...data,/// ghi de cac ban ghi moi 
-      department,/// ghi de cac ban ghi moi 
-      course,/// ghi de cac ban ghi moi 
-    });
-
-    await this.enrollmentSessionRepository.save(updatedEnrollmentSession);
-
-    const enrollmentSession = await this.enrollmentSessionRepository.findOne({
-      where: { id },
-      relations: {course:true, department:true },
-    });
-
-    return enrollmentSession;
-  } catch (error) {
-    throw new InternalServerErrorException(error.message || 'Có lỗi xảy ra khi cập nhật đợt đăng ký');
   }
-}
+  
 
 
 }

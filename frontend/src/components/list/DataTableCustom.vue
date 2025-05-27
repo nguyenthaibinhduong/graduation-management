@@ -80,7 +80,7 @@
                 <!-- Dropdown menu -->
                 <OverlayPanel ref="dropdown">
                   <div class="w-[100px] text-sm">
-                    <button class="w-full px-3 py-2 hover:bg-gray-100 flex items-center"
+                    <button v-if="blockFuntion('edit')" class="w-full px-3 py-2 hover:bg-gray-100 flex items-center"
                       @click="$emit('edit', selectedItem)">
                       <i class="pi pi-pencil mr-2"></i> Sửa
                     </button>

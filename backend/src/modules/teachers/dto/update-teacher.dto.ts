@@ -1,5 +1,23 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateTeacherDto } from './create-teacher.dto';
-import { IsArray, IsOptional, IsString } from 'class-validator';
-
-export class UpdateTeacherDto extends PartialType(CreateTeacherDto) {}
+import {
+    ValidateNested,
+  } from 'class-validator';
+  import { Type } from 'class-transformer';
+import { UpdateUserDto } from 'src/modules/users/dto/update-user.dto';
+  
+  export class UpdateTeacherDto {
+   
+    code: string | any;
+  
+    @ValidateNested()
+    @Type(() => UpdateUserDto)
+    user: UpdateUserDto;
+  
+    degree: string;
+  
+    
+    positionIds?: number[];
+  
+    
+    departmentId: any;
+  }
+  

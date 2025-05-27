@@ -168,7 +168,7 @@ async updateTeacher(
       where: { id:In(positionIds) }
     }, positionIds.length, 'Một hoặc nhiều chức vụ không tồn tại')
     teacher.position = positions || teacher.position
-
+    teacher.degree = teacherData.degree || teacher.degree;
     if (user) {
       const { id, password, ...safeUser } = user;
       await this.repository.manager.update(User, teacher?.user.id, safeUser);

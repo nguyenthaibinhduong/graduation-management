@@ -19,6 +19,7 @@ import { CreateEnrollmentSessionDto } from './dto/create-enrollment_session.dto'
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { Response } from 'src/common/globalClass';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
+import { UpdateEnrollmentSessionDto } from './dto/update-enrollment_session.dto';
 
 @Controller('enrollment_sessions')
 @UseGuards(JwtAuthGuard)
@@ -27,7 +28,7 @@ export class EnrollmentSessionsController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) enrollmentSession: any,
+    @Body(new ValidationPipe()) enrollmentSession: CreateEnrollmentSessionDto,
     @DecodedId(['body', 'department_id']) department_id: any,
     @DecodedId(['body', 'course_id']) course_id: any
   ): Promise<Response<EnrollmentSession>> {
@@ -77,7 +78,7 @@ export class EnrollmentSessionsController {
   @Put(':id')
   async update(
     @DecodedId(["params"]) id: number,
-    @Body(new ValidationPipe()) enrollmentSession: CreateEnrollmentSessionDto,
+    @Body(new ValidationPipe()) enrollmentSession: UpdateEnrollmentSessionDto,
   ): Promise<Response<EnrollmentSession>> {
     try {
       const updatedEnrollmentSession = await this.enrollmentSessionService.updateEnrollmentSession(
@@ -95,7 +96,7 @@ export class EnrollmentSessionsController {
   @Delete(':id')
   async remove(@DecodedId(["params"]) id: number): Promise<Response<void>> {
     try {
-      await this.enrollmentSessionService.delete(id);
+      await this.enrollmentSessionService.delete(id,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       return new Response(null, HttpStatus.ERROR, Message.ERROR);
@@ -107,7 +108,7 @@ export class EnrollmentSessionsController {
     @Body() ids: number[],
   ): Promise<Response<void> | HttpException> {
     try {
-      await this.enrollmentSessionService.delete(ids);
+      await this.enrollmentSessionService.delete(ids,true);
       return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
