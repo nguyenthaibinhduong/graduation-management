@@ -24,8 +24,8 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  email: string; // Địa chỉ email (unique)
+  @Column({ unique: true, nullable: true })
+  email: string | null; // Địa chỉ email (unique)
 
   @Column({ length: 255 })
   username: string;

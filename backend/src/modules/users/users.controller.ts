@@ -39,7 +39,7 @@ export class UsersController {
   ): Promise<Response<User>> {
     try {
       const newUser = await this.userService.create(user as any);
-      return new Response(newUser, HttpStatus.SUCCESS, Message.SUCCESS);
+      return new Response(null, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
         { statusCode: HttpStatus.ERROR, message: error.message },
