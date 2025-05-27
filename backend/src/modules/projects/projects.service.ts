@@ -254,18 +254,25 @@ export class ProjectsService extends BaseService<Project> {
         student: { user: true },
         teacher: { user: true },
         course: true,
+        session: { department: true},
       },
     });
     const userProject = await this.repository.manager.findOne(User, {
       where: { id: user?.id },
       relations: {
-        student:true ,
-        teacher:true ,
+        student: {
+     
+          department: true,
+        },
+        teacher: true,
+        
       },
     })
     if (!project) throw new NotFoundException('Đề tài không tồn tại');
     if (user.role == UserRole.STUDENT) {
-      if (type === 'student' &&project.student?.id != userProject?.student?.id &&  project?.status != 'public')
+      if (type === 'student' &&project.student?.id != userProject?.student?.id &&  project?.status != 'public' )
+        throw new NotFoundException('Không có quyền truy cập đề tài này');
+      if (type === 'student' &&project.session?.department?.id != userProject?.student?.department?.id )
         throw new NotFoundException('Không có quyền truy cập đề tài này');
       if (project.student?.user) {
         project.student.user = {
