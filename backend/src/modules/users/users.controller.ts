@@ -22,6 +22,8 @@ import { Roles } from 'src/common/decorators/roles.decorators';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtUtilityService } from 'src/common/jwtUtility.service';
 import { DecodedId } from 'src/common/decorators/decode-id.decorators';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -33,10 +35,10 @@ export class UsersController {
 
   @Post()
   async create(
-    @Body(new ValidationPipe()) user: CreateUserDto,
+    @Body(new ValidationPipe()) user: CreateAccountDto,
   ): Promise<Response<User>> {
     try {
-      const newUser = await this.userService.create(user);
+      const newUser = await this.userService.create(user as any);
       return new Response(newUser, HttpStatus.SUCCESS, Message.SUCCESS);
     } catch (error) {
       throw new HttpException(
@@ -102,7 +104,7 @@ export class UsersController {
   @Put(':id')
   async update(
     @DecodedId(["params"]) id: number,
-    @Body(new ValidationPipe()) user: UpdateUserDto,
+    @Body(new ValidationPipe()) user: UpdateAccountDto,
   ): Promise<Response<void>> {
     try {
       const updatedUser = await this.userService.updateAccount(user,id);
