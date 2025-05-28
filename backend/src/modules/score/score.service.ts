@@ -854,7 +854,7 @@ export class ScoreService extends BaseService<Score> {
         where: { student: { id: member.id } },
       });
       if (!existingStudentScore) {
-        throw new ConflictException(`Sinh viên mã ${member.id} chưa có điểm`);
+        throw new ConflictException(`Sinh viên chưa có điểm`);
       }
     }
     var groupScore = 0;
