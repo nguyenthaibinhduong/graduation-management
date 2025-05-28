@@ -1,4 +1,3 @@
-
 import { EnrollmentSession } from 'src/entities/enrollment_session.entity';
 import { Project } from 'src/entities/project.entity';
 import {
@@ -243,36 +242,39 @@ export class ProjectsService extends BaseService<Project> {
     }
   }
 
-  async getProjectById(
-    id: any,
-    type: string,
-    user:any
-  ): Promise<Project> {
+  async getProjectById(id: any, type: string, user: any): Promise<Project> {
     const project = await this.projectRepository.findOne({
       where: { id },
       relations: {
         student: { user: true },
         teacher: { user: true },
         course: true,
-        session: { department: true},
+        session: { department: true },
       },
     });
     const userProject = await this.repository.manager.findOne(User, {
       where: { id: user?.id },
       relations: {
         student: {
-     
           department: true,
         },
         teacher: true,
-        
       },
-    })
+    });
     if (!project) throw new NotFoundException('Đề tài không tồn tại');
     if (user.role == UserRole.STUDENT) {
-      if (type === 'student' &&project.student?.id != userProject?.student?.id &&  project?.status != 'public' )
+      if (
+        type === 'student' &&
+        project.student?.id != userProject?.student?.id &&
+        project?.status != 'public'
+      )
         throw new NotFoundException('Không có quyền truy cập đề tài này');
-      if (type === 'student' &&project.session?.department?.id != userProject?.student?.department?.id )
+      if (
+        type === 'student' &&
+        project.session?.department?.id !=
+          userProject?.student?.department?.id &&
+        project?.status == 'propose'
+      )
         throw new NotFoundException('Không có quyền truy cập đề tài này');
       if (project.student?.user) {
         project.student.user = {
@@ -281,11 +283,10 @@ export class ProjectsService extends BaseService<Project> {
         } as any;
       }
       return project;
-      
     } else if (user.role == UserRole.TEACHER) {
       if (type === 'teacher' && project.teacher?.id != userProject?.teacher?.id)
         throw new NotFoundException('Không có quyền truy cập đề tài này');
-      
+
       const ProjectData = await this.repository.findOne({
         where: { id: project.id },
         relations: {
@@ -293,8 +294,8 @@ export class ProjectsService extends BaseService<Project> {
           student: { user: true },
           teacher: { user: true },
           course: true,
-        }
-      })
+        },
+      });
       if (ProjectData.teacher?.user) {
         ProjectData.teacher.user = {
           id: ProjectData.teacher.user.id,
@@ -307,8 +308,7 @@ export class ProjectsService extends BaseService<Project> {
           fullname: ProjectData.student.user.fullname,
         } as any;
       }
-      return ProjectData
-      
+      return ProjectData;
     } else if (user.role == UserRole.ADMIN) {
       return project;
     } else {
@@ -316,31 +316,40 @@ export class ProjectsService extends BaseService<Project> {
     }
   }
 
-  async assignGroupForProject(group_ids:any, project_id:any, user_id:any) {
-    const user:any = await this.check_exist_with_data(User, {
-      where:{id: user_id},
-    }, 'Tài khoản không hợp lệ')
-    if (['admin','teacher'].includes(user?.role)) {
-      const project:any = await this.check_exist_with_data(Project, {
-        where:{id: project_id},
-      }, 'Đề tài không hợp lệ')
+  async assignGroupForProject(group_ids: any, project_id: any, user_id: any) {
+    const user: any = await this.check_exist_with_data(
+      User,
+      {
+        where: { id: user_id },
+      },
+      'Tài khoản không hợp lệ',
+    );
+    if (['admin', 'teacher'].includes(user?.role)) {
+      const project: any = await this.check_exist_with_data(
+        Project,
+        {
+          where: { id: project_id },
+        },
+        'Đề tài không hợp lệ',
+      );
       if (group_ids?.length < 1) {
-        throw new Error("Chưa chọn nhóm để thêm");
+        throw new Error('Chưa chọn nhóm để thêm');
       }
-      const groups:any[] = await this.check_exist_with_datas(Group, {
-        where:{id: project_id},
-      }, group_ids?.length,'Danh sách nhóm không hợp lệ')
+      const groups: any[] = await this.check_exist_with_datas(
+        Group,
+        {
+          where: { id: project_id },
+        },
+        group_ids?.length,
+        'Danh sách nhóm không hợp lệ',
+      );
       await this.repository.update(project?.id, {
-        groups
-      })
-
-
+        groups,
+      });
     } else {
-      throw new Error("Tài khoản không có quyền");
+      throw new Error('Tài khoản không có quyền');
     }
   }
-     
- 
 
   async updateStatus(data: any, type: string): Promise<void> {
     try {
@@ -366,13 +375,13 @@ export class ProjectsService extends BaseService<Project> {
           throw new NotFoundException('Không có quyền truy cập đề tài này');
         }
       }
-      await this.projectRepository.update(project?.id,{status});
+      await this.projectRepository.update(project?.id, { status });
     } catch (error) {
       throw new BadRequestException(`Lỗi: ${error.message}`);
     }
   }
 
-  async publicProject(data: any, type: string, user_id:any): Promise<void> {
+  async publicProject(data: any, type: string, user_id: any): Promise<void> {
     try {
       const { id, session_id }: any = data;
 
@@ -417,12 +426,12 @@ export class ProjectsService extends BaseService<Project> {
     type: string,
   ): Promise<void> {
     const idArray = Array.isArray(ids) ? ids : [ids];
-    
+
     let whereCondition: any = {
       id: In(idArray),
       status: 'propose',
     };
-  
+
     if (type === 'student') {
       whereCondition.student = { id: obj_id };
     } else if (type === 'teacher') {
@@ -430,22 +439,22 @@ export class ProjectsService extends BaseService<Project> {
     } else {
       throw new BadRequestException('Loại người dùng không hợp lệ');
     }
-  
+
     const projects = await this.projectRepository.find({
       where: whereCondition,
       relations: [type], // chỉ lấy quan hệ cần thiết
     });
-  
+
     if (!projects.length) {
       throw new NotFoundException('Không tìm thấy đề tài hợp lệ để xóa');
     }
-  
+
     const validIds = projects.map((p) => p.id);
-  
+
     try {
       await this.projectRepository.delete(validIds);
     } catch (error) {
-      throw new BadRequestException(`Lỗi khi xóa đề tài`)
+      throw new BadRequestException(`Lỗi khi xóa đề tài`);
     }
-  } 
+  }
 }

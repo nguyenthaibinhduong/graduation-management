@@ -339,7 +339,7 @@ export class GroupsService extends BaseService<Group> {
             'student_attemp',
             'student_attemp.user',
             'project',
-            'committee'
+            'committee',
           ],
         });
 
@@ -359,7 +359,7 @@ export class GroupsService extends BaseService<Group> {
               'student_attemp',
               'student_attemp.user',
               'project',
-              'committee'
+              'committee',
             ],
           });
           return this.freshData(fullGroup);
@@ -383,7 +383,7 @@ export class GroupsService extends BaseService<Group> {
                 'student_attemp',
                 'student_attemp.user',
                 'project',
-                'committee'
+                'committee',
               ],
             });
             return this.freshData(fullGroup);
@@ -760,7 +760,10 @@ export class GroupsService extends BaseService<Group> {
       delete data.teacher.updated_at;
       data.teacher = {
         ...data.teacher,
-        fullname: data.teacher.user?.fullname,
+        user: {
+          id: data.teacher.user?.id,
+          fullname: data.teacher.user?.fullname,
+        },
       };
     }
     return data;

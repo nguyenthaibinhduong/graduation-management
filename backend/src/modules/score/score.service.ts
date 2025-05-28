@@ -522,6 +522,29 @@ export class ScoreService extends BaseService<Score> {
 
         advisorGroups.forEach((group) => {
           (group as any).teacherRole = 'advisor';
+          if (
+            (group.teacher &&
+              group.teacher.user &&
+              'password' in group.teacher.user) ||
+            (group.leader.user && 'password' in group.leader.user)
+          ) {
+            delete group.teacher.user.password;
+            delete group.leader.user.password;
+          }
+
+          if (group?.students) {
+            group.students = group.students.map((student: any) => {
+              delete student.created_at;
+              delete student.updated_at;
+              return {
+                ...student,
+                user: {
+                  id: student.user?.id,
+                  fullname: student.user?.fullname,
+                },
+              };
+            });
+          }
         });
 
         allGroups = [...allGroups, ...advisorGroups];
@@ -552,6 +575,29 @@ export class ScoreService extends BaseService<Score> {
 
         reviewerGroups.forEach((group) => {
           (group as any).teacherRole = 'reviewer';
+          if (
+            (group.teacher &&
+              group.teacher.user &&
+              'password' in group.teacher.user) ||
+            (group.leader.user && 'password' in group.leader.user)
+          ) {
+            delete group.teacher.user.password;
+            delete group.leader.user.password;
+          }
+
+          if (group?.students) {
+            group.students = group.students.map((student: any) => {
+              delete student.created_at;
+              delete student.updated_at;
+              return {
+                ...student,
+                user: {
+                  id: student.user?.id,
+                  fullname: student.user?.fullname,
+                },
+              };
+            });
+          }
         });
 
         allGroups = [...allGroups, ...reviewerGroups];
@@ -583,6 +629,29 @@ export class ScoreService extends BaseService<Score> {
 
         committeeGroups.forEach((group) => {
           (group as any).teacherRole = 'committee';
+          if (
+            (group.teacher &&
+              group.teacher.user &&
+              'password' in group.teacher.user) ||
+            (group.leader.user && 'password' in group.leader.user)
+          ) {
+            delete group.teacher.user.password;
+            delete group.leader.user.password;
+          }
+
+          if (group?.students) {
+            group.students = group.students.map((student: any) => {
+              delete student.created_at;
+              delete student.updated_at;
+              return {
+                ...student,
+                user: {
+                  id: student.user?.id,
+                  fullname: student.user?.fullname,
+                },
+              };
+            });
+          }
         });
 
         allGroups = [...allGroups, ...committeeGroups];

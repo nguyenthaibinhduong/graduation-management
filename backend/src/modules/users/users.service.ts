@@ -15,26 +15,34 @@ export class UsersService extends BaseService<User> {
     private readonly userRepository: Repository<User>,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-     @InjectRepository(LoginAttempt)
-        private readonly loginAttemptRepository: Repository<LoginAttempt>,
+    @InjectRepository(LoginAttempt)
+    private readonly loginAttemptRepository: Repository<LoginAttempt>,
   ) {
     super(userRepository);
   }
 
-  async getLoginAttempt(username: string, ipAddress: string): Promise<LoginAttempt> {
-  let loginAttempt = await this.loginAttemptRepository.findOne({ where: { username, ip_address: ipAddress } });
-
-  if (!loginAttempt) {
-    loginAttempt = this.loginAttemptRepository.create({
-      username,
-      ip_address: ipAddress,
+  async getLoginAttempt(
+    username: string,
+    ipAddress: string,
+  ): Promise<LoginAttempt> {
+    let loginAttempt = await this.loginAttemptRepository.findOne({
+      where: { username, ip_address: ipAddress },
     });
-    await this.loginAttemptRepository.save(loginAttempt);
-  }
 
-  return loginAttempt;
+    if (!loginAttempt) {
+      loginAttempt = this.loginAttemptRepository.create({
+        username,
+        ip_address: ipAddress,
+      });
+      await this.loginAttemptRepository.save(loginAttempt);
+    }
+
+    return loginAttempt;
   }
-  async resetFailedAttempts(username: string, ipAddress: string): Promise<void> {
+  async resetFailedAttempts(
+    username: string,
+    ipAddress: string,
+  ): Promise<void> {
     const loginAttempt = await this.getLoginAttempt(username, ipAddress);
 
     if (loginAttempt) {
@@ -48,10 +56,10 @@ export class UsersService extends BaseService<User> {
     }
   }
 
-
-
-
-  async incrementFailedAttempts(username: string, ipAddress: string): Promise<void> {
+  async incrementFailedAttempts(
+    username: string,
+    ipAddress: string,
+  ): Promise<void> {
     const loginAttempt = await this.getLoginAttempt(username, ipAddress);
 
     // Nếu đã vượt quá 3 lần đăng nhập sai, khóa tài khoản 15 phút
@@ -60,16 +68,10 @@ export class UsersService extends BaseService<User> {
 
     if (loginAttempt.failed_attempts >= 3) {
       loginAttempt.locked_until = new Date(Date.now() + 15 * 60 * 1000);
-
     }
 
     await this.loginAttemptRepository.save(loginAttempt);
   }
-  
-
-
-
-
 
   async register(userData: Partial<User>): Promise<any> {
     const user = this.userRepository.create(userData);
@@ -82,24 +84,30 @@ export class UsersService extends BaseService<User> {
   //   return user;
   // }
 
-
-
-
-
   async findByUsername(username: string) {
-    const user = await this.userRepository.findOne({where:{ username ,active:true}});
+    const user = await this.userRepository.findOne({
+      where: { username, active: true },
+    });
     return user;
   }
 
-   async findByID(id: any) {
-     const user = await this.check_exist_with_data(User, {where:{id}}, 'Không tìm thấy người dùng');
-     const data = await this.getUserDetails(user);
-     return this.remove_password_field(data);
+  async findByID(id: any) {
+    const user = await this.check_exist_with_data(
+      User,
+      { where: { id } },
+      'Không tìm thấy người dùng',
+    );
+    const data = await this.getUserDetails(user);
+    return this.remove_password_field(data);
   }
- 
 
-  async validateUser(username: string, password: string, ipAddress: string, captchaResponse: string) {
-    if(!captchaResponse)  throw new Error('Chưa xác minh không phải robot');
+  async validateUser(
+    username: string,
+    password: string,
+    ipAddress: string,
+    captchaResponse: string,
+  ) {
+    if (!captchaResponse) throw new Error('Chưa xác minh không phải robot');
     const isCaptchaValid = await this.verifyCaptcha(captchaResponse);
     if (!isCaptchaValid) {
       throw new Error('CAPTCHA không hợp lệ. Vui lòng thử lại.');
@@ -108,7 +116,10 @@ export class UsersService extends BaseService<User> {
     const loginAttempt = await this.getLoginAttempt(username, ipAddress);
 
     // Nếu tài khoản bị khóa, trả về thông báo lỗi
-    if (loginAttempt.locked_until && new Date() < new Date(loginAttempt.locked_until)) {
+    if (
+      loginAttempt.locked_until &&
+      new Date() < new Date(loginAttempt.locked_until)
+    ) {
       throw new Error('Tài khoản đã bị khóa tạm thời , Hãy thử lại sau !');
     }
 
@@ -134,16 +145,16 @@ export class UsersService extends BaseService<User> {
   }
 
   async verifyCaptcha(captchaResponse: string): Promise<boolean> {
-  const secretKey = process.env.GG_CAPTCHA_SECRECT; // Thay thế bằng key của bạn
-  const response = await axios.post(process.env.GG_CAPTCHA_API, null, {
-    params: {
-      secret: secretKey,
-      response: captchaResponse,
-    },
-  });
+    const secretKey = process.env.GG_CAPTCHA_SECRECT; // Thay thế bằng key của bạn
+    const response = await axios.post(process.env.GG_CAPTCHA_API, null, {
+      params: {
+        secret: secretKey,
+        response: captchaResponse,
+      },
+    });
 
-  return response.data.success;
-}
+    return response.data.success;
+  }
 
   async saveRefreshToken(
     refreshToken: string,
@@ -223,17 +234,16 @@ export class UsersService extends BaseService<User> {
 
   async getUserDetails(user: any): Promise<any> {
     const userData = await this.userRepository.findOne({
-      where: { id: user.id,active:true },
+      where: { id: user.id, active: true },
       relations: {
-        teacher: user.role === 'teacher'?{ department: true } : false,
+        teacher: user.role === 'teacher' ? { department: true } : false,
         student:
           user.role === 'student' ? { department: true, major: true } : false,
       },
     });
+    if (userData) delete userData.password;
     return userData;
   }
-
-
 
   async updatePassword(
     id: number,
@@ -254,14 +264,14 @@ export class UsersService extends BaseService<User> {
   }
   async updateAccount(data: any, user_id: any) {
     const { username, password, role, email, address, phone } = data;
-  
+
     // Đảm bảo await
     const user: User = await this.check_exist_with_data(
       User,
       { where: { id: user_id } },
-      'Tài khoản không tồn tại'
+      'Tài khoản không tồn tại',
     );
-  
+
     if (username) user.username = username;
     if (password) user.password = await bcrypt.hash(password, 10);
     if (role) user.role = role;
@@ -269,10 +279,7 @@ export class UsersService extends BaseService<User> {
     if (address) user.address = address;
     if (phone) user.phone = phone;
 
-  
     // Dùng save để cập nhật entity
     await this.userRepository.save(user);
-    
   }
-  
 }

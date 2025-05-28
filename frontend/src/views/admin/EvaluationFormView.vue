@@ -1,13 +1,32 @@
 <template>
   <!-- BẢNG DANH SÁCH --------------------------------------------------------->
-  <DataTableCustom :block="['headerBar', 'selectAll', 'import', 'export']" title="Danh sách phiếu đánh giá"
-    :data="evaluationForm" :columns="columns" :total="evaluationStore?.total" :loading="loading"
-    @fetch="fetchEvaluation" @add="openDrawer" @edit="editEvaluation" @delete="deleteEvaluation" @rowSelect="goDetail"
-    @selectOne="handleSelectData" @selectAll="handleSelectData" />
+  <DataTableCustom
+    :block="['headerBar', 'selectAll', 'import', 'export']"
+    title="Danh sách phiếu đánh giá"
+    :data="evaluationForm"
+    :columns="columns"
+    :total="evaluationStore?.total"
+    :loading="loading"
+    @fetch="fetchEvaluation"
+    @add="openDrawer"
+    @edit="editEvaluation"
+    @delete="deleteEvaluation"
+    @rowSelect="goDetail"
+    @selectOne="handleSelectData"
+    @selectAll="handleSelectData"
+  />
 
   <!-- DRAWER ----------------------------------------------------------------->
-  <MyDrawer class="w-full" title="Phiếu đánh giá" :isEditing="isEditing" :onCancel="cancelForm" :onSave="saveEvaluation"
-    v-model:visible="visibleLeft" position="right" :closable="false">
+  <MyDrawer
+    class="w-full"
+    title="Phiếu đánh giá"
+    :isEditing="isEditing"
+    :onCancel="cancelForm"
+    :onSave="saveEvaluation"
+    v-model:visible="visibleLeft"
+    position="right"
+    :closable="false"
+  >
     <TabView>
       <!-- TAB 1: PHIẾU ĐÁNH GIÁ -->
       <TabPanel header="Thông tin phiếu đánh giá">
@@ -16,21 +35,32 @@
             <MyInput v-model="form.title" id="title" title="Tiêu đề phiếu" required />
             <span>Tiêu chí được chọn</span>
             <div class="w-full grid grid-cols-4 gap-2 bg-slate-50 p-2 rounded-lg h-[50px]">
-              <Button v-for="criteria in selectedCriteria" class="btn-submit" :label="criteria?.name" />
+              <Button
+                v-for="criteria in selectedCriteria"
+                class="btn-submit"
+                :label="criteria?.name"
+              />
             </div>
             <span>Nội dung</span>
-            <MyInput v-model="form.content" id="content" type="editor" required />
+            <MyInput v-model="form.description" id="content" type="editor" required />
           </div>
           <div class="flex flex-col">
-            <DataTableCustom :block="['toolbar', 'action']" title=" Danh sách tiêu chí đánh giá" :data="criteriaOptions"
+            <DataTableCustom
+              :block="['toolbar', 'action']"
+              title=" Danh sách tiêu chí đánh giá"
+              :data="criteriaOptions"
               :columns="[
                 { field: 'name', header: 'Tiêu chí' },
                 { field: 'content', header: 'Tiêu chí', type: 'html' },
                 { field: 'max_score', header: 'Điểm tối đa' },
                 { field: 'step', header: 'Bước nhảy' },
                 { field: 'weightPercent', header: 'Phần trăm' },
-              ]" :total="evaluationStore?.total" :loading="loading" @selectOne="handleSelectDataCriteria"
-              @selectAll="handleSelectDataCriteria" />
+              ]"
+              :total="evaluationStore?.total"
+              :loading="loading"
+              @selectOne="handleSelectDataCriteria"
+              @selectAll="handleSelectDataCriteria"
+            />
           </div>
 
           <!-- Nếu cần chọn khoa -->
@@ -39,16 +69,38 @@
 
       <!-- TAB 2: TIÊU CHÍ -->
       <TabPanel header="Thêm tiêu chí đánh giá">
-        <Button icon="pi pi-plus" @click="saveCriteria" class="btn-submit" label="Thêm" text size="small" />
+        <Button
+          icon="pi pi-plus"
+          @click="saveCriteria"
+          class="btn-submit"
+          label="Thêm"
+          text
+          size="small"
+        />
         <section class="grid grid-cols-1 gap-6 py-4">
           <div class="grid grid-cols-2 gap-6">
             <MyInput v-model="newCriteria.name" id="name" title="Tên tiêu chí" />
-            <MyInput v-model="newCriteria.max_score" id="max_score" title="Điểm tối đa" type="number" />
+            <MyInput
+              v-model="newCriteria.max_score"
+              id="max_score"
+              title="Điểm tối đa"
+              type="number"
+            />
             <MyInput v-model="newCriteria.step" id="step" title="Bước nhảy" type="number" />
-            <MyInput v-model="newCriteria.weightPercent" id="weightPercent" prefix="%" title="Tỉ trọng (%)"
-              type="number" />
+            <MyInput
+              v-model="newCriteria.weightPercent"
+              id="weightPercent"
+              prefix="%"
+              title="Tỉ trọng (%)"
+              type="number"
+            />
           </div>
-          <MyInput v-model="newCriteria.content" id="criteria_content" title="Nội dung tiêu chí" type="editor" />
+          <MyInput
+            v-model="newCriteria.content"
+            id="criteria_content"
+            title="Nội dung tiêu chí"
+            type="editor"
+          />
         </section>
       </TabPanel>
     </TabView>
@@ -110,7 +162,7 @@ onMounted(async () => {
 })
 
 watchEffect(async () => {
-  ; (evaluationForm.value = evaluationStore.items), (criteriaOptions.value = criteriaStore.items)
+  ;(evaluationForm.value = evaluationStore.items), (criteriaOptions.value = criteriaStore.items)
 })
 
 // ---------- METHODS ---------------------------------------------------------
@@ -133,20 +185,17 @@ function editEvaluation(row) {
 async function saveEvaluation() {
   form.value.criteria_ids = selectedCriteriaIds.value
 
-
   const payload = {
     ...form.value,
   }
 
   if (isEditing.value) {
-
     await evaluationStore.updateItem(editedId.value, payload)
     cancelForm()
   } else {
     await evaluationStore.addItem(payload)
     cancelForm()
   }
-
 }
 
 async function saveCriteria() {
@@ -211,13 +260,11 @@ async function saveCriteria() {
     return
   }
 
-
   const payload = {
     ...newCriteria.value,
   }
   await criteriaStore.addItem(payload)
   newCriteria.value = {
-
     content: '',
     max_score: null,
     step: null,

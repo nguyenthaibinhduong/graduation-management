@@ -197,7 +197,7 @@ onMounted(async () => {
   await committeeStore.fetchItems()
   await departmentStore.fetchItems()
   await courseStore.fetchItems()
-  await teacherStore.fetchItems()
+  await teacherStore.fetchItems(1, 100, null, null)
   await projectStore.fetchItems('public')
 })
 watchEffect(() => {
@@ -221,6 +221,15 @@ const fetchCommittee = async (newPage, newLimit, newSearch) => {
     newSearch
   )
 }
+watch(
+  newCommittee,
+  async (newVal) => {
+    if (newVal.department_id) {
+      await teacherStore.fetchItems(1, 100, null, { departmentId: newVal.department_id })
+    }
+  },
+  { deep: true }
+)
 
 const addCommittee = () => {
   clearValues()
